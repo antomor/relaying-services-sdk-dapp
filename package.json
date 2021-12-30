@@ -19,7 +19,7 @@
     "react-materialize": "^3.10.0",
     "react-scripts": "4.0.3",
     "typescript": "^4.5.5",
-    "relaying-services-sdk": "https://github.com/antomor/relaying-services-sdk#PP-106/request-fees-rebased",
+    "relaying-services-sdk": "github:infuy/relaying-services-sdk#PP-108/collector-contract",
     "web-vitals": "^1.0.1",
     "web3": "^1.5.2",
     "web3-utils": "^1.5.2"
