@@ -30,6 +30,7 @@ type TransferInfo = {
     check: boolean;
     address: string;
     amount: string;
+    collector: string;
 };
 
 type TransferInfoKey = keyof TransferInfo;
@@ -46,7 +47,8 @@ function Transfer(props: TransferProps) {
         check: false,
         fees: '',
         amount: '',
-        address: ''
+        address: '',
+        collector: ''
     });
 
     const close = () => {
@@ -55,7 +57,8 @@ function Transfer(props: TransferProps) {
             check: false,
             fees: '',
             amount: '',
-            address: ''
+            address: '',
+            collector: ''
         });
         setEstimateLoading(false);
         setTransferLoading(false);
@@ -103,7 +106,7 @@ function Transfer(props: TransferProps) {
     const transferSmartWalletButtonClick = async () => {
         setTransferLoading(true);
         try {
-            const { amount } = transfer;
+            const { amount, collector } = transfer;
             const fees = transfer.fees === '' ? '0' : transfer.fees;
 
             const encodedAbi = (
@@ -126,7 +129,8 @@ function Transfer(props: TransferProps) {
                 transactionDetails: {
                     retries: 7,
                     waitForTransactionReceipt: false
-                }
+                },
+                collector
             };
 
             const result: RelayingResult =
@@ -315,6 +319,18 @@ function Transfer(props: TransferProps) {
                             validate
                             onChange={(event) => {
                                 changeValue(event.currentTarget.value, 'fees');
+                            }}
+                        />
+                    </Col>
+                    <Col s={10}>
+                        <TextInput
+                            label='Collector'
+                            placeholder={`0 ${state.token!.symbol}`}
+                            value={transfer.collector}
+                            type='number'
+                            validate
+                            onChange={(event) => {
+                                changeValue(event.currentTarget.value, 'collector');
                             }}
                         />
                     </Col>
