@@ -33,10 +33,11 @@ function Execute(props) {
         function: '',
         fees: ''
     });
-    const [loading, setLoading] = useState(false);
+    const [executeLoading, setExecuteLoading] = useState(false);
+    const [estimateLoading, setEstimateLoading] = useState(false);
 
     async function handleExecuteSmartWalletButtonClick() {
-        setLoading(true);
+        setExecuteLoading(true);
         try {
             const funcData = calculateAbiEncodedFunction();
             const destinationContract = execute.address;
@@ -54,26 +55,27 @@ function Execute(props) {
                     address: swAddress
                 }, fees);
 
-                console.log('data: ', transaction)
-                console.log(`Your TxHash is ${transaction.blockHash}`)
+                console.log('Transaction ', transaction)
+                console.log(`Transaction hash: ${transaction.blockHash}`)
 
                 const logs = abiDecoder.decodeLogs(transaction.logs)
 
-                console.log("Your logs are: ", logs)
+                console.log("Transaction logs: ", logs)
 
                 const sampleRecipientEmitted = logs.find((e) => e != null && e.name === 'TransactionRelayed')
                 console.log(sampleRecipientEmitted)
                 if (execute.show) {
-                    setResults(transaction);
+                    setResults(JSON.stringify(transaction));
                 } else {
                     setUpdateInfo(true);
+                    close();
                 }
             }
         } catch (error) {
             alert(error.message);
             console.error(error)
         }
-        setLoading(false);
+        setExecuteLoading(false);
     }
     async function relayTransactionDirectExecution(toAddress, swAddress, abiEncodedTx) {
         const swContract = new web3.eth.Contract(IForwarder.abi, swAddress)
@@ -106,7 +108,7 @@ function Execute(props) {
     }
 
     async function handleEstimateSmartWalletButtonClick() {
-        setLoading(true);
+        setEstimateLoading(true);
         try {
             const isUnitRBTC = execute.check;
 
@@ -173,7 +175,7 @@ function Execute(props) {
             alert(error.message);
             console.error(error)
         }
-        setLoading(false);
+        setEstimateLoading(false);
     }
 
     function calculateAbiEncodedFunction() {
@@ -208,12 +210,12 @@ function Execute(props) {
     }
 
     async function pasteRecipientAddress() {
-        setLoading(true);
+        setExecuteLoading(true);
         const address = await navigator.clipboard.readText();
         if (Utils.checkAddress(address.toLowerCase())) {
             changeValue({ currentTarget: { value: address } }, 'address');
         }
-        setLoading(false);
+        setExecuteLoading(false);
     }
 
     async function estimateDirectExecution(swAddress, toAddress, abiEncodedTx) {
@@ -297,7 +299,7 @@ function Execute(props) {
                                 </label>
                             </div>
                         </div>
-                        <div className={`row mb-0 ${execute.show ? 'hide' : ''}`} id="execute-result-row">
+                        <div className={`row mb-0 ${execute.show && results ? '' : 'hide'}`} id="execute-result-row">
                             <div className="input-field col s12">
                                 <span id="execute-result" style={{ 'wordBreak': 'break-all', 'width': 'inherit' }}>{results}</span>
                             </div>
@@ -306,12 +308,12 @@ function Execute(props) {
                 </div>
             </div>
             <div className="modal-footer">
-                <a href="#!" id="execute-smart-wallet" className={`waves-effect waves-green btn-flat  ${loading ? 'disabled' : ''}`} onClick={() => {
+                <a href="#!" id="execute-smart-wallet" className={`waves-effect waves-green btn-flat  ${executeLoading ? 'disabled' : ''}`} onClick={() => {
                     handleExecuteSmartWalletButtonClick()
-                }}>Execute <img alt="loading" className={`loading ${!loading ? 'hide' : ''}`} src="images/loading.gif" /></a>
-                <a href="#!" id="execute-smart-wallet-estimate" className={`waves-effect waves-green btn-flat  ${loading ? 'disabled' : ''}`} onClick={() => {
+                }}>Execute <img alt="loading" className={`loading ${!executeLoading ? 'hide' : ''}`} src="images/loading.gif" /></a>
+                <a href="#!" id="execute-smart-wallet-estimate" className={`waves-effect waves-green btn-flat  ${estimateLoading ? 'disabled' : ''}`} onClick={() => {
                     handleEstimateSmartWalletButtonClick()
-                }}>Estimate <img alt="loading" className={`loading ${!loading ? 'hide' : ''}`} src="images/loading.gif" /></a>
+                }}>Estimate <img alt="loading" className={`loading ${!estimateLoading ? 'hide' : ''}`} src="images/loading.gif" /></a>
                 <a href="#!" id="execute-smart-wallet-cancel" className="waves-effect waves-green btn-flat" onClick={() =>{ close()}}>Cancel</a>
             </div>
         </div>
