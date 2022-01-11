@@ -2,7 +2,6 @@ import { useState } from 'react';
 import Utils from '../Utils';
 import './Transfer.css';
 
-//import { useState } from 'react';
 const M = window.M;
 const $ = window.$;
 
@@ -53,7 +52,7 @@ function Transfer(props) {
         try {
             const amount = transfer.amount.toString(); // it raises an error if the field is untouched
             const fees = transfer.fees === "" ? undefined : transfer.fees.toString();
-            const collector = transfer.collector;
+            const collector = transfer.collector || `0x${'0'.repeat(40)}`;
 
             const encodedAbi = (await Utils.getTokenContract()).methods
                 .transfer(transfer.address, await Utils.toWei(amount)).encodeABI();
