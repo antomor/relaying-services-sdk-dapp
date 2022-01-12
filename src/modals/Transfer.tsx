@@ -106,7 +106,7 @@ function Transfer(props: TransferProps) {
     const transferSmartWalletButtonClick = async () => {
         setTransferLoading(true);
         try {
-            const { amount, collector } = transfer;
+            const { amount, collector = `0x${'0'.repeat(40)}` } = transfer;
             const fees = transfer.fees === '' ? '0' : transfer.fees;
 
             const encodedAbi = (
