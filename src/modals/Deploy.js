@@ -21,9 +21,10 @@ function Deploy(props) {
         relayGas: 0
     });
     const [loading, setLoading] = useState(false);
+    const [estimateLoading, setEstimateLoading] = useState(false);
 
     async function handleEstimateDeploySmartWalletButtonClick() {
-        setLoading(true);
+        setEstimateLoading(true);
         try {
             const estimate = await provider.estimateMaxPossibleRelayGas(
                 currentSmartWallet
@@ -52,7 +53,7 @@ function Deploy(props) {
             alert(error.message);
             console.error(error);
         }
-        setLoading(false);
+        setEstimateLoading(false);
     }
 
     async function getReceipt(transactionHash) {
@@ -165,8 +166,8 @@ function Deploy(props) {
                 </div>
             </div>
             <div className="modal-footer">
-                <a href="#!" id="deploy-smart-wallet-estimate" className={`waves-effect waves-green btn-flat ${ loading? 'disabled' : ''}`} onClick={handleEstimateDeploySmartWalletButtonClick} >
-                    Estimate <img alt="loading" className={`loading ${ !loading? 'hide' : ''}`} src="images/loading.gif"/>
+                <a href="#!" id="deploy-smart-wallet-estimate" className={`waves-effect waves-green btn-flat ${ estimateLoading? 'disabled' : ''}`} onClick={handleEstimateDeploySmartWalletButtonClick} >
+                    Estimate <img alt="loading" className={`loading ${ !estimateLoading? 'hide' : ''}`} src="images/loading.gif"/>
                 </a>
                 <a onClick={handleDeploySmartWalletButtonClick} href="#!" className={`waves-effect waves-green btn-flat ${ loading? 'disabled' : ''}`}>
                     Deploy <img alt="loading" className={`loading ${ !loading? 'hide' : ''}`} src="images/loading.gif"/>
