@@ -1,9 +1,11 @@
 
 import TestToken from './contracts/TestToken.json';
 import Web3 from 'web3';
+import { toHex } from 'web3-utils';
 
 // Zero address
 export const TRIF_PRICE = 0.000005739;
+export const TRIF_TOKEN_DECIMALS = 18;
 if (window.ethereum) {
     window.web3 = new Web3(window.ethereum);
 } else if (window.web3) {
@@ -83,6 +85,45 @@ class Utils {
     static async sendTransaction(transactionDetails){
         await web3.eth.sendTransaction(transactionDetails);
     }
+}
+
+const ESTIMATED_GAS_CORRECTION_FACTOR = 1.0;
+const INTERNAL_TRANSACTION_ESTIMATE_CORRECTION = 20000;
+async function estimateDestinationContractCallGas(transactionDetails, addCushion = true) {
+    const estimated = await window.web3.eth.estimateGas({
+        from: transactionDetails.from,
+        to: transactionDetails.to,
+        gasPrice: transactionDetails.gasPrice,
+        data: transactionDetails.data
+    });
+    let internalCallCost =
+        estimated > INTERNAL_TRANSACTION_ESTIMATE_CORRECTION
+            ? estimated - INTERNAL_TRANSACTION_ESTIMATE_CORRECTION
+            : estimated;
+    if (addCushion) {
+        internalCallCost =
+            internalCallCost * ESTIMATED_GAS_CORRECTION_FACTOR;
+    }
+
+    return internalCallCost;
+  }
+
+export async function estimateMaxPossibleRelayGas(relayClient, trxDetails) {
+    const txDetailsClone = {
+        ...trxDetails
+    };
+    const internalCallCost = estimateDestinationContractCallGas(
+              relayClient.getEstimateGasParams(txDetailsClone)
+    );
+    txDetailsClone.gas = toHex(internalCallCost);
+    const tokenGas = (
+        await relayClient.estimateTokenTransferGas(txDetailsClone, process.env.REACT_APP_CONTRACTS_RELAY_WORKER)
+    ).toString();
+    txDetailsClone.tokenGas = tokenGas;
+    const maxPossibleGasValue = await relayClient.estimateMaxPossibleRelayGas(
+        txDetailsClone, process.env.REACT_APP_CONTRACTS_RELAY_WORKER
+    );
+    return maxPossibleGasValue;
 }
 
 export default Utils;

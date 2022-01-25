@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import Utils from '../Utils';
+import { toBN } from 'web3-utils';
+import Utils, { estimateMaxPossibleRelayGas, TRIF_PRICE } from '../Utils';
 import './Transfer.css';
 
 //import { useState } from 'react';
@@ -15,6 +16,7 @@ function Transfer(props) {
     } = props;
 
     const [loading, setLoading] = useState(false);
+    const [estimateLoading, setEstimateLoading] = useState(false);
 
     const [transfer, setTransfer] = useState({
         check: false,
@@ -34,7 +36,11 @@ function Transfer(props) {
 
     function changeValue(event, prop) {
         let obj = Object.assign({}, transfer);
-        obj[prop] = event.currentTarget.value;
+        if (event.currentTarget.type === 'checkbox') {
+            obj[prop] = event.currentTarget.checked;
+        } else {
+            obj[prop] = event.currentTarget.value;
+        }
         setTransfer(obj)
     }
 
@@ -54,7 +60,7 @@ function Transfer(props) {
             const encodedAbi = (await Utils.getTokenContract()).methods
                 .transfer(transfer.address, await Utils.toWei(amount)).encodeABI();
 
-            const txDetials = await provider.relayTransaction(
+            const txDetails = await provider.relayTransaction(
                 {
                     to: transfer.address
                     , data: encodedAbi
@@ -65,7 +71,7 @@ function Transfer(props) {
                 }
                 , fees
             );
-            console.log(txDetials);
+            console.log(txDetails);
             setUpdateInfo(true);
             close();
         } catch (error) {
@@ -103,6 +109,57 @@ function Transfer(props) {
             address: ''
         });
     }
+    
+      async function handleEstimateDeploySmartWalletButtonClick() {
+        setEstimateLoading(true);
+        const encodedTransferFunction = (await Utils.getTokenContract()).methods
+          .transfer(
+            transfer.address,
+            await Utils.toWei(transfer.amount.toString() || "0")
+          )
+          .encodeABI();
+        try {
+            const trxDetails = {
+                from: account,
+                to: process.env.REACT_APP_CONTRACTS_RIF_TOKEN,
+                value: "0",
+                relayHub: process.env.REACT_APP_CONTRACTS_RELAY_HUB,
+                callVerifier: process.env.REACT_APP_CONTRACTS_RELAY_VERIFIER,
+                callForwarder: currentSmartWallet.address,
+                data: encodedTransferFunction,
+                tokenContract: process.env.REACT_APP_CONTRACTS_RIF_TOKEN,
+                // value set just for the estimation; in the original dapp the estimation is performed using an eight of the user's token balance,
+                tokenAmount: window.web3.utils.toWei("1"),
+                onlyPreferredRelays: true,
+            };
+            const maxPossibleGasValue = await estimateMaxPossibleRelayGas(provider.relayProvider.relayClient, trxDetails);    
+            const gasPrice = toBN(
+                await provider.relayProvider.relayClient._calculateGasPrice()
+                );
+            console.log('maxPossibleGas, gasPrice', maxPossibleGasValue.toString(), gasPrice.toString());
+            const maxPossibleGas = toBN(maxPossibleGasValue);
+            const estimate = maxPossibleGas.mul(gasPrice);
+        
+            const costInRBTC = await Utils.fromWei(estimate.toString());
+            console.log("Cost in RBTC:", costInRBTC);
+
+            const costInTrif = parseFloat(costInRBTC) / TRIF_PRICE;
+            const tokenContract = await Utils.getTokenContract();
+            const ritTokenDecimals = await tokenContract.methods.decimals().call();
+            const costInTrifFixed = costInTrif.toFixed(ritTokenDecimals);
+            console.log("Cost in TRif: ", costInTrifFixed);
+
+            if (transfer.check === true) {
+                changeValue({ currentTarget: { value: costInRBTC } }, "fees");
+            } else {
+                changeValue({ currentTarget: { value: costInTrifFixed } }, "fees");
+            }
+        } catch (error) {
+          alert(error.message);
+          console.error(error);
+        }
+        setEstimateLoading(false);
+      }
 
     return (
         <div id="transfer-modal" className="modal">
@@ -127,7 +184,7 @@ function Transfer(props) {
                                 }} value={transfer.amount} />
                                 <label htmlFor="transfer-amount">Amount</label>
                             </div>
-                            <div className="switch col s4 hide" style={{ 'paddingTop': '2.5em' }}>
+                            <div className="switch col s4" style={{ 'paddingTop': '2.5em' }}>
                                 <label>
                                     tRIF
                                     <input type="checkbox" onChange={(event) => {
@@ -152,6 +209,9 @@ function Transfer(props) {
             <div className="modal-footer">
                 <a href="#!" onClick={handleTransferSmartWalletButtonClick} className={`waves-effect waves-green btn-flat ${ loading? 'disabled' : ''}`}>
                     Transfer <img alt="loading" className={`loading ${ !loading? 'hide' : ''}`} src="images/loading.gif"/>
+                </a>
+                <a href="#!" id="deploy-smart-wallet-estimate" className={`waves-effect waves-green btn-flat ${estimateLoading ? "disabled" : ""}`}onClick={handleEstimateDeploySmartWalletButtonClick}>
+                    Estimate<img alt="loading" className={`loading ${!estimateLoading ? "hide" : ""}`} src="images/loading.gif"/>
                 </a>
                 <a href="#!" className="waves-effect waves-green btn-flat" onClick={() =>{
                     close();
