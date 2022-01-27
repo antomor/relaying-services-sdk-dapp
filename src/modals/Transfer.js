@@ -108,17 +108,19 @@ function Transfer(props) {
             amount: 0,
             address: ''
         });
+        setEstimateLoading(false);
+        setLoading(false);
     }
     
-      async function handleEstimateDeploySmartWalletButtonClick() {
+      async function handleEstimateTransferButtonClick() {
         setEstimateLoading(true);
-        const encodedTransferFunction = (await Utils.getTokenContract()).methods
-          .transfer(
-            transfer.address,
-            await Utils.toWei(transfer.amount.toString() || "0")
-          )
-          .encodeABI();
         try {
+            const encodedTransferFunction = (await Utils.getTokenContract()).methods
+            .transfer(
+                transfer.address,
+                await Utils.toWei(transfer.amount.toString() || "0")
+            )
+            .encodeABI();
             const trxDetails = {
                 from: account,
                 to: process.env.REACT_APP_CONTRACTS_RIF_TOKEN,
@@ -210,7 +212,7 @@ function Transfer(props) {
                 <a href="#!" onClick={handleTransferSmartWalletButtonClick} className={`waves-effect waves-green btn-flat ${ loading? 'disabled' : ''}`}>
                     Transfer <img alt="loading" className={`loading ${ !loading? 'hide' : ''}`} src="images/loading.gif"/>
                 </a>
-                <a href="#!" id="deploy-smart-wallet-estimate" className={`waves-effect waves-green btn-flat ${estimateLoading ? "disabled" : ""}`}onClick={handleEstimateDeploySmartWalletButtonClick}>
+                <a href="#!" id="deploy-smart-wallet-estimate" className={`waves-effect waves-green btn-flat ${estimateLoading ? "disabled" : ""}`}onClick={handleEstimateTransferButtonClick}>
                     Estimate<img alt="loading" className={`loading ${!estimateLoading ? "hide" : ""}`} src="images/loading.gif"/>
                 </a>
                 <a href="#!" className="waves-effect waves-green btn-flat" onClick={() =>{
