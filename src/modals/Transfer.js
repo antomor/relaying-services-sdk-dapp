@@ -64,6 +64,9 @@ function Transfer(props) {
                     , ...currentSmartWallet
                 }
                 , fees
+                , {
+                    retries: 7
+                }
             );
             console.log(txDetials);
             setUpdateInfo(true);
