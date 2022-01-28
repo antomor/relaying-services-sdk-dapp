@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import Utils, { TRIF_PRICE } from '../Utils';
+import PartnerBalances from './PartnerBalances';
 import './Footer.css';
-//import { useState } from 'react';
+
+
 
 function Footer(props) {
     const {
@@ -13,7 +15,6 @@ function Footer(props) {
         , setShow
     } = props;
 
-    const [workerBalance, setWorkerBalance] = useState('0');
 
     const setBalance = useCallback(async (smartWallet) => {
         const balance = await Utils.tokenBalance(smartWallet.address);
@@ -48,13 +49,6 @@ function Footer(props) {
         })();
     }, [account, provider, setSmartWallets, setBalance, setShow]);
 
-    useEffect(() => {
-        (async () => {
-            const workerAddress = process.env.REACT_APP_CONTRACTS_RELAY_WORKER;
-            const workerBalance = parseFloat(Utils.fromWei(await Utils.tokenBalance(workerAddress))).toFixed(4);
-            setWorkerBalance(workerBalance);
-        })();
-    }, [setWorkerBalance]);
 
     async function create() {
         setShow(true);
@@ -66,6 +60,7 @@ function Footer(props) {
     }
 
     return (
+        <>
         <div className="row footer-controls">
             <div className="col s12">
                 <div className="row">
@@ -80,13 +75,18 @@ function Footer(props) {
                         <h6 className="right-align">
                             tRIF price:
                             <span id='trif-price'>{TRIF_PRICE}</span>
-                            RBTC - Worker balance:
-                            <span id='worker-balance'>{workerBalance}</span> tRIF
+                            RBTC
                         </h6>
                     </div>
                 </div>
             </div>
         </div>
+        <div className="row">
+            <div className="col s12 m4 offset-m4">      
+            <PartnerBalances/>
+            </div>
+        </div>
+        </>
     );
 }
 
