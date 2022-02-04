@@ -134,6 +134,7 @@ function Transfer(props) {
                 // value set just for the estimation; in the original dapp the estimation is performed using an eight of the user's token balance,
                 tokenAmount: window.web3.utils.toWei("1"),
                 onlyPreferredRelays: true,
+                collectorContract: transfer.collector || `0x${'0'.repeat(40)}`
             };
             const maxPossibleGasValue = await estimateMaxPossibleRelayGas(provider.relayProvider.relayClient, trxDetails);    
             const gasPrice = toBN(
