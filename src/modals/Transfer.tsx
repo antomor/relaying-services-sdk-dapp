@@ -176,7 +176,8 @@ function Transfer(props: TransferProps) {
                     tokenFees: '1',
                     destinationContract: state.token!.address,
                     relayWorker: process.env.REACT_APP_CONTRACTS_RELAY_WORKER!,
-                    tokenAddress: state.token!.address
+                    tokenAddress: state.token!.address,
+                    collector: transfer.collector || `0x${'0'.repeat(40)}`
                 };
 
                 const estimate =
