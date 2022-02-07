@@ -85,6 +85,12 @@ class Utils {
     static async sendTransaction(transactionDetails){
         await web3.eth.sendTransaction(transactionDetails);
     }
+
+    static getPartners() {
+        const partnerEnvVar = process.env.REACT_APP_CONTRACTS_PARTNERS;
+        const partners = partnerEnvVar.split(",");
+        return partners;
+    }
 }
 
 const ESTIMATED_GAS_CORRECTION_FACTOR = 1.0;

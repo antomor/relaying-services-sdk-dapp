@@ -11,48 +11,36 @@ const getTokenBalance = async (address) => {
     }
 }
 
-const getPartnerBalances = async () => {
-    const addresses = {
-        worker: process.env.REACT_APP_CONTRACTS_RELAY_WORKER,
-        collector: process.env.REACT_APP_CONTRACTS_COLLECTOR,
-        relayOperator: process.env.REACT_APP_CONTRACTS_RELAY_OPERATOR,
-        walletProvider: process.env.REACT_APP_CONTRACTS_WALLET_PROVIDER,
-        liquidityProvider: process.env.REACT_APP_CONTRACTS_LIQUIDITY_PROVIDER,
-        iovLabsRecipient: process.env.REACT_APP_CONTRACTS_IOVLABS_RECIPIENT,
-    }
-    const addressesArray = [
-        addresses.worker,
-        addresses.collector,
-        addresses.relayOperator,
-        addresses.walletProvider,
-        addresses.liquidityProvider,
-        addresses.iovLabsRecipient
+const getUpdatedBalances = async () => {
+    const workerAddr = process.env.REACT_APP_CONTRACTS_RELAY_WORKER
+    const collectorAddr = process.env.REACT_APP_CONTRACTS_COLLECTOR
+    const partnerAddresses = Utils.getPartners();
+    const addresses = [
+        workerAddr,
+        collectorAddr,
+        ...partnerAddresses
     ];
-    const newBalances = await Promise.all(addressesArray.map(address => getTokenBalance(address)))
-    const newPartnerBalances = {
-        worker: newBalances[0],
-        collector: newBalances[1],
-        relayOperator: newBalances[2],
-        walletProvider: newBalances[3],
-        liquidityProvider: newBalances[4],
-        iovLabsRecipient: newBalances[5]
+    const updatedBalances = await Promise.all(addresses.map(address => getTokenBalance(address)))
+    const [ worker, collector, ...partnerBalances] = updatedBalances;
+    const newBalanceState = {
+        worker,
+        collector,
+        partners: partnerBalances
     }
-    return newPartnerBalances;
+    return newBalanceState;
 }
 
 function PartnerBalances() {
     const [balances, setBalances] = useState({
         worker: '0',
-        relayOperator: '0',
-        walletProvider: '0',
-        liquidityProvider: '0',
-        iovLabsRecipient: '0'
+        collector: '0',
+        partners: []
     });
 
 
     useEffect(() => {
         let isMounted = true;
-        getPartnerBalances().then((balances) => {
+        getUpdatedBalances().then((balances) => {
             if (isMounted) {
                 setBalances(balances);
             }
@@ -65,10 +53,9 @@ function PartnerBalances() {
             <li className="collection-header"><h4>Balances</h4></li>
             <PartnerBalance label={'Worker'} balance={balances.worker}/>
             <PartnerBalance label={'Collector'} balance={balances.collector}/>
-            <PartnerBalance label={'Relay Operator'} balance={balances.relayOperator}/>
-            <PartnerBalance label={'Wallet Provider'} balance={balances.walletProvider}/>
-            <PartnerBalance label={'Liquidity Provider'} balance={balances.liquidityProvider}/>
-            <PartnerBalance label={'IOV Labs Recipient'} balance={balances.iovLabsRecipient}/>
+            {
+                balances.partners.map((partnerBalance, index) => <PartnerBalance key={index} label={`Partner #${index+1}`} balance={partnerBalance}/>)
+            }
         </ul>
     )
 }
