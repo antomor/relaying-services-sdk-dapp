@@ -122,6 +122,12 @@ class Utils {
         transactions.push(transaction);
         localStorage.setItem(address, JSON.stringify(transactions));
     }
+
+    static getPartners() {
+        const partnerEnvVar = process.env.REACT_APP_CONTRACTS_PARTNERS!;
+        const partners = partnerEnvVar.split(",");
+        return partners;
+    }
 }
 
 export default Utils;
