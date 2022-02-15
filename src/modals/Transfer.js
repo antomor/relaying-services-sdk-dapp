@@ -3,7 +3,6 @@ import { toBN } from 'web3-utils';
 import Utils, { estimateMaxPossibleRelayGas, TRIF_PRICE } from '../Utils';
 import './Transfer.css';
 
-//import { useState } from 'react';
 const M = window.M;
 const $ = window.$;
 

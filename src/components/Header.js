@@ -10,7 +10,6 @@ function Header(props) {
     , connected
   } = props;
 
-  //const [status, setStatus] = useState('red');
   const [balance, setBalance] = useState();
 
   useEffect(() => {

@@ -1,5 +1,4 @@
 import './SmartWallet.css';
-//import { useState } from 'react';
 
 window.M.AutoInit();
 const M = window.M;

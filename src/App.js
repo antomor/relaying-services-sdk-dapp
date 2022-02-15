@@ -1,4 +1,3 @@
-/* eslint-disable import/first */
 import { useState, useEffect } from 'react';
 import './App.css';
 import Web3 from 'web3';
@@ -10,7 +9,7 @@ import SmartWallet from './components/SmartWallet';
 import Footer from './components/Footer';
 
 import Deploy from './modals/Deploy';
-//import Execute from './modals/Execute';
+
 import Receive from './modals/Receive';
 import Transfer from './modals/Transfer';
 import Loading from './modals/Loading';
@@ -188,7 +187,6 @@ function App() {
                 setUpdateInfo={setUpdateInfo}
                 account={account}
             />
-            {/*<Execute />*/}
             <Execute
                 provider={provider}
                 currentSmartWallet={currentSmartWallet}

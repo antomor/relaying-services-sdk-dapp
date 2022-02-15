@@ -3,7 +3,6 @@ import TestToken from './contracts/TestToken.json';
 import Web3 from 'web3';
 import { toHex } from 'web3-utils';
 
-// Zero address
 export const TRIF_PRICE = 0.000005739;
 export const TRIF_TOKEN_DECIMALS = 18;
 if (window.ethereum) {
@@ -14,7 +13,6 @@ if (window.ethereum) {
     throw new Error('No web3 detected');
 }
 const web3 = window.web3;
-//const ethereum = window.ethereum;
 
 class Utils {
     static async ritTokenDecimals() {
