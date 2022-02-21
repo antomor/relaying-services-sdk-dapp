@@ -1,8 +1,17 @@
+import React from 'react';
 import { useEffect, useState } from 'react';
 import Utils from '../Utils';
 import './Header.css';
 
-function Header(props) {
+type HeaderProps = {
+  account: string,
+  connect: any
+  setUpdateInfo: any
+  connected: boolean,
+  refreshBalances: any,
+}
+
+function Header(props: HeaderProps) {
   const {
     account
     , connect
@@ -10,7 +19,7 @@ function Header(props) {
     , connected
   } = props;
 
-  const [balance, setBalance] = useState();
+  const [balance, setBalance] = useState<string>();
 
   useEffect(() => {
     if(!account){
