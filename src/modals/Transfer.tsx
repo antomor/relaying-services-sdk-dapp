@@ -1,12 +1,32 @@
-import { useState } from 'react';
+import EnvelopingTransactionDetails from '@rsksmart/rif-relay-common/dist/types/EnvelopingTransactionDetails';
+import { Dispatch, SetStateAction, useState } from 'react';
+import { RelayingServices } from 'relaying-services-sdk';
 import { toBN } from 'web3-utils';
+import { FixMeLater } from '../types';
 import Utils, { estimateMaxPossibleRelayGas, TRIF_PRICE } from '../Utils';
 import './Transfer.css';
 
 const M = window.M;
 const $ = window.$;
 
-function Transfer(props) {
+type TransferProps = {
+    currentSmartWallet: FixMeLater;
+    provider: RelayingServices;
+    setUpdateInfo: FixMeLater;
+    account: FixMeLater;
+    setShow: Dispatch<SetStateAction<boolean>>
+}
+
+type TransferInfo = {
+    fees: number | string,
+    check: boolean,
+    address: string,
+    amount: number
+}
+
+type TransferInfoKey = keyof TransferInfo;
+
+function Transfer(props: TransferProps) {
     const {
         currentSmartWallet
         , provider
@@ -17,7 +37,7 @@ function Transfer(props) {
     const [loading, setLoading] = useState(false);
     const [estimateLoading, setEstimateLoading] = useState(false);
 
-    const [transfer, setTransfer] = useState({
+    const [transfer, setTransfer] = useState<TransferInfo>({
         check: false,
         fees: 0,
         amount: 0,
@@ -28,18 +48,15 @@ function Transfer(props) {
         setLoading(true);
         const address = await navigator.clipboard.readText();
         if (Utils.checkAddress(address.toLowerCase())) {
-            changeValue({ currentTarget: { value: address } }, 'address');
+            changeValue(address, 'address');
         }
         setLoading(false);
     }
 
-    function changeValue(event, prop) {
+    function changeValue(value: FixMeLater, prop: TransferInfoKey) {
         let obj = Object.assign({}, transfer);
-        if (event.currentTarget.type === 'checkbox') {
-            obj[prop] = event.currentTarget.checked;
-        } else {
-            obj[prop] = event.currentTarget.value;
-        }
+        // @ts-ignore: TODO: change this to be type safe 
+        obj[prop] = value;
         setTransfer(obj)
     }
 
@@ -57,7 +74,7 @@ function Transfer(props) {
             const fees = transfer.fees === "" ? "0" : transfer.fees;
 
             const encodedAbi = (await Utils.getTokenContract()).methods
-                .transfer(transfer.address, await Utils.toWei(amount)).encodeABI();
+                .transfer(transfer.address, await Utils.toWei(amount.toString())).encodeABI();
 
             const txDetails = await provider.relayTransaction(
                 {
@@ -65,10 +82,12 @@ function Transfer(props) {
                     , data: encodedAbi
                 }
                 , {
-                    tokenAddress: process.env.REACT_APP_CONTRACTS_RIF_TOKEN
-                    , ...currentSmartWallet
+                    tokenAddress: process.env.REACT_APP_CONTRACTS_RIF_TOKEN,
+                    address: currentSmartWallet.address,
+                    deployed:  currentSmartWallet.deployed,
+                    index: currentSmartWallet.index,
                 }
-                , fees
+                , Number(fees)
                 , {
                     retries: 7
                 }
@@ -77,7 +96,10 @@ function Transfer(props) {
             setUpdateInfo(true);
             close();
         } catch (error) {
-            alert(error.message);
+            const errorObj = error as Error;
+            if (errorObj.message) {
+                alert(errorObj.message);
+            }
             console.error(error);
         }
         setLoading(false);
@@ -86,7 +108,7 @@ function Transfer(props) {
     async function sendRBTC() {
         setLoading(true);
         try {
-            const amount = await Utils.toWei(transfer.amount, "ether");
+            const amount = await Utils.toWei(transfer.amount.toString());
             await Utils.sendTransaction({
                 from: account, //currentSmartWallet.address,
                 to: transfer.address,
@@ -95,7 +117,10 @@ function Transfer(props) {
             close();
             setUpdateInfo(true);
         } catch (error) {
-            alert(error.message);
+            const errorObj = error as Error;
+            if (errorObj.message) {
+                alert(errorObj.message);
+            }
             console.error(error)
         }
         setLoading(false);
@@ -123,9 +148,9 @@ function Transfer(props) {
                 await Utils.toWei(transfer.amount.toString() || "0")
             )
             .encodeABI();
-            const trxDetails = {
+            const trxDetails: EnvelopingTransactionDetails = {
                 from: account,
-                to: process.env.REACT_APP_CONTRACTS_RIF_TOKEN,
+                to: process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
                 value: "0",
                 relayHub: process.env.REACT_APP_CONTRACTS_RELAY_HUB,
                 callVerifier: process.env.REACT_APP_CONTRACTS_RELAY_VERIFIER,
@@ -136,8 +161,10 @@ function Transfer(props) {
                 tokenAmount: window.web3.utils.toWei("1"),
                 onlyPreferredRelays: true,
             };
+            //@ts-ignore TODO: we shouldn't access to the relayProvider
             const maxPossibleGasValue = await estimateMaxPossibleRelayGas(provider.relayProvider.relayClient, trxDetails);    
             const gasPrice = toBN(
+                //@ts-ignore TODO: we shouldn't access to the relayProvider
                 await provider.relayProvider.relayClient._calculateGasPrice()
                 );
             console.log('maxPossibleGas, gasPrice', maxPossibleGasValue.toString(), gasPrice.toString());
@@ -154,13 +181,16 @@ function Transfer(props) {
             console.log("Cost in TRif: ", costInTrifFixed);
 
             if (transfer.check === true) {
-                changeValue({ currentTarget: { value: costInRBTC } }, "fees");
+                changeValue(costInRBTC, "fees");
             } else {
-                changeValue({ currentTarget: { value: costInTrifFixed } }, "fees");
+                changeValue(costInTrifFixed, "fees");
             }
         } catch (error) {
-          alert(error.message);
-          console.error(error);
+            const errorObj = error as Error;
+            if (errorObj.message) {
+                alert(errorObj.message);
+            }
+            console.error(error);
         }
         setEstimateLoading(false);
       }
@@ -173,7 +203,7 @@ function Transfer(props) {
                         <div className="row">
                             <div className="input-field col s5">
                                 <input placeholder="Address" type="text" className="validate" onChange={(event) => {
-                                    changeValue(event, 'address')
+                                    changeValue(event.currentTarget.value, 'address')
                                 }} value={transfer.address} />
                                 <label htmlFor="transfer-to">Transfer to</label>
                             </div>
@@ -184,7 +214,7 @@ function Transfer(props) {
                         <div className="row">
                             <div className="input-field col s8">
                                 <input placeholder="0 tRIF" type="number" min="0" className="validate" onChange={(event) => {
-                                    changeValue(event, 'amount')
+                                    changeValue(event.currentTarget.value, 'amount')
                                 }} value={transfer.amount} />
                                 <label htmlFor="transfer-amount">Amount</label>
                             </div>
@@ -192,8 +222,8 @@ function Transfer(props) {
                                 <label>
                                     tRIF
                                     <input type="checkbox" onChange={(event) => {
-                                        changeValue(event, 'check')
-                                    }} value={transfer.check} />
+                                        changeValue(event.currentTarget.checked, 'check')
+                                    }} checked={transfer.check??undefined} />
                                     <span className="lever"></span>
                                     RBTC
                                 </label>
@@ -202,7 +232,7 @@ function Transfer(props) {
                         <div className="row">
                             <div className="input-field col s10">
                                 <input placeholder="0 tRIF" type="number" min="0" className="validate" onChange={(event) => {
-                                    changeValue(event, 'fees')
+                                    changeValue(event.currentTarget.value, 'fees')
                                 }} value={transfer.fees} />
                                 <label htmlFor="transfer-fees">Fees</label>
                             </div>

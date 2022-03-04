@@ -1,9 +1,13 @@
 
 import './Loading.css';
 
-function Loading(props) {
+type LoadingProps = {
+    show: boolean
+}
+
+function Loading({show}: LoadingProps) {
     return (
-        <div className={`holder ${props.show ? '' :'hide'}`} >
+        <div className={`holder ${show ? '' :'hide'}`} >
             <div className="subholder">
                 <span className="font-weight-bold pt-0">Loading...</span>
                 <div className="pb-5 lds-ring d-inline-block position-relative">

@@ -2,6 +2,9 @@
 import TestToken from './contracts/TestToken.json';
 import Web3 from 'web3';
 import { toHex } from 'web3-utils';
+import { FixMeLater } from './types';
+import { RelayClient } from '@rsksmart/rif-relay-client';
+import { EnvelopingTransactionDetails } from '@rsksmart/rif-relay-common';
 
 export const TRIF_PRICE = 0.000005739;
 export const TRIF_TOKEN_DECIMALS = 18;
@@ -21,7 +24,7 @@ class Utils {
         const balance = await rifTokenContract.methods.decimals().call();
         return balance;
     }
-    static async tokenBalance(address) {
+    static async tokenBalance(address: string) {
         let rifTokenContract = new web3.eth.Contract(TestToken.abi, process.env.REACT_APP_CONTRACTS_RIF_TOKEN);
         rifTokenContract.setProvider(web3.currentProvider);
         const balance = await rifTokenContract.methods.balanceOf(address).call();
@@ -33,15 +36,15 @@ class Utils {
         return rifTokenContract;
     }
 
-    static async getBalance(address) {
+    static async getBalance(address: string) {
         const balance = await web3.eth.getBalance(address);
         return balance;
     }
-    static fromWei(balance) {
+    static fromWei(balance: string) {
         return web3.utils.fromWei(balance);
     }
 
-    static async getReceipt(transactionHash) {
+    static async getReceipt(transactionHash: string) {
         let receipt = await web3.eth.getTransactionReceipt(transactionHash)
         let times = 0
 
@@ -64,15 +67,15 @@ class Utils {
         return accounts;
     }
 
-    static async toWei(tRifPriceInRBTC) {
+    static async toWei(tRifPriceInRBTC: string) {
         return web3.utils.toWei(tRifPriceInRBTC);
     }
 
-    static async getTransactionReceipt(transactionHash) {
+    static async getTransactionReceipt(transactionHash: string) {
         return await web3.eth.getTransactionReceipt(transactionHash);
     }
     // UI functions
-    static checkAddress(address) {
+    static checkAddress(address: string) {
         if (!/^(0x)?[0-9a-f]{40}$/i.test(address)) {
             return false;
         } else if (/^(0x)?[0-9a-f]{40}$/.test(address) || /^(0x)?[0-9A-F]{40}$/.test(address)) {
@@ -80,7 +83,7 @@ class Utils {
         }
     }
 
-    static async sendTransaction(transactionDetails){
+    static async sendTransaction(transactionDetails: FixMeLater){
         await web3.eth.sendTransaction(transactionDetails);
     }
 }
@@ -89,7 +92,7 @@ const ESTIMATED_GAS_CORRECTION_FACTOR = 1.0;
 // When estimating the gas an internal call is going to spend, we need to subtract some gas inherent to send the parameters to the blockchain
 const INTERNAL_TRANSACTION_ESTIMATE_CORRECTION = 20000;
 // extracted from rif-relay-common/ContractInteractor
-async function estimateDestinationContractCallGas(transactionDetails, addCushion = true) {
+async function estimateDestinationContractCallGas(transactionDetails: FixMeLater, addCushion = true): Promise<string|number> {
     // For relay calls, transactionDetails.gas is only the portion of gas sent to the destination contract, the tokenPayment
     // Part is done before, by the SmartWallet
 
@@ -118,20 +121,21 @@ async function estimateDestinationContractCallGas(transactionDetails, addCushion
     return internalCallCost;
   }
 
-export async function estimateMaxPossibleRelayGas(relayClient, trxDetails) {
+// TODO: this method should be moved to the sdk
+export async function estimateMaxPossibleRelayGas(relayClient: RelayClient, trxDetails: EnvelopingTransactionDetails) {
     const txDetailsClone = {
         ...trxDetails
     };
-    const internalCallCost = estimateDestinationContractCallGas(
+    const internalCallCost = await estimateDestinationContractCallGas(
               relayClient.getEstimateGasParams(txDetailsClone)
     );
     txDetailsClone.gas = toHex(internalCallCost);
     const tokenGas = (
-        await relayClient.estimateTokenTransferGas(txDetailsClone, process.env.REACT_APP_CONTRACTS_RELAY_WORKER)
+        await relayClient.estimateTokenTransferGas(txDetailsClone, process.env.REACT_APP_CONTRACTS_RELAY_WORKER!)
     ).toString();
     txDetailsClone.tokenGas = tokenGas;
     const maxPossibleGasValue = await relayClient.estimateMaxPossibleRelayGas(
-        txDetailsClone, process.env.REACT_APP_CONTRACTS_RELAY_WORKER
+        txDetailsClone, process.env.REACT_APP_CONTRACTS_RELAY_WORKER!
     );
     return maxPossibleGasValue;
 }

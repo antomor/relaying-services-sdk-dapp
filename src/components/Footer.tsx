@@ -1,9 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
+import { RelayingServices } from 'relaying-services-sdk';
+import { FixMeLater } from '../types';
 import Utils, { TRIF_PRICE } from '../Utils';
 import './Footer.css';
-//import { useState } from 'react';
 
-function Footer(props) {
+type FooterProps = {
+    smartWallets: FixMeLater
+    setSmartWallets: FixMeLater
+    connected: FixMeLater
+    account: FixMeLater
+    provider?: RelayingServices
+    setShow: FixMeLater
+}
+
+function Footer(props: FooterProps) {
     const {
         smartWallets
         , setSmartWallets
@@ -21,7 +31,7 @@ function Footer(props) {
 
         smartWallet.balance = Utils.fromWei(balance) + ' tRIF';
         smartWallet.rbtcBalance = Utils.fromWei(rbtcBalance) + ' RBTC';
-        smartWallet.deployed = await provider.isSmartWalletDeployed(smartWallet.address);
+        smartWallet.deployed = await provider?.isSmartWalletDeployed(smartWallet.address);
         return smartWallet;
     }, [provider]);
 
@@ -38,7 +48,7 @@ function Footer(props) {
                 const balance = await Utils.tokenBalance(smartWallet.address);
                 if (balance > '0' || smartWallet.deployed) {
                     smartWallet = await setBalance(smartWallet);
-                    setSmartWallets((currentSmartWallet) => [...currentSmartWallet, smartWallet]);
+                    setSmartWallets((currentSmartWallet: FixMeLater) => [...currentSmartWallet, smartWallet]);
                     smartWalletIndex += 1;
                 } else {
                     found = false;
@@ -50,7 +60,7 @@ function Footer(props) {
 
     useEffect(() => {
         (async () => {
-            const workerAddress = process.env.REACT_APP_CONTRACTS_RELAY_WORKER;
+            const workerAddress = process.env.REACT_APP_CONTRACTS_RELAY_WORKER!;
             const workerBalance = parseFloat(Utils.fromWei(await Utils.tokenBalance(workerAddress))).toFixed(4);
             setWorkerBalance(workerBalance);
         })();
@@ -58,7 +68,7 @@ function Footer(props) {
 
     async function create() {
         setShow(true);
-        let smartWallet = await provider.generateSmartWallet(smartWallets.length + 1);
+        let smartWallet = await provider?.generateSmartWallet(smartWallets.length + 1);
         smartWallet = await setBalance(smartWallet);
         setSmartWallets([...smartWallets, smartWallet]);
         

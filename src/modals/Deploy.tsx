@@ -1,20 +1,39 @@
 import Utils, { TRIF_PRICE } from '../Utils';
 import './Deploy.css';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
+import { RelayingServices, SmartWallet } from 'relaying-services-sdk';
+import { FixMeLater } from '../types';
 
 const $ = window.$;
 const M = window.M;
 setTimeout(() => {
     M.AutoInit();
 }, 0);
-function Deploy(props) {
+
+type DeployProps = {
+    currentSmartWallet?: SmartWallet 
+    provider?: RelayingServices
+    setUpdateInfo: FixMeLater,
+    setShow: Dispatch<SetStateAction<boolean>>
+}
+
+type DeployInfo = {
+    fees: number | string,
+    check: boolean,
+    tokenGas: number | string,
+    relayGas: number,
+}
+
+type DeployInfoKey = keyof DeployInfo;
+
+function Deploy(props: DeployProps) {
     const {
         currentSmartWallet
         , provider
         , setUpdateInfo
     } = props;
     
-    const [deploy, setDeploy] = useState({
+    const [deploy, setDeploy] = useState<DeployInfo>({
         fees: 0,
         check: false,
         tokenGas: 0,
@@ -26,37 +45,43 @@ function Deploy(props) {
     async function handleEstimateDeploySmartWalletButtonClick() {
         setEstimateLoading(true);
         try {
-            const estimate = await provider.estimateMaxPossibleRelayGas(
-                currentSmartWallet
-                , process.env.REACT_APP_CONTRACTS_RELAY_WORKER
+            const estimate = await provider?.estimateMaxPossibleRelayGas(
+                currentSmartWallet!
+                , process.env.REACT_APP_CONTRACTS_RELAY_WORKER!
             );
 
-            changeValue({ currentTarget: { value: estimate } })
+            // TODO: delete this line, doesn't make sense
+            // changeValue({ currentTarget: { value: estimate } });
+            
+            if ( estimate ) {
+                const costInRBTC = await Utils.fromWei(estimate.toString());
+                console.log("Cost in RBTC:", costInRBTC);
 
-            const costInRBTC = await Utils.fromWei(estimate.toString());
-            console.log("Cost in RBTC:", costInRBTC);
-
-            const costInTrif = parseFloat(costInRBTC) / TRIF_PRICE;
-            const tokenContract = await Utils.getTokenContract();
-            const ritTokenDecimals = await tokenContract.methods.decimals().call();
-            const costInTrifFixed = costInTrif.toFixed(ritTokenDecimals);
-            console.log("Cost in TRif: ", costInTrifFixed)
+                const costInTrif = parseFloat(costInRBTC) / TRIF_PRICE;
+                const tokenContract = await Utils.getTokenContract();
+                const ritTokenDecimals = await tokenContract.methods.decimals().call();
+                const costInTrifFixed = costInTrif.toFixed(ritTokenDecimals);
+                console.log("Cost in TRif: ", costInTrifFixed)
 
 
-            if (deploy.check === true) {
-                changeValue({ currentTarget: { value: costInRBTC } }, 'fees');
-            }
-            else {
-                changeValue({ currentTarget: { value: costInTrifFixed } }, 'fees');
+                if (deploy.check === true) {
+                    changeValue(costInRBTC, 'fees');
+                }
+                else {
+                    changeValue(costInTrifFixed, 'fees');
+                }
             }
         } catch (error) {
-            alert(error.message);
+            const errorObj = error as Error;
+            if ( errorObj.message) {
+                alert(errorObj.message);
+            }
             console.error(error);
         }
         setEstimateLoading(false);
     }
 
-    async function getReceipt(transactionHash) {
+    async function getReceipt(transactionHash: string) {
         let receipt = await Utils.getTransactionReceipt(transactionHash)
         let times = 0
 
@@ -70,7 +95,7 @@ function Deploy(props) {
         return receipt
     }
 
-    async function checkSmartWalletDeployment(txHash) {
+    async function checkSmartWalletDeployment(txHash: string) {
         let receipt = await getReceipt(txHash);
 
         if (receipt === null) {
@@ -82,30 +107,35 @@ function Deploy(props) {
         return receipt.status;
     }
 
-    async function relaySmartWalletDeployment(tokenAmount) {
+    async function relaySmartWalletDeployment(tokenAmount: string | number) {
         try {
-            const isAllowToken = await provider.isAllowedToken(process.env.REACT_APP_CONTRACTS_RIF_TOKEN);
-            if (isAllowToken) {
-                const fees = await Utils.toWei(tokenAmount + '');
-                const smartWallet = await provider.deploySmartWallet(
-                    currentSmartWallet
-                    , process.env.REACT_APP_CONTRACTS_RIF_TOKEN
-                    , fees
-                );
-                const smartWalledIsDeployed = await checkSmartWalletDeployment(smartWallet.deployTransaction);
-                if (!smartWalledIsDeployed) {
-                    throw new Error('SmartWallet: deployment failed');
+            if (provider){
+                const isAllowToken = await provider.isAllowedToken(process.env.REACT_APP_CONTRACTS_RIF_TOKEN!);
+                if (isAllowToken) {
+                    const fees = await Utils.toWei(tokenAmount + '');
+                    const smartWallet = await provider.deploySmartWallet(
+                        currentSmartWallet!
+                        , process.env.REACT_APP_CONTRACTS_RIF_TOKEN
+                        , fees
+                    );
+                    const smartWalledIsDeployed = await checkSmartWalletDeployment(smartWallet.deployTransaction!);
+                    if (!smartWalledIsDeployed) {
+                        throw new Error('SmartWallet: deployment failed');
+                    }
+                    return smartWallet;
+                } else {
+                    throw new Error('SmartWallet: was not created because Verifier does not accept the specified token for payment');
                 }
-                return smartWallet;
-            } else {
-                throw new Error('SmartWallet: was not created because Verifier does not accept the specified token for payment');
             }
         }
         catch (error) {
-            alert(error.message);
+            const errorObj = error as Error;
+            if (errorObj.message) {
+                alert(errorObj.message);
+            }
             console.error(error);
         }
-        return {};
+        return undefined;
     }
 
     async function handleDeploySmartWalletButtonClick() {
@@ -116,7 +146,7 @@ function Deploy(props) {
         let smartWallet = await relaySmartWalletDeployment(
             deploy.fees
         );
-        if (smartWallet.deployed) {
+        if (smartWallet?.deployed) {
             setUpdateInfo(true);
             close();
         }
@@ -124,9 +154,10 @@ function Deploy(props) {
         setLoading(false);
     }
 
-    function changeValue(event, prop) {
-        let obj = Object.assign({}, deploy);
-        obj[prop] = event.currentTarget.value;
+    function changeValue(value: FixMeLater, prop: DeployInfoKey) {
+        let obj: DeployInfo = {...deploy};
+        // @ts-ignore: TODO: change this to be type safe 
+        obj[prop] = value;
         setDeploy(obj)
     }
     function close(){
@@ -147,7 +178,7 @@ function Deploy(props) {
                         <div className="row">
                             <div className="input-field col s8">
                                 <input placeholder="0" value={deploy.fees} type="number" min="0" className="validate tooltipped" onChange={(event) => {
-                                    changeValue(event, 'fees')
+                                    changeValue(event.target.value, 'fees')
                                 }} data-tooltip="" />
                                 <label htmlFor="deploy-fees" id="deploy-fees-label">Fees (tRIF)</label>
                             </div>
@@ -155,8 +186,8 @@ function Deploy(props) {
                                 <label>
                                     tRIF
                                     <input type="checkbox" onChange={(event) => {
-                                        changeValue(event, 'check')
-                                    }} value={deploy.check} />
+                                        changeValue(event.target.value, 'check')
+                                    }} checked={deploy.check??undefined} />
                                     <span className="lever"></span>
                                     RBTC
                                 </label>

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import Web3 from 'web3';
 
-import { DefaultRelayingServices } from 'relaying-services-sdk';
+import { DefaultRelayingServices, RelayingServices } from 'relaying-services-sdk';
 
 import Header from './components/Header';
 import SmartWallet from './components/SmartWallet';
@@ -15,6 +15,8 @@ import Transfer from './modals/Transfer';
 import Loading from './modals/Loading';
 import Execute from './modals/Execute';
 import Utils from './Utils';
+import { RelayingServicesAddresses } from 'relaying-services-sdk/dist/interfaces';
+import { EnvelopingConfig } from '@rsksmart/rif-relay-common';
 
 if (window.ethereum) {
     window.web3 = new Web3(window.ethereum);
@@ -24,15 +26,19 @@ if (window.ethereum) {
     throw new Error('Error: MetaMask or web3 not detected');
 }
 
+function getEnvParamAsInt(value: string | undefined): number | undefined {
+    return value ? parseInt(value) : undefined;
+}
+
 const web3 = window.web3;
 const ethereum = window.ethereum;
 
 
 function App() {
     const [connected, setConnect] = useState(false);
-    const [account, setAccount] = useState('');
-    const [currentSmartWallet, setCurrentSmartWallet] = useState(null);
-    const [provider, setProvider] = useState(null);
+    const [account, setAccount] = useState<string | undefined>(undefined);
+    const [currentSmartWallet, setCurrentSmartWallet] = useState(undefined);
+    const [provider, setProvider] = useState<RelayingServices|undefined>(undefined);
     const [show, setShow] = useState(false);
 
     const [smartWallets, setSmartWallets] = useState([]);
@@ -40,30 +46,38 @@ function App() {
 
     async function initProvider() {
         try {
-            const config = {
-                verbose: window.location.href.includes('verbose')
-                , chainId: process.env.REACT_APP_RIF_RELAY_CHAIN_ID
-                , gasPriceFactorPercent: process.env.REACT_APP_RIF_RELAY_GAS_PRICE_FACTOR_PERCENT
-                , relayLookupWindowBlocks: process.env.REACT_APP_RIF_RELAY_LOOKUP_WINDOW_BLOCKS
-                , preferredRelays: [process.env.REACT_APP_RIF_RELAY_PREFERRED_RELAYS]
+            const config: Partial<EnvelopingConfig> = {
+                chainId: getEnvParamAsInt(process.env.REACT_APP_RIF_RELAY_CHAIN_ID)
+                , gasPriceFactorPercent: getEnvParamAsInt(process.env.REACT_APP_RIF_RELAY_GAS_PRICE_FACTOR_PERCENT)
+                , relayLookupWindowBlocks: getEnvParamAsInt(process.env.REACT_APP_RIF_RELAY_LOOKUP_WINDOW_BLOCKS)
+                , preferredRelays: process.env.REACT_APP_RIF_RELAY_PREFERRED_RELAYS ? process.env.REACT_APP_RIF_RELAY_PREFERRED_RELAYS.split(","): undefined
                 , relayHubAddress: process.env.REACT_APP_CONTRACTS_RELAY_HUB
                 , relayVerifierAddress: process.env.REACT_APP_CONTRACTS_RELAY_VERIFIER
                 , deployVerifierAddress: process.env.REACT_APP_CONTRACTS_DEPLOY_VERIFIER
                 , smartWalletFactoryAddress: process.env.REACT_APP_CONTRACTS_SMART_WALLET_FACTORY
+                , logLevel: 0
             };
-            const contractAddresses = {
-                relayHub: process.env.REACT_APP_CONTRACTS_RELAY_HUB
-                , smartWallet: process.env.REACT_APP_CONTRACTS_SMART_WALLET
-                , smartWalletFactory: process.env.REACT_APP_CONTRACTS_SMART_WALLET_FACTORY
-                , smartWalletDeployVerifier: process.env.REACT_APP_CONTRACTS_DEPLOY_VERIFIER
-                , smartWalletRelayVerifier: process.env.REACT_APP_CONTRACTS_RELAY_VERIFIER
-                , testToken: process.env.REACT_APP_CONTRACTS_RIF_TOKEN
+            const contractAddresses: RelayingServicesAddresses = {
+                relayHub: process.env.REACT_APP_CONTRACTS_RELAY_HUB!,
+                smartWallet: process.env.REACT_APP_CONTRACTS_SMART_WALLET!,
+                smartWalletFactory: process.env.REACT_APP_CONTRACTS_SMART_WALLET_FACTORY!,
+                smartWalletDeployVerifier: process.env.REACT_APP_CONTRACTS_DEPLOY_VERIFIER!,
+                smartWalletRelayVerifier: process.env.REACT_APP_CONTRACTS_RELAY_VERIFIER!,
+                testToken: process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
+                // TODO: Why aren't these addresses required? we may set them as optional
+                penalizer: '',
+                customSmartWallet: '',
+                customSmartWalletFactory: '',
+                customSmartWalletDeployVerifier: '',
+                customSmartWalletRelayVerifier: '',
+                sampleRecipient: ''
             };
 
             // Get an RIF Relay RelayProvider instance and assign it to Web3 to use RIF Relay transparently
             const relayingServices = new DefaultRelayingServices({
                 web3Instance: web3,
-                account: account
+                rskHost: '',
+                envelopingConfig: config
             });
             await relayingServices.initialize(config, contractAddresses);
             setProvider(relayingServices);
@@ -147,7 +161,6 @@ function App() {
         <div className="App">
             <Loading show={show}/>
             <Header
-                setAccount={setAccount}
                 account={account}
                 connect={connect}
                 connected={connected}
@@ -181,7 +194,7 @@ function App() {
                 currentSmartWallet={currentSmartWallet}
             />
             <Transfer
-                provider={provider}
+                provider={provider!}
                 currentSmartWallet={currentSmartWallet}
                 setShow={setShow}
                 setUpdateInfo={setUpdateInfo}

@@ -1,8 +1,11 @@
+import { FixMeLater } from '../types';
 import './SmartWallet.css';
 
+// TODO: Replace it with react-materialize
 window.M.AutoInit();
 const M = window.M;
-function SmartWallet(props) {
+
+function SmartWallet(props: FixMeLater) {
     const { 
         connected
         , smartWallets
@@ -10,12 +13,13 @@ function SmartWallet(props) {
         , setShow
     } = props;
 
-    async function copySmartWalletAddress(address) {
+    async function copySmartWalletAddress(address: string) {
         setShow(true);
         await navigator.clipboard.writeText(address);
         setShow(false);
     }
-    function openModal(modalId, smartWallet){
+    function openModal(modalId: string, smartWallet: FixMeLater){
+        console.log({smartWallet});
         setCurrentSmartWallet(smartWallet);
         const instance = M.Modal.init( document.getElementById(modalId), {dismissible: false});
         instance.open();
@@ -30,7 +34,7 @@ function SmartWallet(props) {
                     <h6 className="center-align">Wallet not connected, please connect.</h6>
                 </div>
             </div>
-            {smartWallets.map((smartWallet, index) => {
+            {smartWallets.map((smartWallet: FixMeLater, index: number) => {
                 return (
                     <div key={index} className={`smart-wallet row teal lighten-4`}>
                         <div className="col s1">

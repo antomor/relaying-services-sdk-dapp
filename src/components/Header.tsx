@@ -1,14 +1,14 @@
-import React from 'react';
 import { useEffect, useState } from 'react';
+import { FixMeLater } from '../types';
 import Utils from '../Utils';
 import './Header.css';
 
 type HeaderProps = {
-  account: string,
-  connect: any
-  setUpdateInfo: any
-  connected: boolean,
-  refreshBalances: any,
+  account?: string,
+  connect: FixMeLater,
+  setUpdateInfo: FixMeLater
+  connected: FixMeLater,
+  refreshBalances?: FixMeLater,
 }
 
 function Header(props: HeaderProps) {
@@ -26,6 +26,7 @@ function Header(props: HeaderProps) {
       return;
     }
     (async () => {
+      console.log(account);
       const balance = await Utils.getBalance(account);
       const balanceConverted = Utils.fromWei(balance);
       setBalance(balanceConverted + ' RBTC  ');
@@ -40,7 +41,7 @@ function Header(props: HeaderProps) {
       <nav>
         <div className="nav-wrapper gradient">
           <div className="brand-logo left">
-            <img className="responsive-img" alt="logo" src="images/rif_logo.png" onClick={props.refreshBalances} />
+            <img className="responsive-img" alt="logo" src="images/rif_logo.png" onClick={props.refreshBalances??(() => {})} />
             <span ><b>RIF Relay</b></span>
           </div>
           <ul id="nav-mobile" className="right hide-on-med-and-down">
