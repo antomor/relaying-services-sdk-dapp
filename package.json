@@ -14,6 +14,8 @@
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
     "relaying-services-sdk": "github:antomor/relaying-services-sdk#PP-102/dapp-review",
+    "@rsksmart/rif-relay-client": "https://github.com/infuy/rif-relay-client",
+    "@rsksmart/rif-relay-common": "https://github.com/infuy/rif-relay-common",
     "typescript": "^4.5.5",
     "web-vitals": "^1.0.1",
     "web3": "^1.5.2",
@@ -23,7 +25,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint --ext .ts .",
+    "lint:fix": "eslint . --ext .ts --fix"
   },
   "eslintConfig": {
     "extends": [
@@ -44,7 +48,15 @@
     ]
   },
   "devDependencies": {
-    "dotenv": "^10.0.0"
+    "@typescript-eslint/eslint-plugin": "^5.13.0",
+    "@typescript-eslint/parser": "^5.13.0",
+    "dotenv": "^10.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-react": "^7.29.3",
+    "eslint-plugin-react-hooks": "^4.3.0"
   },
   "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
   "repository": {
