@@ -2,7 +2,7 @@ import EnvelopingTransactionDetails from '@rsksmart/rif-relay-common/dist/types/
 import { Dispatch, SetStateAction, useState } from 'react';
 import { RelayingServices } from 'relaying-services-sdk';
 import { toBN } from 'web3-utils';
-import { FixMeLater } from '../types';
+import { SmartWalletWithBalance } from '../types';
 import Utils, { estimateMaxPossibleRelayGas, TRIF_PRICE } from '../Utils';
 import './Transfer.css';
 
@@ -10,10 +10,10 @@ const M = window.M;
 const $ = window.$;
 
 type TransferProps = {
-    currentSmartWallet: FixMeLater;
+    currentSmartWallet: SmartWalletWithBalance;
     provider: RelayingServices;
-    setUpdateInfo: FixMeLater;
-    account: FixMeLater;
+    setUpdateInfo: Dispatch<SetStateAction<boolean>>;
+    account?: string;
     setShow: Dispatch<SetStateAction<boolean>>
 }
 
@@ -53,7 +53,7 @@ function Transfer(props: TransferProps) {
         setLoading(false);
     }
 
-    function changeValue(value: FixMeLater, prop: TransferInfoKey) {
+    function changeValue<T>(value: T, prop: TransferInfoKey) {
         let obj = Object.assign({}, transfer);
         // @ts-ignore: TODO: change this to be type safe 
         obj[prop] = value;
@@ -106,24 +106,27 @@ function Transfer(props: TransferProps) {
     }
 
     async function sendRBTC() {
-        setLoading(true);
-        try {
-            const amount = await Utils.toWei(transfer.amount.toString());
-            await Utils.sendTransaction({
-                from: account, //currentSmartWallet.address,
-                to: transfer.address,
-                value: amount
-            });
-            close();
-            setUpdateInfo(true);
-        } catch (error) {
-            const errorObj = error as Error;
-            if (errorObj.message) {
-                alert(errorObj.message);
+        if (account) {
+            setLoading(true);
+            try {
+                const amount = await Utils.toWei(transfer.amount.toString());
+                await Utils.sendTransaction({
+                    from: account, //currentSmartWallet.address,
+                    to: transfer.address,
+                    value: amount,
+                    data: '0x'
+                });
+                close();
+                setUpdateInfo(true);
+            } catch (error) {
+                const errorObj = error as Error;
+                if (errorObj.message) {
+                    alert(errorObj.message);
+                }
+                console.error(error)
             }
-            console.error(error)
+            setLoading(false);
         }
-        setLoading(false);
     }
 
     function close(){
@@ -140,60 +143,62 @@ function Transfer(props: TransferProps) {
     }
     
       async function handleEstimateTransferButtonClick() {
-        setEstimateLoading(true);
-        try {
-            const encodedTransferFunction = (await Utils.getTokenContract()).methods
-            .transfer(
-                transfer.address,
-                await Utils.toWei(transfer.amount.toString() || "0")
-            )
-            .encodeABI();
-            const trxDetails: EnvelopingTransactionDetails = {
-                from: account,
-                to: process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
-                value: "0",
-                relayHub: process.env.REACT_APP_CONTRACTS_RELAY_HUB,
-                callVerifier: process.env.REACT_APP_CONTRACTS_RELAY_VERIFIER,
-                callForwarder: currentSmartWallet.address,
-                data: encodedTransferFunction,
-                tokenContract: process.env.REACT_APP_CONTRACTS_RIF_TOKEN,
-                // value set just for the estimation; in the original dapp the estimation is performed using an eight of the user's token balance,
-                tokenAmount: window.web3.utils.toWei("1"),
-                onlyPreferredRelays: true,
-            };
-            //@ts-ignore TODO: we shouldn't access to the relayProvider
-            const maxPossibleGasValue = await estimateMaxPossibleRelayGas(provider.relayProvider.relayClient, trxDetails);    
-            const gasPrice = toBN(
+          if (account){
+            setEstimateLoading(true);
+            try {
+                const encodedTransferFunction = (await Utils.getTokenContract()).methods
+                .transfer(
+                    transfer.address,
+                    await Utils.toWei(transfer.amount.toString() || "0")
+                )
+                .encodeABI();
+                const trxDetails: EnvelopingTransactionDetails = {
+                    from: account,
+                    to: process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
+                    value: "0",
+                    relayHub: process.env.REACT_APP_CONTRACTS_RELAY_HUB,
+                    callVerifier: process.env.REACT_APP_CONTRACTS_RELAY_VERIFIER,
+                    callForwarder: currentSmartWallet.address,
+                    data: encodedTransferFunction,
+                    tokenContract: process.env.REACT_APP_CONTRACTS_RIF_TOKEN,
+                    // value set just for the estimation; in the original dapp the estimation is performed using an eight of the user's token balance,
+                    tokenAmount: window.web3.utils.toWei("1"),
+                    onlyPreferredRelays: true,
+                };
                 //@ts-ignore TODO: we shouldn't access to the relayProvider
-                await provider.relayProvider.relayClient._calculateGasPrice()
-                );
-            console.log('maxPossibleGas, gasPrice', maxPossibleGasValue.toString(), gasPrice.toString());
-            const maxPossibleGas = toBN(maxPossibleGasValue);
-            const estimate = maxPossibleGas.mul(gasPrice);
-        
-            const costInRBTC = await Utils.fromWei(estimate.toString());
-            console.log("Cost in RBTC:", costInRBTC);
+                const maxPossibleGasValue = await estimateMaxPossibleRelayGas(provider.relayProvider.relayClient, trxDetails);    
+                const gasPrice = toBN(
+                    //@ts-ignore TODO: we shouldn't access to the relayProvider
+                    await provider.relayProvider.relayClient._calculateGasPrice()
+                    );
+                console.log('maxPossibleGas, gasPrice', maxPossibleGasValue.toString(), gasPrice.toString());
+                const maxPossibleGas = toBN(maxPossibleGasValue);
+                const estimate = maxPossibleGas.mul(gasPrice);
+            
+                const costInRBTC = await Utils.fromWei(estimate.toString());
+                console.log("Cost in RBTC:", costInRBTC);
 
-            const costInTrif = parseFloat(costInRBTC) / TRIF_PRICE;
-            const tokenContract = await Utils.getTokenContract();
-            const ritTokenDecimals = await tokenContract.methods.decimals().call();
-            const costInTrifFixed = costInTrif.toFixed(ritTokenDecimals);
-            console.log("Cost in TRif: ", costInTrifFixed);
+                const costInTrif = parseFloat(costInRBTC) / TRIF_PRICE;
+                const tokenContract = await Utils.getTokenContract();
+                const ritTokenDecimals = await tokenContract.methods.decimals().call();
+                const costInTrifFixed = costInTrif.toFixed(ritTokenDecimals);
+                console.log("Cost in TRif: ", costInTrifFixed);
 
-            if (transfer.check === true) {
-                changeValue(costInRBTC, "fees");
-            } else {
-                changeValue(costInTrifFixed, "fees");
+                if (transfer.check === true) {
+                    changeValue(costInRBTC, "fees");
+                } else {
+                    changeValue(costInTrifFixed, "fees");
+                }
+            } catch (error) {
+                const errorObj = error as Error;
+                if (errorObj.message) {
+                    alert(errorObj.message);
+                }
+                console.error(error);
             }
-        } catch (error) {
-            const errorObj = error as Error;
-            if (errorObj.message) {
-                alert(errorObj.message);
-            }
-            console.error(error);
+            setEstimateLoading(false);
         }
-        setEstimateLoading(false);
-      }
+    }
 
     return (
         <div id="transfer-modal" className="modal">

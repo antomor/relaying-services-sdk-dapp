@@ -1,11 +1,20 @@
-import { FixMeLater } from '../types';
+import { Dispatch, SetStateAction } from 'react';
+import { SmartWalletWithBalance } from '../types';
 import './SmartWallet.css';
 
 // TODO: Replace it with react-materialize
 window.M.AutoInit();
 const M = window.M;
 
-function SmartWallet(props: FixMeLater) {
+
+type SmartWalletProps = {
+    connected: boolean;
+    smartWallets: SmartWalletWithBalance[]
+    setCurrentSmartWallet: Dispatch<SetStateAction<SmartWalletWithBalance | undefined>>
+    setShow: Dispatch<SetStateAction<boolean>>
+}
+
+function SmartWallet(props: SmartWalletProps) {
     const { 
         connected
         , smartWallets
@@ -18,7 +27,7 @@ function SmartWallet(props: FixMeLater) {
         await navigator.clipboard.writeText(address);
         setShow(false);
     }
-    function openModal(modalId: string, smartWallet: FixMeLater){
+    function openModal(modalId: string, smartWallet: SmartWalletWithBalance){
         console.log({smartWallet});
         setCurrentSmartWallet(smartWallet);
         const instance = M.Modal.init( document.getElementById(modalId), {dismissible: false});
@@ -34,7 +43,7 @@ function SmartWallet(props: FixMeLater) {
                     <h6 className="center-align">Wallet not connected, please connect.</h6>
                 </div>
             </div>
-            {smartWallets.map((smartWallet: FixMeLater, index: number) => {
+            {smartWallets.map((smartWallet: SmartWalletWithBalance, index: number) => {
                 return (
                     <div key={index} className={`smart-wallet row teal lighten-4`}>
                         <div className="col s1">

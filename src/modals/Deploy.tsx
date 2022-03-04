@@ -2,7 +2,6 @@ import Utils, { TRIF_PRICE } from '../Utils';
 import './Deploy.css';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { RelayingServices, SmartWallet } from 'relaying-services-sdk';
-import { FixMeLater } from '../types';
 
 const $ = window.$;
 const M = window.M;
@@ -13,7 +12,7 @@ setTimeout(() => {
 type DeployProps = {
     currentSmartWallet?: SmartWallet 
     provider?: RelayingServices
-    setUpdateInfo: FixMeLater,
+    setUpdateInfo: Dispatch<SetStateAction<boolean>>,
     setShow: Dispatch<SetStateAction<boolean>>
 }
 
@@ -154,7 +153,7 @@ function Deploy(props: DeployProps) {
         setLoading(false);
     }
 
-    function changeValue(value: FixMeLater, prop: DeployInfoKey) {
+    function changeValue<T>(value: T, prop: DeployInfoKey) {
         let obj: DeployInfo = {...deploy};
         // @ts-ignore: TODO: change this to be type safe 
         obj[prop] = value;

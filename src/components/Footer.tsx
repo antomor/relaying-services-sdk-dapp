@@ -1,17 +1,18 @@
-import { useCallback, useEffect, useState } from 'react';
-import { RelayingServices } from 'relaying-services-sdk';
-import { FixMeLater } from '../types';
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
+import { RelayingServices, SmartWallet } from 'relaying-services-sdk';
+import { SmartWalletWithBalance } from '../types';
 import Utils, { TRIF_PRICE } from '../Utils';
 import './Footer.css';
 
 type FooterProps = {
-    smartWallets: FixMeLater
-    setSmartWallets: FixMeLater
-    connected: FixMeLater
-    account: FixMeLater
+    smartWallets: SmartWalletWithBalance[]
+    setSmartWallets: Dispatch<SetStateAction<SmartWalletWithBalance[]>>
+    connected: boolean
+    account?: string
     provider?: RelayingServices
-    setShow: FixMeLater
+    setShow: Dispatch<SetStateAction<boolean>>
 }
+
 
 function Footer(props: FooterProps) {
     const {
@@ -25,14 +26,16 @@ function Footer(props: FooterProps) {
 
     const [workerBalance, setWorkerBalance] = useState('0');
 
-    const setBalance = useCallback(async (smartWallet) => {
+    const setBalance = useCallback(async (smartWallet: SmartWallet): Promise<SmartWalletWithBalance> => {
         const balance = await Utils.tokenBalance(smartWallet.address);
         const rbtcBalance = await Utils.getBalance(smartWallet.address);
-
-        smartWallet.balance = Utils.fromWei(balance) + ' tRIF';
-        smartWallet.rbtcBalance = Utils.fromWei(rbtcBalance) + ' RBTC';
-        smartWallet.deployed = await provider?.isSmartWalletDeployed(smartWallet.address);
-        return smartWallet;
+        const swWithBalance = {
+            ...smartWallet,
+            balance: Utils.fromWei(balance) + ' tRIF',
+            rbtcBalance: Utils.fromWei(rbtcBalance) + ' RBTC',
+            deployed: await provider?.isSmartWalletDeployed(smartWallet.address) || false
+        }
+        return swWithBalance;
     }, [provider]);
 
     useEffect(() => {
@@ -44,11 +47,11 @@ function Footer(props: FooterProps) {
             let found = true;
             setShow(true);
             while (found === true) {
-                let smartWallet = await provider.generateSmartWallet(smartWalletIndex + 1);
+                const smartWallet = await provider.generateSmartWallet(smartWalletIndex + 1);
                 const balance = await Utils.tokenBalance(smartWallet.address);
                 if (balance > '0' || smartWallet.deployed) {
-                    smartWallet = await setBalance(smartWallet);
-                    setSmartWallets((currentSmartWallet: FixMeLater) => [...currentSmartWallet, smartWallet]);
+                    const smartWalletWithBalance = await setBalance(smartWallet);
+                    setSmartWallets((currentSmartWallet) => [...currentSmartWallet, smartWalletWithBalance]);
                     smartWalletIndex += 1;
                 } else {
                     found = false;
@@ -67,12 +70,13 @@ function Footer(props: FooterProps) {
     }, [setWorkerBalance]);
 
     async function create() {
-        setShow(true);
-        let smartWallet = await provider?.generateSmartWallet(smartWallets.length + 1);
-        smartWallet = await setBalance(smartWallet);
-        setSmartWallets([...smartWallets, smartWallet]);
-        
-        setShow(false);
+        if (provider) {
+            setShow(true);
+            const smartWallet = await provider?.generateSmartWallet(smartWallets.length + 1);
+            const smartWalletWithBalance = await setBalance(smartWallet);
+            setSmartWallets([...smartWallets, smartWalletWithBalance]);
+            setShow(false);
+        }
     }
 
     return (

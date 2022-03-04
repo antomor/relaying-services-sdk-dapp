@@ -2,7 +2,6 @@
 import TestToken from './contracts/TestToken.json';
 import Web3 from 'web3';
 import { toHex } from 'web3-utils';
-import { FixMeLater } from './types';
 import { RelayClient } from '@rsksmart/rif-relay-client';
 import { EnvelopingTransactionDetails } from '@rsksmart/rif-relay-common';
 
@@ -83,7 +82,7 @@ class Utils {
         }
     }
 
-    static async sendTransaction(transactionDetails: FixMeLater){
+    static async sendTransaction(transactionDetails: EnvelopingTransactionDetails){
         await web3.eth.sendTransaction(transactionDetails);
     }
 }
@@ -92,7 +91,7 @@ const ESTIMATED_GAS_CORRECTION_FACTOR = 1.0;
 // When estimating the gas an internal call is going to spend, we need to subtract some gas inherent to send the parameters to the blockchain
 const INTERNAL_TRANSACTION_ESTIMATE_CORRECTION = 20000;
 // extracted from rif-relay-common/ContractInteractor
-async function estimateDestinationContractCallGas(transactionDetails: FixMeLater, addCushion = true): Promise<string|number> {
+async function estimateDestinationContractCallGas(transactionDetails: EnvelopingTransactionDetails, addCushion = true): Promise<string|number> {
     // For relay calls, transactionDetails.gas is only the portion of gas sent to the destination contract, the tokenPayment
     // Part is done before, by the SmartWallet
 

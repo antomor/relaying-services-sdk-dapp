@@ -1,14 +1,12 @@
-import { useEffect, useState } from 'react';
-import { FixMeLater } from '../types';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import Utils from '../Utils';
 import './Header.css';
 
 type HeaderProps = {
   account?: string,
-  connect: FixMeLater,
-  setUpdateInfo: FixMeLater
-  connected: FixMeLater,
-  refreshBalances?: FixMeLater,
+  connect: ()=>Promise<void>,
+  setUpdateInfo: Dispatch<SetStateAction<boolean>>
+  connected: boolean,
 }
 
 function Header(props: HeaderProps) {
@@ -41,7 +39,7 @@ function Header(props: HeaderProps) {
       <nav>
         <div className="nav-wrapper gradient">
           <div className="brand-logo left">
-            <img className="responsive-img" alt="logo" src="images/rif_logo.png" onClick={props.refreshBalances??(() => {})} />
+            <img className="responsive-img" alt="logo" src="images/rif_logo.png" onClick={() => refresh()} />
             <span ><b>RIF Relay</b></span>
           </div>
           <ul id="nav-mobile" className="right hide-on-med-and-down">

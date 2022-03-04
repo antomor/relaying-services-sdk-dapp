@@ -17,6 +17,7 @@ import Execute from './modals/Execute';
 import Utils from './Utils';
 import { RelayingServicesAddresses } from 'relaying-services-sdk/dist/interfaces';
 import { EnvelopingConfig } from '@rsksmart/rif-relay-common';
+import { SmartWalletWithBalance } from './types';
 
 if (window.ethereum) {
     window.web3 = new Web3(window.ethereum);
@@ -37,11 +38,11 @@ const ethereum = window.ethereum;
 function App() {
     const [connected, setConnect] = useState(false);
     const [account, setAccount] = useState<string | undefined>(undefined);
-    const [currentSmartWallet, setCurrentSmartWallet] = useState(undefined);
+    const [currentSmartWallet, setCurrentSmartWallet] = useState<SmartWalletWithBalance|undefined>(undefined);
     const [provider, setProvider] = useState<RelayingServices|undefined>(undefined);
     const [show, setShow] = useState(false);
 
-    const [smartWallets, setSmartWallets] = useState([]);
+    const [smartWallets, setSmartWallets] = useState<SmartWalletWithBalance[]>([]);
     const [updateInfo, setUpdateInfo] = useState(false);
 
     async function initProvider() {
@@ -195,13 +196,13 @@ function App() {
             />
             <Transfer
                 provider={provider!}
-                currentSmartWallet={currentSmartWallet}
+                currentSmartWallet={currentSmartWallet!}
                 setShow={setShow}
                 setUpdateInfo={setUpdateInfo}
                 account={account}
             />
             <Execute
-                provider={provider}
+                provider={provider!}
                 currentSmartWallet={currentSmartWallet}
                 setShow={setShow}
                 account={account}

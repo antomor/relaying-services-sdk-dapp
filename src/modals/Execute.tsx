@@ -5,7 +5,8 @@ import abiDecoder from 'abi-decoder'
 import Web3 from 'web3';
 import IForwarder from '../contracts/IForwarder.json'
 import { toBN } from 'web3-utils'
-import { FixMeLater } from '../types';
+import { SmartWalletWithBalance } from '../types';
+import { RelayingServices } from 'relaying-services-sdk';
 
 const M = window.M;
 const $ = window.$;
@@ -19,10 +20,10 @@ if (window.ethereum) {
 const web3 = window.web3;
 
 type ExecuteProps = {
-    account: FixMeLater;
-    currentSmartWallet: FixMeLater
-    provider: FixMeLater
-    setUpdateInfo: FixMeLater
+    account?: string;
+    currentSmartWallet?: SmartWalletWithBalance
+    provider: RelayingServices
+    setUpdateInfo: Dispatch<SetStateAction<boolean>>
     setShow?: Dispatch<SetStateAction<boolean>>
 }
 
@@ -57,48 +58,56 @@ function Execute(props: ExecuteProps) {
     const [estimateLoading, setEstimateLoading] = useState(false);
 
     async function handleExecuteSmartWalletButtonClick() {
-        setExecuteLoading(true);
-        try {
-            const funcData = calculateAbiEncodedFunction();
-            const destinationContract = execute.address;
-            const swAddress = currentSmartWallet.address;
+        if (currentSmartWallet){
+            setExecuteLoading(true);
+            try {
+                const funcData = calculateAbiEncodedFunction();
+                const destinationContract = execute.address;
+                const swAddress = currentSmartWallet.address;
 
-            if (execute.check) {
-                await relayTransactionDirectExecution(destinationContract, swAddress, funcData);
-            }
-            else {
-                const fees = execute.fees === "" ? "0" : execute.fees
-                const transaction = await provider.relayTransaction({
-                    data: funcData
-                }, {
-                    tokenAddress: destinationContract,
-                    address: swAddress
-                }, fees);
-
-                console.log('Transaction ', transaction)
-                console.log(`Transaction hash: ${transaction.blockHash}`)
-
-                const logs = abiDecoder.decodeLogs(transaction.logs)
-
-                console.log("Transaction logs: ", logs)
-
-                const sampleRecipientEmitted = logs.find((e: FixMeLater) => e != null && e.name === 'TransactionRelayed')
-                console.log(sampleRecipientEmitted)
-                if (execute.show) {
-                    setResults(JSON.stringify(transaction));
-                } else {
-                    setUpdateInfo(true);
-                    close();
+                if (execute.check) {
+                    await relayTransactionDirectExecution(destinationContract, swAddress, funcData);
                 }
+                else {
+                    const fees = execute.fees === "" ? "0" : execute.fees
+                    const transaction = await provider.relayTransaction(
+                        {
+                            data: funcData
+                        }, {
+                            tokenAddress: destinationContract,
+                            address: swAddress,
+                            index: currentSmartWallet.index,
+                            deployed: currentSmartWallet.deployed
+                        }, 
+                        Number(fees)
+                    );
+
+                    console.log('Transaction ', transaction)
+                    console.log(`Transaction hash: ${transaction.blockHash}`)
+
+                    const logs = abiDecoder.decodeLogs(transaction.logs)
+
+                    console.log("Transaction logs: ", logs)
+
+                    // TODO: abi-decode doesn't provide declaration files
+                    const sampleRecipientEmitted = logs.find((e: any) => e != null && e.name === 'TransactionRelayed')
+                    console.log(sampleRecipientEmitted)
+                    if (execute.show) {
+                        setResults(JSON.stringify(transaction));
+                    } else {
+                        setUpdateInfo(true);
+                        close();
+                    }
+                }
+            } catch (error) {
+                const errorObj = error as Error;
+                if (errorObj.message) {
+                    alert(errorObj.message);
+                }
+                console.error(error)
             }
-        } catch (error) {
-            const errorObj = error as Error;
-            if (errorObj.message) {
-                alert(errorObj.message);
-            }
-            console.error(error)
+            setExecuteLoading(false);
         }
-        setExecuteLoading(false);
     }
     async function relayTransactionDirectExecution(toAddress: string, swAddress: string, abiEncodedTx: string) {
         const swContract = new web3.eth.Contract(IForwarder.abi, swAddress)
@@ -108,7 +117,10 @@ function Execute(props: ExecuteProps) {
             .directExecute(toAddress, abiEncodedTx)
             .send({
                 from: account
-            }, async (error: FixMeLater, data: FixMeLater) => {
+            }, 
+            // TODO: we may add the types
+            async (error: any, data: any) => {
+                
                 if (error !== undefined && error !== null) {
                     throw error;
                 }
@@ -131,77 +143,79 @@ function Execute(props: ExecuteProps) {
     }
 
     async function handleEstimateSmartWalletButtonClick() {
-        setEstimateLoading(true);
-        try {
-            const isUnitRBTC = execute.check;
+        if (currentSmartWallet) {
+            setEstimateLoading(true);
+            try {
+                const isUnitRBTC = execute.check;
 
-            const funcData = calculateAbiEncodedFunction();
-            const destinationContract = execute.address;
-            const swAddress = currentSmartWallet.address;
+                const funcData = calculateAbiEncodedFunction();
+                const destinationContract = execute.address;
+                const swAddress = currentSmartWallet.address;
 
-            //for estimation we will use an eight of the user's token balance, it's just to estimate the gas cost
-            const tokenBalance = await Utils.tokenBalance(swAddress)
-            const userTokenBalance = toBN(tokenBalance)
+                //for estimation we will use an eight of the user's token balance, it's just to estimate the gas cost
+                const tokenBalance = await Utils.tokenBalance(swAddress)
+                const userTokenBalance = toBN(tokenBalance)
 
-            if (userTokenBalance.gt(toBN("0"))) {
+                if (userTokenBalance.gt(toBN("0"))) {
 
-                const eightOfBalance = await Utils.fromWei(userTokenBalance.divRound(toBN("8")).toString());
-                console.log("Your Balance: ", await Utils.fromWei(userTokenBalance.toString()))
-                console.log("Estimating with: ", eightOfBalance.toString())
+                    const eightOfBalance = await Utils.fromWei(userTokenBalance.divRound(toBN("8")).toString());
+                    console.log("Your Balance: ", await Utils.fromWei(userTokenBalance.toString()))
+                    console.log("Estimating with: ", eightOfBalance.toString())
 
-                let result = 0
-                if (isUnitRBTC) {
-                    result = await estimateDirectExecution(swAddress, destinationContract, funcData);
-                    changeValue(result, 'fees');
-                    console.log("Estimated direct SWCall cost: ", result);
+                    let result = 0
+                    if (isUnitRBTC) {
+                        result = await estimateDirectExecution(swAddress, destinationContract, funcData);
+                        changeValue(result, 'fees');
+                        console.log("Estimated direct SWCall cost: ", result);
+                    }
+                    else {
+                        const relayWorker = process.env.REACT_APP_CONTRACTS_RELAY_WORKER!;
+                        const costInWei = await provider.estimateMaxPossibleRelayGasWithLinearFit(
+                            destinationContract,
+                            swAddress,
+                            '0',
+                            funcData,
+                            relayWorker);
+
+                        const costInRBTC = await Utils.fromWei(costInWei.toString());
+                        const tRifPriceInRBTC = parseFloat($('#trif-price').text()); // 1 tRIF = tRifPriceInRBTC RBTC
+                        const tRifPriceInWei = toBN(await Utils.toWei(tRifPriceInRBTC.toString())); // 1 tRIF = tRifPriceInWei wei
+
+                        console.log("Cost in RBTC (wei): ", costInWei.toString());
+                        console.log("Cost in RBTC:", costInRBTC);
+                        console.log("TRIf price in RBTC:", tRifPriceInRBTC.toString());
+                        console.log("TRIf price in Wei:", tRifPriceInWei.toString());
+                        const ritTokenDecimals = await Utils.ritTokenDecimals()
+                        console.log("TRIF Decimals: ", ritTokenDecimals);
+
+                        const costInTrif = costInRBTC / tRifPriceInRBTC
+                        console.log("Cost in TRIF (rbtc): ", costInTrif.toString());
+
+                        const costInTrifFixed = costInTrif.toFixed(ritTokenDecimals);
+                        console.log("Cost in TRIF Fixed (rbtc): ", costInTrifFixed.toString());
+
+                        const costInTrifAsWei = Utils.toWei(costInTrifFixed.toString());
+                        console.log("Cost in TRIF (wei): ", costInTrifAsWei.toString());
+
+
+                        console.log("RIF Token Decimals: ", ritTokenDecimals);
+
+                        changeValue(costInTrifFixed, 'fees');
+                        console.log("Cost in TRif: ", costInTrifFixed);
+                    }
                 }
                 else {
-                    const relayWorker = process.env.REACT_APP_CONTRACTS_RELAY_WORKER;
-                    const costInWei = await provider.estimateMaxPossibleRelayGasWithLinearFit(
-                        destinationContract,
-                        swAddress,
-                        '0',
-                        funcData,
-                        relayWorker);
-
-                    const costInRBTC = await Utils.fromWei(costInWei.toString());
-                    const tRifPriceInRBTC = parseFloat($('#trif-price').text()); // 1 tRIF = tRifPriceInRBTC RBTC
-                    const tRifPriceInWei = toBN(await Utils.toWei(tRifPriceInRBTC.toString())); // 1 tRIF = tRifPriceInWei wei
-
-                    console.log("Cost in RBTC (wei): ", costInWei.toString());
-                    console.log("Cost in RBTC:", costInRBTC);
-                    console.log("TRIf price in RBTC:", tRifPriceInRBTC.toString());
-                    console.log("TRIf price in Wei:", tRifPriceInWei.toString());
-                    const ritTokenDecimals = await Utils.ritTokenDecimals()
-                    console.log("TRIF Decimals: ", ritTokenDecimals);
-
-                    const costInTrif = costInRBTC / tRifPriceInRBTC
-                    console.log("Cost in TRIF (rbtc): ", costInTrif.toString());
-
-                    const costInTrifFixed = costInTrif.toFixed(ritTokenDecimals);
-                    console.log("Cost in TRIF Fixed (rbtc): ", costInTrifFixed.toString());
-
-                    const costInTrifAsWei = Utils.toWei(costInTrifFixed.toString());
-                    console.log("Cost in TRIF (wei): ", costInTrifAsWei.toString());
-
-
-                    console.log("RIF Token Decimals: ", ritTokenDecimals);
-
-                    changeValue(costInTrifFixed, 'fees');
-                    console.log("Cost in TRif: ", costInTrifFixed);
+                    throw new Error("You dont have any token balance")
                 }
+            } catch (error) {
+                const errorObj = error as Error;
+                if (errorObj.message) {
+                    alert(errorObj.message);
+                }
+                console.error(error)
             }
-            else {
-                throw new Error("You dont have any token balance")
-            }
-        } catch (error) {
-            const errorObj = error as Error;
-            if (errorObj.message) {
-                alert(errorObj.message);
-            }
-            console.error(error)
+            setEstimateLoading(false);
         }
-        setEstimateLoading(false);
     }
 
     function calculateAbiEncodedFunction() {
@@ -225,7 +239,7 @@ function Execute(props: ExecuteProps) {
         return funcData
     }
 
-    function changeValue(value: FixMeLater, prop: ExecuteInfoKey) {
+    function changeValue<T>(value: T, prop: ExecuteInfoKey) {
         let obj = Object.assign({}, execute);
         // @ts-ignore: TODO: change this to be type safe 
         obj[prop] = value;
