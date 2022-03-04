@@ -14,25 +14,20 @@ type TransferProps = {
     provider: RelayingServices;
     setUpdateInfo: Dispatch<SetStateAction<boolean>>;
     account?: string;
-    setShow: Dispatch<SetStateAction<boolean>>
-}
+    setShow: Dispatch<SetStateAction<boolean>>;
+};
 
 type TransferInfo = {
-    fees: number | string,
-    check: boolean,
-    address: string,
-    amount: number
-}
+    fees: number | string;
+    check: boolean;
+    address: string;
+    amount: number;
+};
 
 type TransferInfoKey = keyof TransferInfo;
 
 function Transfer(props: TransferProps) {
-    const {
-        currentSmartWallet
-        , provider
-        , setUpdateInfo
-        , account
-    } = props;
+    const { currentSmartWallet, provider, setUpdateInfo, account } = props;
 
     const [loading, setLoading] = useState(false);
     const [estimateLoading, setEstimateLoading] = useState(false);
@@ -55,9 +50,9 @@ function Transfer(props: TransferProps) {
 
     function changeValue<T>(value: T, prop: TransferInfoKey) {
         let obj = Object.assign({}, transfer);
-        // @ts-ignore: TODO: change this to be type safe 
+        // @ts-ignore: TODO: change this to be type safe
         obj[prop] = value;
-        setTransfer(obj)
+        setTransfer(obj);
     }
 
     async function handleTransferSmartWalletButtonClick() {
@@ -71,24 +66,28 @@ function Transfer(props: TransferProps) {
         setLoading(true);
         try {
             const amount = transfer.amount;
-            const fees = transfer.fees === "" ? "0" : transfer.fees;
+            const fees = transfer.fees === '' ? '0' : transfer.fees;
 
             const encodedAbi = (await Utils.getTokenContract()).methods
-                .transfer(transfer.address, await Utils.toWei(amount.toString())).encodeABI();
+                .transfer(
+                    transfer.address,
+                    await Utils.toWei(amount.toString())
+                )
+                .encodeABI();
 
             const txDetails = await provider.relayTransaction(
                 {
-                    to: transfer.address
-                    , data: encodedAbi
-                }
-                , {
+                    to: transfer.address,
+                    data: encodedAbi
+                },
+                {
                     tokenAddress: process.env.REACT_APP_CONTRACTS_RIF_TOKEN,
                     address: currentSmartWallet.address,
-                    deployed:  currentSmartWallet.deployed,
-                    index: currentSmartWallet.index,
-                }
-                , Number(fees)
-                , {
+                    deployed: currentSmartWallet.deployed,
+                    index: currentSmartWallet.index
+                },
+                Number(fees),
+                {
                     retries: 7
                 }
             );
@@ -123,13 +122,13 @@ function Transfer(props: TransferProps) {
                 if (errorObj.message) {
                     alert(errorObj.message);
                 }
-                console.error(error)
+                console.error(error);
             }
             setLoading(false);
         }
     }
 
-    function close(){
+    function close() {
         var instance = M.Modal.getInstance($('#transfer-modal'));
         instance.close();
         setTransfer({
@@ -141,53 +140,65 @@ function Transfer(props: TransferProps) {
         setEstimateLoading(false);
         setLoading(false);
     }
-    
-      async function handleEstimateTransferButtonClick() {
-          if (account){
+
+    async function handleEstimateTransferButtonClick() {
+        if (account) {
             setEstimateLoading(true);
             try {
-                const encodedTransferFunction = (await Utils.getTokenContract()).methods
-                .transfer(
-                    transfer.address,
-                    await Utils.toWei(transfer.amount.toString() || "0")
-                )
-                .encodeABI();
+                const encodedTransferFunction = (
+                    await Utils.getTokenContract()
+                ).methods
+                    .transfer(
+                        transfer.address,
+                        await Utils.toWei(transfer.amount.toString() || '0')
+                    )
+                    .encodeABI();
                 const trxDetails: EnvelopingTransactionDetails = {
                     from: account,
                     to: process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
-                    value: "0",
+                    value: '0',
                     relayHub: process.env.REACT_APP_CONTRACTS_RELAY_HUB,
-                    callVerifier: process.env.REACT_APP_CONTRACTS_RELAY_VERIFIER,
+                    callVerifier:
+                        process.env.REACT_APP_CONTRACTS_RELAY_VERIFIER,
                     callForwarder: currentSmartWallet.address,
                     data: encodedTransferFunction,
                     tokenContract: process.env.REACT_APP_CONTRACTS_RIF_TOKEN,
                     // value set just for the estimation; in the original dapp the estimation is performed using an eight of the user's token balance,
-                    tokenAmount: window.web3.utils.toWei("1"),
-                    onlyPreferredRelays: true,
+                    tokenAmount: window.web3.utils.toWei('1'),
+                    onlyPreferredRelays: true
                 };
                 //@ts-ignore TODO: we shouldn't access to the relayProvider
-                const maxPossibleGasValue = await estimateMaxPossibleRelayGas(provider.relayProvider.relayClient, trxDetails);    
+                const maxPossibleGasValue = await estimateMaxPossibleRelayGas(
+                    provider.relayProvider.relayClient,
+                    trxDetails
+                );
                 const gasPrice = toBN(
                     //@ts-ignore TODO: we shouldn't access to the relayProvider
                     await provider.relayProvider.relayClient._calculateGasPrice()
-                    );
-                console.log('maxPossibleGas, gasPrice', maxPossibleGasValue.toString(), gasPrice.toString());
+                );
+                console.log(
+                    'maxPossibleGas, gasPrice',
+                    maxPossibleGasValue.toString(),
+                    gasPrice.toString()
+                );
                 const maxPossibleGas = toBN(maxPossibleGasValue);
                 const estimate = maxPossibleGas.mul(gasPrice);
-            
+
                 const costInRBTC = await Utils.fromWei(estimate.toString());
-                console.log("Cost in RBTC:", costInRBTC);
+                console.log('Cost in RBTC:', costInRBTC);
 
                 const costInTrif = parseFloat(costInRBTC) / TRIF_PRICE;
                 const tokenContract = await Utils.getTokenContract();
-                const ritTokenDecimals = await tokenContract.methods.decimals().call();
+                const ritTokenDecimals = await tokenContract.methods
+                    .decimals()
+                    .call();
                 const costInTrifFixed = costInTrif.toFixed(ritTokenDecimals);
-                console.log("Cost in TRif: ", costInTrifFixed);
+                console.log('Cost in TRif: ', costInTrifFixed);
 
                 if (transfer.check === true) {
-                    changeValue(costInRBTC, "fees");
+                    changeValue(costInRBTC, 'fees');
                 } else {
-                    changeValue(costInTrifFixed, "fees");
+                    changeValue(costInTrifFixed, 'fees');
                 }
             } catch (error) {
                 const errorObj = error as Error;
@@ -201,60 +212,138 @@ function Transfer(props: TransferProps) {
     }
 
     return (
-        <div id="transfer-modal" className="modal">
-            <div className="modal-content">
-                <div className="row">
-                    <form className="col s12 offset-s1">
-                        <div className="row">
-                            <div className="input-field col s5">
-                                <input placeholder="Address" type="text" className="validate" onChange={(event) => {
-                                    changeValue(event.currentTarget.value, 'address')
-                                }} value={transfer.address} />
-                                <label htmlFor="transfer-to">Transfer to</label>
+        <div id='transfer-modal' className='modal'>
+            <div className='modal-content'>
+                <div className='row'>
+                    <form className='col s12 offset-s1'>
+                        <div className='row'>
+                            <div className='input-field col s5'>
+                                <input
+                                    placeholder='Address'
+                                    type='text'
+                                    className='validate'
+                                    onChange={(event) => {
+                                        changeValue(
+                                            event.currentTarget.value,
+                                            'address'
+                                        );
+                                    }}
+                                    value={transfer.address}
+                                />
+                                <label htmlFor='transfer-to'>Transfer to</label>
                             </div>
-                            <div className="input-field paste-container col s1">
-                                <a href="#!" className="btn waves-effect waves-light indigo accent-2"><i className="material-icons center" onClick={pasteRecipientAddress}>content_paste</i></a>
+                            <div className='input-field paste-container col s1'>
+                                <a
+                                    href='#!'
+                                    className='btn waves-effect waves-light indigo accent-2'
+                                >
+                                    <i
+                                        className='material-icons center'
+                                        onClick={pasteRecipientAddress}
+                                    >
+                                        content_paste
+                                    </i>
+                                </a>
                             </div>
                         </div>
-                        <div className="row">
-                            <div className="input-field col s8">
-                                <input placeholder="0 tRIF" type="number" min="0" className="validate" onChange={(event) => {
-                                    changeValue(event.currentTarget.value, 'amount')
-                                }} value={transfer.amount} />
-                                <label htmlFor="transfer-amount">Amount</label>
+                        <div className='row'>
+                            <div className='input-field col s8'>
+                                <input
+                                    placeholder='0 tRIF'
+                                    type='number'
+                                    min='0'
+                                    className='validate'
+                                    onChange={(event) => {
+                                        changeValue(
+                                            event.currentTarget.value,
+                                            'amount'
+                                        );
+                                    }}
+                                    value={transfer.amount}
+                                />
+                                <label htmlFor='transfer-amount'>Amount</label>
                             </div>
-                            <div className="switch col s4" style={{ 'paddingTop': '2.5em' }}>
+                            <div
+                                className='switch col s4'
+                                style={{ paddingTop: '2.5em' }}
+                            >
                                 <label>
                                     tRIF
-                                    <input type="checkbox" onChange={(event) => {
-                                        changeValue(event.currentTarget.checked, 'check')
-                                    }} checked={transfer.check??undefined} />
-                                    <span className="lever"></span>
+                                    <input
+                                        type='checkbox'
+                                        onChange={(event) => {
+                                            changeValue(
+                                                event.currentTarget.checked,
+                                                'check'
+                                            );
+                                        }}
+                                        checked={transfer.check ?? undefined}
+                                    />
+                                    <span className='lever'></span>
                                     RBTC
                                 </label>
                             </div>
                         </div>
-                        <div className="row">
-                            <div className="input-field col s10">
-                                <input placeholder="0 tRIF" type="number" min="0" className="validate" onChange={(event) => {
-                                    changeValue(event.currentTarget.value, 'fees')
-                                }} value={transfer.fees} />
-                                <label htmlFor="transfer-fees">Fees</label>
+                        <div className='row'>
+                            <div className='input-field col s10'>
+                                <input
+                                    placeholder='0 tRIF'
+                                    type='number'
+                                    min='0'
+                                    className='validate'
+                                    onChange={(event) => {
+                                        changeValue(
+                                            event.currentTarget.value,
+                                            'fees'
+                                        );
+                                    }}
+                                    value={transfer.fees}
+                                />
+                                <label htmlFor='transfer-fees'>Fees</label>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
-            <div className="modal-footer">
-                <a href="#!" onClick={handleTransferSmartWalletButtonClick} className={`waves-effect waves-green btn-flat ${ loading? 'disabled' : ''}`}>
-                    Transfer <img alt="loading" className={`loading ${ !loading? 'hide' : ''}`} src="images/loading.gif"/>
+            <div className='modal-footer'>
+                <a
+                    href='#!'
+                    onClick={handleTransferSmartWalletButtonClick}
+                    className={`waves-effect waves-green btn-flat ${
+                        loading ? 'disabled' : ''
+                    }`}
+                >
+                    Transfer{' '}
+                    <img
+                        alt='loading'
+                        className={`loading ${!loading ? 'hide' : ''}`}
+                        src='images/loading.gif'
+                    />
                 </a>
-                <a href="#!" id="deploy-smart-wallet-estimate" className={`waves-effect waves-green btn-flat ${estimateLoading ? "disabled" : ""}`}onClick={handleEstimateTransferButtonClick}>
-                    Estimate<img alt="loading" className={`loading ${!estimateLoading ? "hide" : ""}`} src="images/loading.gif"/>
+                <a
+                    href='#!'
+                    id='deploy-smart-wallet-estimate'
+                    className={`waves-effect waves-green btn-flat ${
+                        estimateLoading ? 'disabled' : ''
+                    }`}
+                    onClick={handleEstimateTransferButtonClick}
+                >
+                    Estimate
+                    <img
+                        alt='loading'
+                        className={`loading ${!estimateLoading ? 'hide' : ''}`}
+                        src='images/loading.gif'
+                    />
                 </a>
-                <a href="#!" className="waves-effect waves-green btn-flat" onClick={() =>{
-                    close();
-                }} >Cancel</a>
+                <a
+                    href='#!'
+                    className='waves-effect waves-green btn-flat'
+                    onClick={() => {
+                        close();
+                    }}
+                >
+                    Cancel
+                </a>
             </div>
         </div>
     );
