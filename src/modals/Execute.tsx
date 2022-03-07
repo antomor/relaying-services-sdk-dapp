@@ -1,15 +1,15 @@
 import { Dispatch, SetStateAction, useState } from 'react';
-import Utils from '../Utils';
 // @ts-ignore: TODO: Check if there is a ts library
 import abiDecoder from 'abi-decoder';
 import Web3 from 'web3';
-import IForwarder from '../contracts/IForwarder.json';
 import { toBN } from 'web3-utils';
-import { SmartWalletWithBalance } from '../types';
 import { RelayingServices } from 'relaying-services-sdk';
+import IForwarder from '../contracts/IForwarder.json';
+import { SmartWalletWithBalance } from '../types';
+import Utils from '../Utils';
 
-const M = window.M;
-const $ = window.$;
+const { M } = window;
+const { $ } = window;
 if (window.ethereum) {
     window.web3 = new Web3(window.ethereum);
 } else if (window.web3) {
@@ -17,14 +17,13 @@ if (window.ethereum) {
 } else {
     throw new Error('Error: MetaMask or web3 not detected');
 }
-const web3 = window.web3;
+const { web3 } = window;
 
 type ExecuteProps = {
     account?: string;
     currentSmartWallet?: SmartWalletWithBalance;
     provider: RelayingServices;
     setUpdateInfo: Dispatch<SetStateAction<boolean>>;
-    setShow?: Dispatch<SetStateAction<boolean>>;
 };
 
 type ExecuteInfo = {
@@ -51,6 +50,91 @@ function Execute(props: ExecuteProps) {
     });
     const [executeLoading, setExecuteLoading] = useState(false);
     const [estimateLoading, setEstimateLoading] = useState(false);
+
+    function calculateAbiEncodedFunction() {
+        const contractFunction = execute.function.trim();
+        const functionSig =
+            web3.eth.abi.encodeFunctionSignature(contractFunction);
+
+        const paramsStart = contractFunction.indexOf('(', 0);
+        const paramsEnd = contractFunction.indexOf(')', paramsStart);
+
+        let funcData = functionSig;
+
+        if (paramsEnd > paramsStart + 1) {
+            // There are params
+            const paramsStr = contractFunction.substring(
+                paramsStart + 1,
+                paramsEnd
+            );
+
+            const paramsTypes = paramsStr.split(',');
+            const paramsValues = execute.value.split(',');
+
+            const encodedParamVals = web3.eth.abi.encodeParameters(
+                paramsTypes,
+                paramsValues
+            );
+            funcData = funcData.concat(
+                encodedParamVals.slice(2, encodedParamVals.length)
+            );
+        }
+        return funcData;
+    }
+
+    async function relayTransactionDirectExecution(
+        toAddress: string,
+        swAddress: string,
+        abiEncodedTx: string
+    ) {
+        const swContract = new web3.eth.Contract(IForwarder.abi, swAddress);
+        swContract.setProvider(web3.currentProvider);
+
+        await swContract.methods.directExecute(toAddress, abiEncodedTx).send(
+            {
+                from: account
+            },
+            // TODO: we may add the types
+            async (error: any, data: any) => {
+                if (error !== undefined && error !== null) {
+                    throw error;
+                } else {
+                    const txHash = data;
+                    console.log(`Your TxHash is ${txHash}`);
+
+                    // checks to verify that the contract was executed properly
+                    const receipt = await Utils.getReceipt(txHash);
+
+                    console.log(`Your receipt is`);
+                    console.log(receipt);
+
+                    const trxData = await web3.eth.getTransaction(txHash);
+                    console.log('Your tx data is');
+                    console.log(trxData);
+                }
+            }
+        );
+    }
+
+    function close() {
+        const instance = M.Modal.getInstance($('#execute-modal'));
+        instance.close();
+        setExecute({
+            check: false,
+            show: false,
+            address: '',
+            value: '',
+            function: '',
+            fees: ''
+        });
+    }
+
+    function changeValue<T>(value: T, prop: ExecuteInfoKey) {
+        const obj = { ...execute };
+        // @ts-ignore: TODO: change this to be type safe
+        obj[prop] = value;
+        setExecute(obj);
+    }
 
     async function handleExecuteSmartWalletButtonClick() {
         if (currentSmartWallet) {
@@ -110,38 +194,19 @@ function Execute(props: ExecuteProps) {
             setExecuteLoading(false);
         }
     }
-    async function relayTransactionDirectExecution(
-        toAddress: string,
+
+    async function estimateDirectExecution(
         swAddress: string,
+        toAddress: string,
         abiEncodedTx: string
     ) {
         const swContract = new web3.eth.Contract(IForwarder.abi, swAddress);
         swContract.setProvider(web3.currentProvider);
 
-        await swContract.methods.directExecute(toAddress, abiEncodedTx).send(
-            {
-                from: account
-            },
-            // TODO: we may add the types
-            async (error: any, data: any) => {
-                if (error !== undefined && error !== null) {
-                    throw error;
-                } else {
-                    const txHash = data;
-                    console.log(`Your TxHash is ${txHash}`);
-
-                    // checks to verify that the contract was executed properly
-                    let receipt = await Utils.getReceipt(txHash);
-
-                    console.log(`Your receipt is`);
-                    console.log(receipt);
-
-                    const trxData = await web3.eth.getTransaction(txHash);
-                    console.log('Your tx data is');
-                    console.log(trxData);
-                }
-            }
-        );
+        const estimate = await swContract.methods
+            .directExecute(toAddress, abiEncodedTx)
+            .estimateGas({ from: account });
+        return estimate;
     }
 
     async function handleEstimateSmartWalletButtonClick() {
@@ -154,7 +219,7 @@ function Execute(props: ExecuteProps) {
                 const destinationContract = execute.address;
                 const swAddress = currentSmartWallet.address;
 
-                //for estimation we will use an eight of the user's token balance, it's just to estimate the gas cost
+                // for estimation we will use an eight of the user's token balance, it's just to estimate the gas cost
                 const tokenBalance = await Utils.tokenBalance(swAddress);
                 const userTokenBalance = toBN(tokenBalance);
 
@@ -255,44 +320,6 @@ function Execute(props: ExecuteProps) {
         }
     }
 
-    function calculateAbiEncodedFunction() {
-        const contractFunction = execute.function.trim();
-        const functionSig =
-            web3.eth.abi.encodeFunctionSignature(contractFunction);
-
-        const paramsStart = contractFunction.indexOf('(', 0);
-        const paramsEnd = contractFunction.indexOf(')', paramsStart);
-
-        let funcData = functionSig;
-
-        if (paramsEnd > paramsStart + 1) {
-            //There are params
-            const paramsStr = contractFunction.substring(
-                paramsStart + 1,
-                paramsEnd
-            );
-
-            const paramsTypes = paramsStr.split(',');
-            const paramsValues = execute.value.split(',');
-
-            const encodedParamVals = web3.eth.abi.encodeParameters(
-                paramsTypes,
-                paramsValues
-            );
-            funcData = funcData.concat(
-                encodedParamVals.slice(2, encodedParamVals.length)
-            );
-        }
-        return funcData;
-    }
-
-    function changeValue<T>(value: T, prop: ExecuteInfoKey) {
-        let obj = Object.assign({}, execute);
-        // @ts-ignore: TODO: change this to be type safe
-        obj[prop] = value;
-        setExecute(obj);
-    }
-
     async function pasteRecipientAddress() {
         setExecuteLoading(true);
         const address = await navigator.clipboard.readText();
@@ -302,32 +329,6 @@ function Execute(props: ExecuteProps) {
         setExecuteLoading(false);
     }
 
-    async function estimateDirectExecution(
-        swAddress: string,
-        toAddress: string,
-        abiEncodedTx: string
-    ) {
-        const swContract = new web3.eth.Contract(IForwarder.abi, swAddress);
-        swContract.setProvider(web3.currentProvider);
-
-        const estimate = await swContract.methods
-            .directExecute(toAddress, abiEncodedTx)
-            .estimateGas({ from: account });
-        return estimate;
-    }
-
-    function close() {
-        var instance = M.Modal.getInstance($('#execute-modal'));
-        instance.close();
-        setExecute({
-            check: false,
-            show: false,
-            address: '',
-            value: '',
-            function: '',
-            fees: ''
-        });
-    }
     return (
         <div
             id='execute-modal'
@@ -408,7 +409,7 @@ function Execute(props: ExecuteProps) {
                                         }}
                                         checked={execute.show ?? undefined}
                                     />
-                                    <span className='lever'></span>
+                                    <span className='lever' />
                                 </label>
                             </div>
                         </div>
@@ -472,7 +473,7 @@ function Execute(props: ExecuteProps) {
                                         }}
                                         checked={execute.check ?? undefined}
                                     />
-                                    <span className='lever'></span>
+                                    <span className='lever' />
                                     RBTC
                                 </label>
                             </div>

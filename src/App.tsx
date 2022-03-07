@@ -7,6 +7,8 @@ import {
     RelayingServices
 } from 'relaying-services-sdk';
 
+import { RelayingServicesAddresses } from 'relaying-services-sdk/dist/interfaces';
+import { EnvelopingConfig } from '@rsksmart/rif-relay-common';
 import Header from './components/Header';
 import SmartWallet from './components/SmartWallet';
 import Footer from './components/Footer';
@@ -18,8 +20,6 @@ import Transfer from './modals/Transfer';
 import Loading from './modals/Loading';
 import Execute from './modals/Execute';
 import Utils from './Utils';
-import { RelayingServicesAddresses } from 'relaying-services-sdk/dist/interfaces';
-import { EnvelopingConfig } from '@rsksmart/rif-relay-common';
 import { SmartWalletWithBalance } from './types';
 
 if (window.ethereum) {
@@ -31,11 +31,11 @@ if (window.ethereum) {
 }
 
 function getEnvParamAsInt(value: string | undefined): number | undefined {
-    return value ? parseInt(value) : undefined;
+    return value ? parseInt(value, 10) : undefined;
 }
 
-const web3 = window.web3;
-const ethereum = window.ethereum;
+const { web3 } = window;
+const { ethereum } = window;
 
 function App() {
     const [connected, setConnect] = useState(false);
@@ -137,26 +137,25 @@ function App() {
         }
     }
 
+    async function refreshAccount() {
+        const accounts = await Utils.getAccounts();
+        const currentAccount = accounts[0];
+        setAccount(currentAccount);
+    }
+
     async function connectToMetamask() {
         let isConnected = false;
         try {
             await ethereum.request({ method: 'eth_requestAccounts' });
-            ethereum.on('accountsChanged', async (/*accounts*/) => {
+            ethereum.on('accountsChanged', async (/* accounts */) => {
                 await refreshAccount();
             });
             isConnected = true;
         } catch (error) {
             console.error(error);
-        } finally {
-            setConnect(isConnected);
-            return isConnected;
         }
-    }
-
-    async function refreshAccount() {
-        const accounts = await Utils.getAccounts();
-        const account = accounts[0];
-        setAccount(account);
+        setConnect(isConnected);
+        return isConnected;
     }
 
     async function connect() {
@@ -188,6 +187,7 @@ function App() {
             <Loading show={show} />
             <Header
                 account={account}
+                // eslint-disable-next-line react/jsx-no-bind
                 connect={connect}
                 connected={connected}
                 setUpdateInfo={setUpdateInfo}
@@ -214,21 +214,18 @@ function App() {
             <Deploy
                 currentSmartWallet={currentSmartWallet}
                 provider={provider}
-                setShow={setShow}
                 setUpdateInfo={setUpdateInfo}
             />
             <Receive currentSmartWallet={currentSmartWallet} />
             <Transfer
                 provider={provider!}
                 currentSmartWallet={currentSmartWallet!}
-                setShow={setShow}
                 setUpdateInfo={setUpdateInfo}
                 account={account}
             />
             <Execute
                 provider={provider!}
                 currentSmartWallet={currentSmartWallet}
-                setShow={setShow}
                 account={account}
                 setUpdateInfo={setUpdateInfo}
             />

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { SmartWallet } from 'relaying-services-sdk';
 import './Receive.css';
 
-const $ = window.$;
+const { $ } = window;
 
 type ReceiveProps = {
     currentSmartWallet?: SmartWallet;
@@ -26,9 +26,9 @@ function Receive(props: ReceiveProps) {
         <div id='receive-modal' className='modal'>
             <div className='modal-content'>
                 <div className='row'>
-                    <div className='col s2'></div>
-                    <div id='qr-code' className='col s8 center-align'></div>
-                    <div className='col s2'></div>
+                    <div className='col s2' />
+                    <div id='qr-code' className='col s8 center-align' />
+                    <div className='col s2' />
                 </div>
                 <div className='row'>
                     <div className='col s12'>

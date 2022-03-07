@@ -37,8 +37,8 @@ function Footer(props: FooterProps) {
             const rbtcBalance = await Utils.getBalance(smartWallet.address);
             const swWithBalance = {
                 ...smartWallet,
-                balance: Utils.fromWei(balance) + ' tRIF',
-                rbtcBalance: Utils.fromWei(rbtcBalance) + ' RBTC',
+                balance: `${Utils.fromWei(balance)} tRIF`,
+                rbtcBalance: `${Utils.fromWei(rbtcBalance)} RBTC`,
                 deployed:
                     (await provider?.isSmartWalletDeployed(
                         smartWallet.address
@@ -58,11 +58,14 @@ function Footer(props: FooterProps) {
             let found = true;
             setShow(true);
             while (found === true) {
+                // eslint-disable-next-line no-await-in-loop
                 const smartWallet = await provider.generateSmartWallet(
                     smartWalletIndex + 1
                 );
+                // eslint-disable-next-line no-await-in-loop
                 const balance = await Utils.tokenBalance(smartWallet.address);
                 if (balance > '0' || smartWallet.deployed) {
+                    // eslint-disable-next-line no-await-in-loop
                     const smartWalletWithBalance = await setBalance(
                         smartWallet
                     );
@@ -82,10 +85,10 @@ function Footer(props: FooterProps) {
     useEffect(() => {
         (async () => {
             const workerAddress = process.env.REACT_APP_CONTRACTS_RELAY_WORKER!;
-            const workerBalance = parseFloat(
+            const currentWorkerBalance = parseFloat(
                 Utils.fromWei(await Utils.tokenBalance(workerAddress))
             ).toFixed(4);
-            setWorkerBalance(workerBalance);
+            setWorkerBalance(currentWorkerBalance);
         })();
     }, [setWorkerBalance]);
 

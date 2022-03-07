@@ -26,8 +26,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint --ext .ts .",
-    "lint:fix": "eslint . --ext .ts --fix",
+    "lint": "eslint --ext .ts --ext .tsx .",
+    "lint:fix": "eslint . --ext .ts --ext .tsx --fix",
     "prettier": "npx prettier --check .",
     "prettier:fix": "npx prettier --write --ignore-unknown ."
   },
@@ -55,6 +55,7 @@
     "dotenv": "^10.0.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-typescript": "^16.1.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-jsx-a11y": "^6.5.1",

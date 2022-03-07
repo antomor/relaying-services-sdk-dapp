@@ -20,9 +20,9 @@ function Header(props: HeaderProps) {
         }
         (async () => {
             console.log(account);
-            const balance = await Utils.getBalance(account);
-            const balanceConverted = Utils.fromWei(balance);
-            setBalance(balanceConverted + ' RBTC  ');
+            const currentBalance = await Utils.getBalance(account);
+            const balanceConverted = Utils.fromWei(currentBalance);
+            setBalance(`${balanceConverted} RBTC  `);
         })();
     }, [account]);
 

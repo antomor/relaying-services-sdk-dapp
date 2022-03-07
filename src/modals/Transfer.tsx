@@ -1,20 +1,19 @@
-import EnvelopingTransactionDetails from '@rsksmart/rif-relay-common/dist/types/EnvelopingTransactionDetails';
 import { Dispatch, SetStateAction, useState } from 'react';
+import EnvelopingTransactionDetails from '@rsksmart/rif-relay-common/dist/types/EnvelopingTransactionDetails';
 import { RelayingServices } from 'relaying-services-sdk';
 import { toBN } from 'web3-utils';
 import { SmartWalletWithBalance } from '../types';
 import Utils, { estimateMaxPossibleRelayGas, TRIF_PRICE } from '../Utils';
 import './Transfer.css';
 
-const M = window.M;
-const $ = window.$;
+const { M } = window;
+const { $ } = window;
 
 type TransferProps = {
     currentSmartWallet: SmartWalletWithBalance;
     provider: RelayingServices;
     setUpdateInfo: Dispatch<SetStateAction<boolean>>;
     account?: string;
-    setShow: Dispatch<SetStateAction<boolean>>;
 };
 
 type TransferInfo = {
@@ -39,6 +38,50 @@ function Transfer(props: TransferProps) {
         address: ''
     });
 
+    function close() {
+        const instance = M.Modal.getInstance($('#transfer-modal'));
+        instance.close();
+        setTransfer({
+            check: false,
+            fees: 0,
+            amount: 0,
+            address: ''
+        });
+        setEstimateLoading(false);
+        setLoading(false);
+    }
+
+    function changeValue<T>(value: T, prop: TransferInfoKey) {
+        const obj = { ...transfer };
+        // @ts-ignore: TODO: change this to be type safe
+        obj[prop] = value;
+        setTransfer(obj);
+    }
+
+    async function sendRBTC() {
+        if (account) {
+            setLoading(true);
+            try {
+                const amount = await Utils.toWei(transfer.amount.toString());
+                await Utils.sendTransaction({
+                    from: account, // currentSmartWallet.address,
+                    to: transfer.address,
+                    value: amount,
+                    data: '0x'
+                });
+                close();
+                setUpdateInfo(true);
+            } catch (error) {
+                const errorObj = error as Error;
+                if (errorObj.message) {
+                    alert(errorObj.message);
+                }
+                console.error(error);
+            }
+            setLoading(false);
+        }
+    }
+
     async function pasteRecipientAddress() {
         setLoading(true);
         const address = await navigator.clipboard.readText();
@@ -48,24 +91,10 @@ function Transfer(props: TransferProps) {
         setLoading(false);
     }
 
-    function changeValue<T>(value: T, prop: TransferInfoKey) {
-        let obj = Object.assign({}, transfer);
-        // @ts-ignore: TODO: change this to be type safe
-        obj[prop] = value;
-        setTransfer(obj);
-    }
-
-    async function handleTransferSmartWalletButtonClick() {
-        if (transfer.check) {
-            await sendRBTC();
-        } else {
-            await transferSmartWalletButtonClick();
-        }
-    }
     async function transferSmartWalletButtonClick() {
         setLoading(true);
         try {
-            const amount = transfer.amount;
+            const { amount } = transfer;
             const fees = transfer.fees === '' ? '0' : transfer.fees;
 
             const encodedAbi = (await Utils.getTokenContract()).methods
@@ -104,43 +133,6 @@ function Transfer(props: TransferProps) {
         setLoading(false);
     }
 
-    async function sendRBTC() {
-        if (account) {
-            setLoading(true);
-            try {
-                const amount = await Utils.toWei(transfer.amount.toString());
-                await Utils.sendTransaction({
-                    from: account, //currentSmartWallet.address,
-                    to: transfer.address,
-                    value: amount,
-                    data: '0x'
-                });
-                close();
-                setUpdateInfo(true);
-            } catch (error) {
-                const errorObj = error as Error;
-                if (errorObj.message) {
-                    alert(errorObj.message);
-                }
-                console.error(error);
-            }
-            setLoading(false);
-        }
-    }
-
-    function close() {
-        var instance = M.Modal.getInstance($('#transfer-modal'));
-        instance.close();
-        setTransfer({
-            check: false,
-            fees: 0,
-            amount: 0,
-            address: ''
-        });
-        setEstimateLoading(false);
-        setLoading(false);
-    }
-
     async function handleEstimateTransferButtonClick() {
         if (account) {
             setEstimateLoading(true);
@@ -167,13 +159,14 @@ function Transfer(props: TransferProps) {
                     tokenAmount: window.web3.utils.toWei('1'),
                     onlyPreferredRelays: true
                 };
-                //@ts-ignore TODO: we shouldn't access to the relayProvider
                 const maxPossibleGasValue = await estimateMaxPossibleRelayGas(
-                    provider.relayProvider.relayClient,
+                    // @ts-ignore TODO: we shouldn't access to the relayProvider
+                    provider as DefaultRelayingServices.relayProvider.relayClient,
                     trxDetails
                 );
                 const gasPrice = toBN(
-                    //@ts-ignore TODO: we shouldn't access to the relayProvider
+                    // @ts-ignore TODO: we shouldn't access to the relayProvider
+                    // eslint-disable-next-line no-underscore-dangle
                     await provider.relayProvider.relayClient._calculateGasPrice()
                 );
                 console.log(
@@ -211,6 +204,14 @@ function Transfer(props: TransferProps) {
         }
     }
 
+    async function handleTransferSmartWalletButtonClick() {
+        if (transfer.check) {
+            await sendRBTC();
+        } else {
+            await transferSmartWalletButtonClick();
+        }
+    }
+
     return (
         <div id='transfer-modal' className='modal'>
             <div className='modal-content'>
@@ -222,6 +223,7 @@ function Transfer(props: TransferProps) {
                                     placeholder='Address'
                                     type='text'
                                     className='validate'
+                                    id='transfer-to'
                                     onChange={(event) => {
                                         changeValue(
                                             event.currentTarget.value,
@@ -279,7 +281,7 @@ function Transfer(props: TransferProps) {
                                         }}
                                         checked={transfer.check ?? undefined}
                                     />
-                                    <span className='lever'></span>
+                                    <span className='lever' />
                                     RBTC
                                 </label>
                             </div>

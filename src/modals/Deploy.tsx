@@ -1,10 +1,10 @@
-import Utils, { TRIF_PRICE } from '../Utils';
 import './Deploy.css';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { RelayingServices, SmartWallet } from 'relaying-services-sdk';
+import Utils, { TRIF_PRICE } from '../Utils';
 
-const $ = window.$;
-const M = window.M;
+const { $ } = window;
+const { M } = window;
 setTimeout(() => {
     M.AutoInit();
 }, 0);
@@ -13,7 +13,6 @@ type DeployProps = {
     currentSmartWallet?: SmartWallet;
     provider?: RelayingServices;
     setUpdateInfo: Dispatch<SetStateAction<boolean>>;
-    setShow: Dispatch<SetStateAction<boolean>>;
 };
 
 type DeployInfo = {
@@ -36,6 +35,13 @@ function Deploy(props: DeployProps) {
     });
     const [loading, setLoading] = useState(false);
     const [estimateLoading, setEstimateLoading] = useState(false);
+
+    function changeValue<T>(value: T, prop: DeployInfoKey) {
+        const obj: DeployInfo = { ...deploy };
+        // @ts-ignore: TODO: change this to be type safe
+        obj[prop] = value;
+        setDeploy(obj);
+    }
 
     async function handleEstimateDeploySmartWalletButtonClick() {
         setEstimateLoading(true);
@@ -81,9 +87,12 @@ function Deploy(props: DeployProps) {
         let times = 0;
 
         while (receipt === null && times < 40) {
-            times++;
+            times += 1;
+            // eslint-disable-next-line no-promise-executor-return
             const sleep = new Promise((resolve) => setTimeout(resolve, 1000));
+            // eslint-disable-next-line no-await-in-loop
             await sleep;
+            // eslint-disable-next-line no-await-in-loop
             receipt = await Utils.getTransactionReceipt(transactionHash);
         }
 
@@ -91,7 +100,7 @@ function Deploy(props: DeployProps) {
     }
 
     async function checkSmartWalletDeployment(txHash: string) {
-        let receipt = await getReceipt(txHash);
+        const receipt = await getReceipt(txHash);
 
         if (receipt === null) {
             return false;
@@ -109,7 +118,7 @@ function Deploy(props: DeployProps) {
                     process.env.REACT_APP_CONTRACTS_RIF_TOKEN!
                 );
                 if (isAllowToken) {
-                    const fees = await Utils.toWei(tokenAmount + '');
+                    const fees = await Utils.toWei(`${tokenAmount}`);
                     const smartWallet = await provider.deploySmartWallet(
                         currentSmartWallet!,
                         process.env.REACT_APP_CONTRACTS_RIF_TOKEN,
@@ -123,11 +132,10 @@ function Deploy(props: DeployProps) {
                         throw new Error('SmartWallet: deployment failed');
                     }
                     return smartWallet;
-                } else {
-                    throw new Error(
-                        'SmartWallet: was not created because Verifier does not accept the specified token for payment'
-                    );
                 }
+                throw new Error(
+                    'SmartWallet: was not created because Verifier does not accept the specified token for payment'
+                );
             }
         } catch (error) {
             const errorObj = error as Error;
@@ -139,28 +147,8 @@ function Deploy(props: DeployProps) {
         return undefined;
     }
 
-    async function handleDeploySmartWalletButtonClick() {
-        deploy.fees = deploy.fees === '' ? '0' : deploy.fees;
-        deploy.tokenGas = deploy.tokenGas === '' ? '0' : deploy.tokenGas;
-
-        setLoading(true);
-        let smartWallet = await relaySmartWalletDeployment(deploy.fees);
-        if (smartWallet?.deployed) {
-            setUpdateInfo(true);
-            close();
-        }
-
-        setLoading(false);
-    }
-
-    function changeValue<T>(value: T, prop: DeployInfoKey) {
-        let obj: DeployInfo = { ...deploy };
-        // @ts-ignore: TODO: change this to be type safe
-        obj[prop] = value;
-        setDeploy(obj);
-    }
     function close() {
-        var instance = M.Modal.getInstance($('#deploy-modal'));
+        const instance = M.Modal.getInstance($('#deploy-modal'));
         instance.close();
         setDeploy({
             fees: 0,
@@ -169,6 +157,21 @@ function Deploy(props: DeployProps) {
             relayGas: 0
         });
     }
+
+    async function handleDeploySmartWalletButtonClick() {
+        deploy.fees = deploy.fees === '' ? '0' : deploy.fees;
+        deploy.tokenGas = deploy.tokenGas === '' ? '0' : deploy.tokenGas;
+
+        setLoading(true);
+        const smartWallet = await relaySmartWalletDeployment(deploy.fees);
+        if (smartWallet?.deployed) {
+            setUpdateInfo(true);
+            close();
+        }
+
+        setLoading(false);
+    }
+
     return (
         <div id='deploy-modal' className='modal'>
             <div className='modal-content'>
@@ -210,7 +213,7 @@ function Deploy(props: DeployProps) {
                                         }}
                                         checked={deploy.check ?? undefined}
                                     />
-                                    <span className='lever'></span>
+                                    <span className='lever' />
                                     RBTC
                                 </label>
                             </div>
