@@ -29,7 +29,8 @@
     "lint": "eslint --ext .ts --ext .tsx .",
     "lint:fix": "eslint . --ext .ts --ext .tsx --fix",
     "prettier": "npx prettier --check .",
-    "prettier:fix": "npx prettier --write --ignore-unknown ."
+    "prettier:fix": "npx prettier --write --ignore-unknown .",
+    "prepare": "husky install"
   },
   "eslintConfig": {
     "extends": [
@@ -61,6 +62,8 @@
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.29.3",
     "eslint-plugin-react-hooks": "^4.3.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.5",
     "prettier": "^2.5.1"
   },
   "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
@@ -77,5 +80,9 @@
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/wilsoniovlabs/relaying-services-sdk-dapp/issues"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": "eslint --cache --fix",
+    "*.{js,css,md}": "prettier --write"
   }
 }
