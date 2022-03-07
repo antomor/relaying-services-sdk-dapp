@@ -51,9 +51,6 @@ function Deploy(props: DeployProps) {
                 process.env.REACT_APP_CONTRACTS_RELAY_WORKER!
             );
 
-            // TODO: delete this line, doesn't make sense
-            // changeValue({ currentTarget: { value: estimate } });
-
             if (estimate) {
                 const costInRBTC = await Utils.fromWei(estimate.toString());
                 console.log('Cost in RBTC:', costInRBTC);
