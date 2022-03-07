@@ -161,7 +161,7 @@ function Transfer(props: TransferProps) {
                 };
                 const maxPossibleGasValue = await estimateMaxPossibleRelayGas(
                     // @ts-ignore TODO: we shouldn't access to the relayProvider
-                    provider as DefaultRelayingServices.relayProvider.relayClient,
+                    (provider as DefaultRelayingServices).relayProvider.relayClient,
                     trxDetails
                 );
                 const gasPrice = toBN(
