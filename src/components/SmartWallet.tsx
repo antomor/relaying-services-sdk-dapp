@@ -24,7 +24,6 @@ function SmartWallet(props: SmartWalletProps) {
         setShow(false);
     }
     function openModal(modalId: string, smartWallet: SmartWalletWithBalance) {
-        console.log({ smartWallet });
         setCurrentSmartWallet(smartWallet);
         const instance = M.Modal.init(document.getElementById(modalId), {
             dismissible: false
