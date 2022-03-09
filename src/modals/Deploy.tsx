@@ -36,6 +36,12 @@ function Deploy(props: DeployProps) {
     const [loading, setLoading] = useState(false);
     const [estimateLoading, setEstimateLoading] = useState(false);
 
+    /* 
+     * It receives the value and the property to change and
+     * it updates the status of the `deploy` object with a copy
+     * of the current status but with the property specified updated
+     * with the new value
+     */
     function changeValue<T>(value: T, prop: DeployInfoKey) {
         const obj: DeployInfo = { ...deploy };
         // @ts-ignore: TODO: change this to be type safe
@@ -111,10 +117,10 @@ function Deploy(props: DeployProps) {
     async function relaySmartWalletDeployment(tokenAmount: string | number) {
         try {
             if (provider) {
-                const isAllowToken = await provider.isAllowedToken(
+                const isTokenAllowed = await provider.isAllowedToken(
                     process.env.REACT_APP_CONTRACTS_RIF_TOKEN!
                 );
-                if (isAllowToken) {
+                if (isTokenAllowed) {
                     const fees = await Utils.toWei(`${tokenAmount}`);
                     const smartWallet = await provider.deploySmartWallet(
                         currentSmartWallet!,
