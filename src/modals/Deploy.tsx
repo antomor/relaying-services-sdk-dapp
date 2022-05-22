@@ -36,7 +36,7 @@ function Deploy(props: DeployProps) {
     const [loading, setLoading] = useState(false);
     const [estimateLoading, setEstimateLoading] = useState(false);
 
-    /* 
+    /*
      * It receives the value and the property to change and
      * it updates the status of the `deploy` object with a copy
      * of the current status but with the property specified updated
