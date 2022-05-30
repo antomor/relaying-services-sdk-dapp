@@ -70,7 +70,6 @@ function Execute(props: ExecuteProps) {
 
             const paramsTypes = paramsStr.split(',');
             const paramsValues = execute.value.split(',');
-
             const encodedParamVals = web3.eth.abi.encodeParameters(
                 paramsTypes,
                 paramsValues
@@ -89,31 +88,37 @@ function Execute(props: ExecuteProps) {
     ) {
         const swContract = new web3.eth.Contract(IForwarder.abi, swAddress);
         swContract.setProvider(web3.currentProvider);
+        const fees = execute.fees === '' ? '0' : execute.fees;
+        const weiAmount = await Utils.toWei(fees.toString());
+        const transaction = await swContract.methods
+            .directExecute(toAddress, weiAmount, abiEncodedTx)
+            .send(
+                {
+                    from: account
+                },
+                // TODO: we may add the types
+                async (error: any, data: any) => {
+                    if (error !== undefined && error !== null) {
+                        throw error;
+                    } else {
+                        const txHash = data;
+                        console.log(`Your TxHash is ${txHash}`);
 
-        await swContract.methods.directExecute(toAddress, abiEncodedTx).send(
-            {
-                from: account
-            },
-            // TODO: we may add the types
-            async (error: any, data: any) => {
-                if (error !== undefined && error !== null) {
-                    throw error;
-                } else {
-                    const txHash = data;
-                    console.log(`Your TxHash is ${txHash}`);
+                        // checks to verify that the contract was executed properly
+                        const receipt = await Utils.getReceipt(txHash);
 
-                    // checks to verify that the contract was executed properly
-                    const receipt = await Utils.getReceipt(txHash);
+                        console.log(`Your receipt is`);
+                        console.log(receipt);
 
-                    console.log(`Your receipt is`);
-                    console.log(receipt);
-
-                    const trxData = await web3.eth.getTransaction(txHash);
-                    console.log('Your tx data is');
-                    console.log(trxData);
+                        const trxData = await web3.eth.getTransaction(txHash);
+                        console.log('Your tx data is');
+                        console.log(trxData);
+                        if (execute.show) {
+                            setResults(JSON.stringify(transaction));
+                        }
+                    }
                 }
-            }
-        );
+            );
     }
 
     function close() {
@@ -202,9 +207,10 @@ function Execute(props: ExecuteProps) {
     ) {
         const swContract = new web3.eth.Contract(IForwarder.abi, swAddress);
         swContract.setProvider(web3.currentProvider);
-
+        const fees = execute.fees === '' ? '0' : execute.fees;
+        const weiAmount = await Utils.toWei(fees.toString());
         const estimate = await swContract.methods
-            .directExecute(toAddress, abiEncodedTx)
+            .directExecute(toAddress, weiAmount, abiEncodedTx)
             .estimateGas({ from: account });
         return estimate;
     }
@@ -454,7 +460,9 @@ function Execute(props: ExecuteProps) {
                                     htmlFor='execute-fees'
                                     id='execute-fees-label'
                                 >
-                                    Fees (tRIF)
+                                    {execute.check
+                                        ? 'Amount to be sent'
+                                        : 'Fees (tRIF)'}
                                 </label>
                             </div>
                             <div
