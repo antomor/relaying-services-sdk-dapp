@@ -52,19 +52,16 @@ function Deploy(props: DeployProps) {
     async function handleEstimateDeploySmartWalletButtonClick() {
         setEstimateLoading(true);
         try {
-
             const opts = {
                 abiEncodedTx: '0x',
                 destinationContract: process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
                 relayWorker: process.env.REACT_APP_CONTRACTS_RELAY_WORKER!,
                 smartWalletAddress: currentSmartWallet?.address!,
                 tokenFees: '1',
-                isSmartWalletDeploy: true,
+                isSmartWalletDeploy: true
             };
-            
-            const estimate = await provider?.estimateMaxPossibleRelayGas(
-                opts
-            );
+
+            const estimate = await provider?.estimateMaxPossibleRelayGas(opts);
 
             if (estimate) {
                 const costInRBTC = await Utils.fromWei(estimate.toString());
@@ -134,7 +131,8 @@ function Deploy(props: DeployProps) {
                     const smartWallet = await provider.deploySmartWallet(
                         currentSmartWallet!,
                         {
-                            tokenAddress: process.env.REACT_APP_CONTRACTS_RIF_TOKEN,
+                            tokenAddress:
+                                process.env.REACT_APP_CONTRACTS_RIF_TOKEN,
                             tokenAmount: fees
                         }
                     );

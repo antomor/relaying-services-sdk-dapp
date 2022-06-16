@@ -1,5 +1,9 @@
 import { Dispatch, SetStateAction, useState } from 'react';
-import { RelayGasEstimationOptions, RelayingServices, RelayingTransactionOptions } from 'relaying-services-sdk';
+import {
+    RelayGasEstimationOptions,
+    RelayingServices,
+    RelayingTransactionOptions
+} from 'relaying-services-sdk';
 import { toBN } from 'web3-utils';
 import { SmartWalletWithBalance } from '../types';
 import Utils, { TRIF_PRICE } from '../Utils';
@@ -114,9 +118,9 @@ function Transfer(props: TransferProps) {
                 transactionDetails: {
                     retries: 7
                 }
-            }
+            };
 
-            const txDetails = await provider.relayTransaction(relayTrxOpts)
+            const txDetails = await provider.relayTransaction(relayTrxOpts);
             console.log(txDetails);
             setUpdateInfo(true);
             close();
@@ -147,13 +151,13 @@ function Transfer(props: TransferProps) {
                     abiEncodedTx: encodedTransferFunction,
                     smartWalletAddress: currentSmartWallet.address,
                     tokenFees: '1',
-                    destinationContract: process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
+                    destinationContract:
+                        process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
                     relayWorker: process.env.REACT_APP_CONTRACTS_RELAY_WORKER!
-                }
+                };
 
-                const maxPossibleGasValue = await provider.estimateMaxPossibleRelayGas(
-                    opts
-                );
+                const maxPossibleGasValue =
+                    await provider.estimateMaxPossibleRelayGas(opts);
                 const gasPrice = toBN(
                     // @ts-ignore TODO: we shouldn't access to the relayProvider
                     // eslint-disable-next-line no-underscore-dangle

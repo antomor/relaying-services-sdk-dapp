@@ -38,7 +38,7 @@ function Footer(props: FooterProps) {
             const swWithBalance = {
                 ...smartWallet,
                 balance: `${Utils.fromWei(balance)} tRIF`,
-                rbtcBalance: `${Utils.fromWei(rbtcBalance)} RBTC`,  
+                rbtcBalance: `${Utils.fromWei(rbtcBalance)} RBTC`,
                 deployed:
                     (await provider?.isSmartWalletDeployed(
                         smartWallet.address

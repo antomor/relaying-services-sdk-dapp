@@ -3,7 +3,11 @@ import { Dispatch, SetStateAction, useState } from 'react';
 import abiDecoder from 'abi-decoder';
 import Web3 from 'web3';
 import { toBN } from 'web3-utils';
-import { RelayingServices, RelayGasEstimationOptions, RelayingTransactionOptions } from 'relaying-services-sdk';
+import {
+    RelayingServices,
+    RelayGasEstimationOptions,
+    RelayingTransactionOptions
+} from 'relaying-services-sdk';
 import IForwarder from '../contracts/IForwarder.json';
 import { SmartWalletWithBalance } from '../types';
 import Utils from '../Utils';
@@ -156,10 +160,11 @@ function Execute(props: ExecuteProps) {
                         unsignedTx: {
                             data: funcData
                         },
-                        tokenAddress: process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
+                        tokenAddress:
+                            process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
                         smartWallet: currentSmartWallet,
                         tokenAmount: Number(fees)
-                    }
+                    };
                     const transaction = await provider.relayTransaction(
                         relayTransactionOpts
                     );
@@ -251,10 +256,12 @@ function Execute(props: ExecuteProps) {
                             smartWalletAddress: swAddress,
                             tokenFees: '0',
                             abiEncodedTx: funcData
-                        }
+                        };
 
                         const costInWei =
-                            await provider.estimateMaxPossibleRelayGasWithLinearFit(gasEstimationOpts);
+                            await provider.estimateMaxPossibleRelayGasWithLinearFit(
+                                gasEstimationOpts
+                            );
 
                         const costInRBTC = await Utils.fromWei(
                             costInWei.toString()
