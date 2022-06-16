@@ -109,6 +109,7 @@ function Transfer(props: TransferProps) {
                     to: transfer.address,
                     data: encodedAbi
                 },
+                tokenAddress: process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
                 tokenAmount: Number(fees),
                 transactionDetails: {
                     retries: 7

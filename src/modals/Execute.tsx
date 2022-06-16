@@ -156,6 +156,7 @@ function Execute(props: ExecuteProps) {
                         unsignedTx: {
                             data: funcData
                         },
+                        tokenAddress: process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
                         smartWallet: currentSmartWallet,
                         tokenAmount: Number(fees)
                     }

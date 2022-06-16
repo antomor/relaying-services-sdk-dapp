@@ -54,7 +54,7 @@ function Deploy(props: DeployProps) {
         try {
 
             const opts = {
-                abiEncodedTx: '',
+                abiEncodedTx: '0x',
                 destinationContract: process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
                 relayWorker: process.env.REACT_APP_CONTRACTS_RELAY_WORKER!,
                 smartWalletAddress: currentSmartWallet?.address!,
