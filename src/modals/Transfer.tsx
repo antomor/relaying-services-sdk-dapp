@@ -155,8 +155,9 @@ function Transfer(props: TransferProps) {
                     relayWorker: process.env.REACT_APP_CONTRACTS_RELAY_WORKER!
                 };
 
-                const estimate =
-                    await provider.estimateMaxPossibleRelayGas(opts);
+                const estimate = await provider.estimateMaxPossibleRelayGas(
+                    opts
+                );
 
                 const costInRBTC = await Utils.fromWei(estimate.toString());
                 console.log('Cost in RBTC:', costInRBTC);
