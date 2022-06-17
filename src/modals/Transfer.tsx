@@ -4,7 +4,6 @@ import {
     RelayingServices,
     RelayingTransactionOptions
 } from 'relaying-services-sdk';
-import { toBN } from 'web3-utils';
 import { SmartWalletWithBalance } from '../types';
 import Utils, { TRIF_PRICE } from '../Utils';
 import './Transfer.css';
@@ -156,20 +155,8 @@ function Transfer(props: TransferProps) {
                     relayWorker: process.env.REACT_APP_CONTRACTS_RELAY_WORKER!
                 };
 
-                const maxPossibleGasValue =
+                const estimate =
                     await provider.estimateMaxPossibleRelayGas(opts);
-                const gasPrice = toBN(
-                    // @ts-ignore TODO: we shouldn't access to the relayProvider
-                    // eslint-disable-next-line no-underscore-dangle
-                    await provider.relayProvider.relayClient._calculateGasPrice()
-                );
-                console.log(
-                    'maxPossibleGas, gasPrice',
-                    maxPossibleGasValue.toString(),
-                    gasPrice.toString()
-                );
-                const maxPossibleGas = toBN(maxPossibleGasValue);
-                const estimate = maxPossibleGas.mul(gasPrice);
 
                 const costInRBTC = await Utils.fromWei(estimate.toString());
                 console.log('Cost in RBTC:', costInRBTC);

@@ -1,7 +1,7 @@
 import './Deploy.css';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { RelayingServices, SmartWallet } from 'relaying-services-sdk';
-import Utils, { TRIF_PRICE } from '../Utils';
+import Utils, { TRIF_PRICE, ZERO_ADDRESS } from '../Utils';
 
 const { $ } = window;
 const { M } = window;
@@ -54,11 +54,12 @@ function Deploy(props: DeployProps) {
         try {
             const opts = {
                 abiEncodedTx: '0x',
-                destinationContract: process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
+                destinationContract: ZERO_ADDRESS.toString(),
                 relayWorker: process.env.REACT_APP_CONTRACTS_RELAY_WORKER!,
                 smartWalletAddress: currentSmartWallet?.address!,
                 tokenFees: '1',
-                isSmartWalletDeploy: true
+                isSmartWalletDeploy: true,
+                index: currentSmartWallet?.index?.toString()
             };
 
             const estimate = await provider?.estimateMaxPossibleRelayGas(opts);

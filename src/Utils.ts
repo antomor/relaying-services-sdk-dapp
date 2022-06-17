@@ -4,6 +4,8 @@ import TestToken from './contracts/TestToken.json';
 
 export const TRIF_PRICE = 0.000005739;
 export const TRIF_TOKEN_DECIMALS = 18;
+export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
 if (window.ethereum) {
     window.web3 = new Web3(window.ethereum);
 } else if (window.web3) {
