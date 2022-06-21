@@ -1,7 +1,7 @@
 import './Deploy.css';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { RelayingServices, SmartWallet } from 'relaying-services-sdk';
-import Utils, { TRIF_PRICE } from '../Utils';
+import Utils, { TRIF_PRICE, ZERO_ADDRESS } from '../Utils';
 
 const { $ } = window;
 const { M } = window;
@@ -52,10 +52,17 @@ function Deploy(props: DeployProps) {
     async function handleEstimateDeploySmartWalletButtonClick() {
         setEstimateLoading(true);
         try {
-            const estimate = await provider?.estimateMaxPossibleRelayGas(
-                currentSmartWallet!,
-                process.env.REACT_APP_CONTRACTS_RELAY_WORKER!
-            );
+            const opts = {
+                abiEncodedTx: '0x',
+                destinationContract: ZERO_ADDRESS.toString(),
+                relayWorker: process.env.REACT_APP_CONTRACTS_RELAY_WORKER!,
+                smartWalletAddress: currentSmartWallet?.address!,
+                tokenFees: '1',
+                isSmartWalletDeploy: true,
+                index: currentSmartWallet?.index?.toString()
+            };
+
+            const estimate = await provider?.estimateMaxPossibleRelayGas(opts);
 
             if (estimate) {
                 const costInRBTC = await Utils.fromWei(estimate.toString());
@@ -124,12 +131,15 @@ function Deploy(props: DeployProps) {
                     const fees = await Utils.toWei(`${tokenAmount}`);
                     const smartWallet = await provider.deploySmartWallet(
                         currentSmartWallet!,
-                        process.env.REACT_APP_CONTRACTS_RIF_TOKEN,
-                        fees
+                        {
+                            tokenAddress:
+                                process.env.REACT_APP_CONTRACTS_RIF_TOKEN,
+                            tokenAmount: fees
+                        }
                     );
                     const smartWalledIsDeployed =
                         await checkSmartWalletDeployment(
-                            smartWallet.deployTransaction!
+                            smartWallet.deployment?.deployTransaction!
                         );
                     if (!smartWalledIsDeployed) {
                         throw new Error('SmartWallet: deployment failed');
@@ -167,7 +177,7 @@ function Deploy(props: DeployProps) {
 
         setLoading(true);
         const smartWallet = await relaySmartWalletDeployment(deploy.fees);
-        if (smartWallet?.deployed) {
+        if (smartWallet?.deployment) {
             setUpdateInfo(true);
             close();
         }

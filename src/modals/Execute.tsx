@@ -3,7 +3,11 @@ import { Dispatch, SetStateAction, useState } from 'react';
 import abiDecoder from 'abi-decoder';
 import Web3 from 'web3';
 import { toBN } from 'web3-utils';
-import { RelayingServices } from 'relaying-services-sdk';
+import {
+    RelayingServices,
+    RelayGasEstimationOptions,
+    RelayingTransactionOptions
+} from 'relaying-services-sdk';
 import IForwarder from '../contracts/IForwarder.json';
 import { SmartWalletWithBalance } from '../types';
 import Utils from '../Utils';
@@ -152,17 +156,17 @@ function Execute(props: ExecuteProps) {
                     );
                 } else {
                     const fees = execute.fees === '' ? '0' : execute.fees;
-                    const transaction = await provider.relayTransaction(
-                        {
+                    const relayTransactionOpts: RelayingTransactionOptions = {
+                        unsignedTx: {
                             data: funcData
                         },
-                        {
-                            tokenAddress: destinationContract,
-                            address: swAddress,
-                            index: currentSmartWallet.index,
-                            deployed: currentSmartWallet.deployed
-                        },
-                        Number(fees)
+                        tokenAddress:
+                            process.env.REACT_APP_CONTRACTS_RIF_TOKEN!,
+                        smartWallet: currentSmartWallet,
+                        tokenAmount: Number(fees)
+                    };
+                    const transaction = await provider.relayTransaction(
+                        relayTransactionOpts
                     );
 
                     console.log('Transaction ', transaction);
@@ -245,13 +249,18 @@ function Execute(props: ExecuteProps) {
                     } else {
                         const relayWorker =
                             process.env.REACT_APP_CONTRACTS_RELAY_WORKER!;
+
+                        const gasEstimationOpts: RelayGasEstimationOptions = {
+                            destinationContract,
+                            relayWorker,
+                            smartWalletAddress: swAddress,
+                            tokenFees: '0',
+                            abiEncodedTx: funcData
+                        };
+
                         const costInWei =
                             await provider.estimateMaxPossibleRelayGasWithLinearFit(
-                                destinationContract,
-                                swAddress,
-                                '0',
-                                funcData,
-                                relayWorker
+                                gasEstimationOpts
                             );
 
                         const costInRBTC = await Utils.fromWei(

@@ -100,12 +100,10 @@ function App() {
             };
 
             // Get an RIF Relay RelayProvider instance and assign it to Web3 to use RIF Relay transparently
-            const relayingServices = new DefaultRelayingServices({
-                web3Instance: web3,
-                rskHost: '',
-                envelopingConfig: config
+            const relayingServices = new DefaultRelayingServices(web3);
+            await relayingServices.initialize(config, contractAddresses, {
+                loglevel: 1
             });
-            await relayingServices.initialize(config, contractAddresses);
             setProvider(relayingServices);
         } catch (error) {
             console.error(error);
