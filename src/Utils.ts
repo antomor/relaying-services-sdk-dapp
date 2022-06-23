@@ -9,7 +9,6 @@ export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 class Utils {
     static async tokenSymbol(token: string) {
         const tokenContract = this.getTokenContract(token);
-        console.log(tokenContract);
         const symbol = await tokenContract.methods.symbol().call();
         return symbol;
     }
