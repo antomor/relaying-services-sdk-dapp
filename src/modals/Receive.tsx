@@ -2,8 +2,8 @@ import { Dispatch, SetStateAction } from 'react';
 import { SmartWallet } from '@rsksmart/rif-relay-sdk';
 import { QRCodeSVG } from 'qrcode.react';
 import { Modal, Col, Row } from 'react-materialize';
-import './Receive.css';
-import { Modals } from '../types';
+import 'src/modals/Receive.css';
+import { Modals } from 'src/types';
 
 type ReceiveProps = {
     currentSmartWallet?: SmartWallet;

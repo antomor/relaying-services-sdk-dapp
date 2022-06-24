@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import Utils from 'src/Utils';
 import 'src/components/Header.css';
 import { Row, Col, Button, Icon } from 'react-materialize';
-import { useStore } from '../context/context';
+import { useStore } from 'src/context/context';
 
 type HeaderProps = {
     connect: () => Promise<void>;

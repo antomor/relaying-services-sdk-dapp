@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Select } from 'react-materialize';
-import { useStore } from '../context/context';
-import Utils from '../Utils';
+import { useStore } from 'src/context/context';
+import Utils from 'src/Utils';
 
 type AllowedTokensProps = {
     updateInfo: boolean;

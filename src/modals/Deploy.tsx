@@ -4,8 +4,8 @@ import { Modal, Col, Row, TextInput, Button } from 'react-materialize';
 import Utils, { TRIF_PRICE, ZERO_ADDRESS } from 'src/Utils';
 import { Modals } from 'src/types';
 import 'src/modals/Deploy.css';
-import LoadingButton from './LoadingButton';
-import { useStore } from '../context/context';
+import LoadingButton from 'src/modals/LoadingButton';
+import { useStore } from 'src/context/context';
 
 type DeployProps = {
     setUpdateInfo: Dispatch<SetStateAction<boolean>>;

@@ -1,5 +1,5 @@
-import { useStore } from '../context/context';
-import './Loading.css';
+import { useStore } from 'src/context/context';
+import 'src/modals/Loading.css';
 
 function Loading() {
     const { state } = useStore();

@@ -1,8 +1,8 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Modal, Col, Row, Table, Button, Icon } from 'react-materialize';
-import { Modals, Transaction } from '../types';
-import Utils from '../Utils';
-import { useStore } from '../context/context';
+import { Modals, Transaction } from 'src/types';
+import Utils from 'src/Utils';
+import { useStore } from 'src/context/context';
 
 type TransactionHistoryProps = {
     modal: Modals;

@@ -15,8 +15,8 @@ import {
     Icon,
     Switch
 } from 'react-materialize';
-import LoadingButton from './LoadingButton';
-import { useStore } from '../context/context';
+import LoadingButton from 'src/modals/LoadingButton';
+import { useStore } from 'src/context/context';
 
 type TransferProps = {
     setUpdateInfo: Dispatch<SetStateAction<boolean>>;

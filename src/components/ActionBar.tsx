@@ -5,7 +5,7 @@ import Utils, { TRIF_PRICE } from 'src/Utils';
 import 'src/components/ActionBar.css';
 import { Col, Row, Button, Icon } from 'react-materialize';
 import AllowedTokens from 'src/components/AllowedTokens';
-import { useStore } from '../context/context';
+import { useStore } from 'src/context/context';
 
 type ActionBarProps = {
     smartWallets: SmartWalletWithBalance[];

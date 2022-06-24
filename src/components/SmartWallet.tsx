@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { Modals, SmartWalletWithBalance } from 'src/types';
 import 'src/components/SmartWallet.css';
 import { Col, Row, Button, Icon } from 'react-materialize';
-import { useStore } from '../context/context';
+import { useStore } from 'src/context/context';
 
 type SmartWalletProps = {
     smartWallets: SmartWalletWithBalance[];

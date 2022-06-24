@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { RelayingServices } from '@rsksmart/rif-relay-sdk';
-import { SmartWalletWithBalance, Token } from '../types';
+import { SmartWalletWithBalance, Token } from 'src/types';
 
 export type Action =
     | { type: 'set_account'; account: string }

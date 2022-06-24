@@ -1,6 +1,6 @@
 import { createContext, useReducer, useContext, useMemo } from 'react';
-import StoreReducer from './reducer';
-import { ProviderProps, State, Dispatch } from './types';
+import StoreReducer from 'src/context/reducer';
+import { ProviderProps, State, Dispatch } from 'src/context/types';
 
 const initialState: State = {
     account: '',

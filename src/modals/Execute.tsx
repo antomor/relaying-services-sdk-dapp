@@ -19,8 +19,8 @@ import {
 } from 'react-materialize';
 import Utils, { TRIF_PRICE } from 'src/Utils';
 import { AbiItem, toBN } from 'web3-utils';
-import LoadingButton from './LoadingButton';
-import { useStore } from '../context/context';
+import LoadingButton from 'src/modals/LoadingButton';
+import { useStore } from 'src/context/context';
 
 type ExecuteProps = {
     setUpdateInfo: Dispatch<SetStateAction<boolean>>;
