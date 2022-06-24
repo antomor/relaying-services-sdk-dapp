@@ -1,6 +1,6 @@
 import { EnvelopingTransactionDetails } from '@rsksmart/rif-relay-common';
 import { AbiItem } from 'web3-utils';
-import ERC20 from './contracts/ERC20.json';
+import ERC20Abi from './contracts/ERC20Abi.json';
 
 export const TRIF_PRICE = 0.000005739;
 export const TRIF_TOKEN_DECIMALS = 18;
@@ -28,7 +28,7 @@ class Utils {
 
     static getTokenContract(token: string) {
         const tokenContract = new web3.eth.Contract(
-            ERC20.abi as AbiItem[],
+            ERC20Abi as AbiItem[],
             token
         );
         return tokenContract;
