@@ -73,6 +73,7 @@ function Execute(props: ExecuteProps) {
 
             const paramsTypes = paramsStr.split(',');
             const paramsValues = execute.value.split(',');
+
             const encodedParamVals = web3.eth.abi.encodeParameters(
                 paramsTypes,
                 paramsValues
@@ -93,10 +94,9 @@ function Execute(props: ExecuteProps) {
             IForwarderAbi as AbiItem[],
             swAddress
         );
-        const fees = execute.fees === '' ? '0' : execute.fees;
-        const weiAmount = await Utils.toWei(fees.toString());
+
         const transaction = await swContract.methods
-            .directExecute(toAddress, weiAmount, abiEncodedTx)
+            .directExecute(toAddress, abiEncodedTx)
             .send(
                 {
                     from: state.account
@@ -174,11 +174,7 @@ function Execute(props: ExecuteProps) {
                 const transaction = await state.provider!.relayTransaction(
                     relayTransactionOpts
                 );
-                Utils.addTransaction(state.smartWallet!.address, {
-                    date: new Date(),
-                    id: transaction.transactionHash,
-                    type: `Execute ${state.token!.symbol}`
-                });
+
                 console.log('Transaction ', transaction);
                 console.log(`Transaction hash: ${transaction.blockHash}`);
 
@@ -197,6 +193,11 @@ function Execute(props: ExecuteProps) {
                     setUpdateInfo(true);
                     close();
                 }
+                Utils.addTransaction(state.smartWallet!.address, {
+                    date: new Date(),
+                    id: transaction.transactionHash,
+                    type: `Execute ${state.token!.symbol}`
+                });
             }
         } catch (error) {
             const errorObj = error as Error;
@@ -217,10 +218,9 @@ function Execute(props: ExecuteProps) {
             IForwarderAbi as AbiItem[],
             swAddress
         );
-        const fees = execute.fees === '' ? '0' : execute.fees;
-        const weiAmount = await Utils.toWei(fees.toString());
+
         const estimate = await swContract.methods
-            .directExecute(toAddress, weiAmount, abiEncodedTx)
+            .directExecute(toAddress, abiEncodedTx)
             .estimateGas({ from: state.account });
         return estimate;
     };
@@ -447,11 +447,7 @@ function Execute(props: ExecuteProps) {
                     </Col>
                     <Col s={8}>
                         <TextInput
-                            label={
-                                execute.check
-                                    ? 'Amount to be sent'
-                                    : `Fees (${state.token!.symbol})`
-                            }
+                            label={`Fees (${state.token!.symbol})`}
                             placeholder='0'
                             value={execute.fees}
                             type='text'

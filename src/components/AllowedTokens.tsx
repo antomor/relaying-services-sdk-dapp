@@ -27,7 +27,9 @@ function AllowedTokens(props: AllowedTokensProps) {
         const tokens = await state.provider!.getAllowedTokens();
         if (tokens.length > 0) {
             setAllowedTokens(tokens);
-            setToken(tokens[0]);
+            if (!state.token) {
+                setToken(tokens[0]);
+            }
         } else {
             alert('Not allowed tokens');
         }
