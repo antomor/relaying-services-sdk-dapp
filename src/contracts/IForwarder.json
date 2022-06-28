@@ -18,11 +18,6 @@
             "inputs": [
                 {
                     "internalType": "bytes32",
-                    "name": "domainSeparator",
-                    "type": "bytes32"
-                },
-                {
-                    "internalType": "bytes32",
                     "name": "suffixData",
                     "type": "bytes32"
                 },
@@ -96,11 +91,6 @@
         },
         {
             "inputs": [
-                {
-                    "internalType": "bytes32",
-                    "name": "domainSeparator",
-                    "type": "bytes32"
-                },
                 {
                     "internalType": "bytes32",
                     "name": "suffixData",
@@ -191,11 +181,6 @@
                     "internalType": "address",
                     "name": "to",
                     "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "value",
-                    "type": "uint256"
                 },
                 {
                     "internalType": "bytes",
