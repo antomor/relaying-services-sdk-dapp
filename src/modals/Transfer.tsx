@@ -128,8 +128,7 @@ function Transfer(props: TransferProps) {
             };
 
             const txDetails = await state.provider!.relayTransaction(
-                relayTrxOpts,
-                true
+                relayTrxOpts
             );
             console.log(txDetails);
             Utils.addTransaction(state.smartWallet!.address, {
