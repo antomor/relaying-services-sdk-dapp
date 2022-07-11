@@ -17,6 +17,7 @@ import {
 } from 'react-materialize';
 import LoadingButton from 'src/modals/LoadingButton';
 import { useStore } from 'src/context/context';
+import { RelayingResult } from '@rsksmart/rif-relay-client';
 
 type TransferProps = {
     setUpdateInfo: Dispatch<SetStateAction<boolean>>;
@@ -123,23 +124,25 @@ function Transfer(props: TransferProps) {
                 tokenAddress: state.token!.address,
                 tokenAmount: Number(fees),
                 transactionDetails: {
-                    retries: 7
+                    retries: 7,
+                    waitForTransactionReceipt: false
                 }
             };
 
-            const txDetails = await state.provider!.relayTransaction(
-                relayTrxOpts
-            );
-            console.log(txDetails);
+            const result: RelayingResult =
+                await state.provider!.relayTransaction(relayTrxOpts);
+            const txHash: string = result
+                .transaction!.hash(true)
+                .toString('hex');
             Utils.addTransaction(state.smartWallet!.address, {
                 date: new Date(),
-                id: txDetails.transactionHash,
+                id: txHash,
                 type: `Transfer ${
                     transfer.check ? 'RBTC' : state.token!.symbol
                 }`
             });
-            setUpdateInfo(true);
             close();
+            setUpdateInfo(true);
         } catch (error) {
             const errorObj = error as Error;
             if (errorObj.message) {

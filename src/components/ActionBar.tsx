@@ -82,7 +82,7 @@ function ActionBar(props: ActionBarProps) {
                 setWorkerBalance(currentWorkerBalance);
             }
         })();
-    }, [state.token]);
+    }, [state.token, updateInfo]);
 
     const create = async () => {
         if (state.provider) {

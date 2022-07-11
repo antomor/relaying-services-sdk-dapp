@@ -109,8 +109,15 @@ class Utils {
 
     static addTransaction(address: string, transaction: Transaction) {
         let transactions: Transaction[] = [];
-        if (address in localStorage) {
-            transactions = JSON.parse(localStorage.getItem(address)!);
+        try {
+            if (address in localStorage) {
+                transactions = JSON.parse(localStorage.getItem(address)!);
+            }
+        } catch (e) {
+            console.log(
+                'Failed trying to read transaction, erased all previous transactions'
+            );
+            console.log(e);
         }
         transactions.push(transaction);
         localStorage.setItem(address, JSON.stringify(transactions));

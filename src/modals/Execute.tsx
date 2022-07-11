@@ -1,6 +1,4 @@
 import { Dispatch, SetStateAction, useState } from 'react';
-// @ts-ignore: TODO: Check if there is a ts library
-import abiDecoder from 'abi-decoder';
 import {
     RelayGasEstimationOptions,
     RelayingTransactionOptions
@@ -21,6 +19,7 @@ import Utils, { TRIF_PRICE } from 'src/Utils';
 import { AbiItem, toBN } from 'web3-utils';
 import LoadingButton from 'src/modals/LoadingButton';
 import { useStore } from 'src/context/context';
+import { RelayingResult } from '@rsksmart/rif-relay-client';
 
 type ExecuteProps = {
     setUpdateInfo: Dispatch<SetStateAction<boolean>>;
@@ -171,33 +170,22 @@ function Execute(props: ExecuteProps) {
                     tokenAmount: Number(fees),
                     tokenAddress: state.token!.address
                 };
-                const transaction = await state.provider!.relayTransaction(
-                    relayTransactionOpts
-                );
+                const result: RelayingResult =
+                    await state.provider!.relayTransaction(
+                        relayTransactionOpts
+                    );
 
-                console.log('Transaction ', transaction);
-                console.log(`Transaction hash: ${transaction.blockHash}`);
+                const txHash: string = result
+                    .transaction!.hash(true)
+                    .toString('hex');
 
-                const logs = abiDecoder.decodeLogs(transaction.logs);
-
-                console.log('Transaction logs: ', logs);
-
-                // TODO: abi-decode doesn't provide declaration files
-                const sampleRecipientEmitted = logs.find(
-                    (e: any) => e != null && e.name === 'TransactionRelayed'
-                );
-                console.log(sampleRecipientEmitted);
-                if (execute.show) {
-                    setResults(JSON.stringify(transaction));
-                } else {
-                    setUpdateInfo(true);
-                    close();
-                }
                 Utils.addTransaction(state.smartWallet!.address, {
                     date: new Date(),
-                    id: transaction.transactionHash,
+                    id: txHash,
                     type: `Execute ${state.token!.symbol}`
                 });
+                close();
+                setUpdateInfo(true);
             }
         } catch (error) {
             const errorObj = error as Error;
