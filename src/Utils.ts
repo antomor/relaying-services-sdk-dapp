@@ -1,4 +1,4 @@
-import { EnvelopingTransactionDetails } from '@rsksmart/rif-relay-common';
+import { EnvelopingTransactionDetails } from '@rsksmart/rif-relay-sdk';
 import { AbiItem } from 'web3-utils';
 import ERC20Abi from './contracts/ERC20Abi.json';
 import { Transaction } from './types';

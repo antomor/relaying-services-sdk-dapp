@@ -1,7 +1,8 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import {
     RelayGasEstimationOptions,
-    RelayingTransactionOptions
+    RelayingTransactionOptions,
+    RelayingResult
 } from '@rsksmart/rif-relay-sdk';
 import { Modals } from 'src/types';
 import Utils, { TRIF_PRICE } from 'src/Utils';
@@ -17,7 +18,6 @@ import {
 } from 'react-materialize';
 import LoadingButton from 'src/modals/LoadingButton';
 import { useStore } from 'src/context/context';
-import { RelayingResult } from '@rsksmart/rif-relay-client';
 
 type TransferProps = {
     setUpdateInfo: Dispatch<SetStateAction<boolean>>;

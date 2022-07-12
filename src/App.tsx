@@ -3,10 +3,10 @@ import 'src/App.css';
 
 import {
     DefaultRelayingServices,
-    RelayingServicesAddresses
+    RelayingServicesAddresses,
+    EnvelopingConfig
 } from '@rsksmart/rif-relay-sdk';
 
-import { EnvelopingConfig } from '@rsksmart/rif-relay-common';
 import Header from 'src/components/Header';
 import SmartWallet from 'src/components/SmartWallet';
 import ActionBar from 'src/components/ActionBar';

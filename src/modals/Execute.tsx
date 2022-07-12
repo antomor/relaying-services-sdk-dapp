@@ -1,7 +1,8 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import {
     RelayGasEstimationOptions,
-    RelayingTransactionOptions
+    RelayingTransactionOptions,
+    RelayingResult
 } from '@rsksmart/rif-relay-sdk';
 import IForwarderAbi from 'src/contracts/IForwarderAbi.json';
 import { Modals } from 'src/types';
@@ -19,7 +20,6 @@ import Utils, { TRIF_PRICE } from 'src/Utils';
 import { AbiItem, toBN } from 'web3-utils';
 import LoadingButton from 'src/modals/LoadingButton';
 import { useStore } from 'src/context/context';
-import { RelayingResult } from '@rsksmart/rif-relay-client';
 
 type ExecuteProps = {
     setUpdateInfo: Dispatch<SetStateAction<boolean>>;

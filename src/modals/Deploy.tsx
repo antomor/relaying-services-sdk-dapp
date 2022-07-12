@@ -98,26 +98,8 @@ function Deploy(props: DeployProps) {
         setEstimateLoading(false);
     };
 
-    const getReceipt = async (transactionHash: string) => {
-        let receipt = await Utils.getTransactionReceipt(transactionHash);
-        let times = 0;
-
-        while (receipt === null && times < 40) {
-            times += 1;
-            // eslint-disable-next-line no-promise-executor-return
-            const sleep = new Promise((resolve) => setTimeout(resolve, 1000));
-            // eslint-disable-next-line no-await-in-loop
-            await sleep;
-            // eslint-disable-next-line no-await-in-loop
-            receipt = await Utils.getTransactionReceipt(transactionHash);
-        }
-
-        return receipt;
-    };
-
     const checkSmartWalletDeployment = async (txHash: string) => {
-        const receipt = await getReceipt(txHash);
-
+        const receipt = await state.provider!.getTransactionReceipt(txHash);
         if (receipt === null) {
             return false;
         }
@@ -138,7 +120,10 @@ function Deploy(props: DeployProps) {
                     state.smartWallet!,
                     {
                         tokenAddress: state.token!.address,
-                        tokenAmount: Number(fees)
+                        tokenAmount: Number(fees),
+                        transactionDetails: {
+                            waitForTransactionReceipt: false
+                        }
                     }
                 );
                 const smartWalledIsDeployed = await checkSmartWalletDeployment(
