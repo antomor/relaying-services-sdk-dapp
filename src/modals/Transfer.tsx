@@ -94,7 +94,6 @@ function Transfer(props: TransferProps) {
 
     const pasteRecipientAddress = async () => {
         const address = await navigator.clipboard.readText();
-        console.log(address);
         if (Utils.checkAddress(address.toLowerCase())) {
             changeValue(address, 'address');
         }

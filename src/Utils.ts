@@ -1,7 +1,10 @@
-import { EnvelopingTransactionDetails } from '@rsksmart/rif-relay-sdk';
+import {
+    EnvelopingTransactionDetails,
+    SmartWallet
+} from '@rsksmart/rif-relay-sdk';
 import { AbiItem } from 'web3-utils';
-import ERC20Abi from './contracts/ERC20Abi.json';
-import { Transaction } from './types';
+import ERC20Abi from 'src/contracts/ERC20Abi.json';
+import { SmartWalletWithBalance, Token, Transaction } from 'src/types';
 
 export const TRIF_PRICE = 0.000005739;
 export const TRIF_TOKEN_DECIMALS = 18;
@@ -121,6 +124,23 @@ class Utils {
         }
         transactions.push(transaction);
         localStorage.setItem(address, JSON.stringify(transactions));
+    }
+
+    static async setBalance(
+        smartWallet: SmartWallet,
+        token: Token
+    ): Promise<SmartWalletWithBalance> {
+        const balance = await Utils.tokenBalance(
+            smartWallet.address,
+            token.address
+        );
+        const rbtcBalance = await Utils.getBalance(smartWallet.address);
+        const swWithBalance = {
+            ...smartWallet,
+            balance: `${Utils.fromWei(balance)} ${token.symbol}`,
+            rbtcBalance: `${Utils.fromWei(rbtcBalance)} RBTC`
+        };
+        return swWithBalance;
     }
 }
 

@@ -2,13 +2,13 @@ import { Dispatch, SetStateAction, useState } from 'react';
 import { RelayGasEstimationOptions } from '@rsksmart/rif-relay-sdk';
 import { Modal, Col, Row, TextInput, Button } from 'react-materialize';
 import Utils, { TRIF_PRICE, ZERO_ADDRESS } from 'src/Utils';
-import { Modals } from 'src/types';
+import { Modals, SmartWalletWithBalance } from 'src/types';
 import 'src/modals/Deploy.css';
 import LoadingButton from 'src/modals/LoadingButton';
 import { useStore } from 'src/context/context';
 
 type DeployProps = {
-    setUpdateInfo: Dispatch<SetStateAction<boolean>>;
+    smartWallets: SmartWalletWithBalance[];
     modal: Modals;
     setModal: Dispatch<SetStateAction<Modals>>;
 };
@@ -25,7 +25,7 @@ type DeployInfoKey = keyof DeployInfo;
 function Deploy(props: DeployProps) {
     const { state } = useStore();
 
-    const { setUpdateInfo, modal, setModal } = props;
+    const { smartWallets, modal, setModal } = props;
 
     const [deploy, setDeploy] = useState<DeployInfo>({
         fees: '0',
@@ -164,7 +164,8 @@ function Deploy(props: DeployProps) {
         setDeployLoading(true);
         const smartWallet = await relaySmartWalletDeployment(deploy.fees);
         if (smartWallet?.deployment) {
-            setUpdateInfo(true);
+            state.smartWallet!.deployed = true;
+            localStorage.setItem(state.account, JSON.stringify(smartWallets));
             close();
         }
 
