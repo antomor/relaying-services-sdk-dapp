@@ -125,7 +125,7 @@ class Utils {
 
     static getPartners() {
         const partnerEnvVar = process.env.REACT_APP_CONTRACTS_PARTNERS!;
-        const partners = partnerEnvVar.split(",");
+        const partners = partnerEnvVar.split(',');
         return partners;
     }
 }

@@ -331,7 +331,10 @@ function Transfer(props: TransferProps) {
                             type='number'
                             validate
                             onChange={(event) => {
-                                changeValue(event.currentTarget.value, 'collector');
+                                changeValue(
+                                    event.currentTarget.value,
+                                    'collector'
+                                );
                             }}
                         />
                     </Col>

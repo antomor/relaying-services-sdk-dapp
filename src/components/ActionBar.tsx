@@ -130,9 +130,9 @@ function ActionBar(props: ActionBarProps) {
                     </Col>
                 </Row>
                 <Row>
-                    <Col s={12} m={4} offset="m4">
+                    <Col s={12} m={4} offset='m4'>
                         {/* TODO: To be reviewed */}
-                        <PartnerBalances/>
+                        <PartnerBalances />
                     </Col>
                 </Row>
             </Col>
