@@ -4,4 +4,3 @@ RUN apk add --no-cache build-base git bash
 WORKDIR /usr/src/app
 COPY . ./
 RUN npm i --no-audit
-# RUN npm start
