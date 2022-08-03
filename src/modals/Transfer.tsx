@@ -5,7 +5,7 @@ import {
     RelayingResult
 } from '@rsksmart/rif-relay-sdk';
 import { Modals } from 'src/types';
-import Utils, { TRIF_PRICE } from 'src/Utils';
+import Utils, { TRIF_PRICE, ZERO_ADDRESS } from 'src/Utils';
 import 'src/modals/Transfer.css';
 import {
     Modal,
@@ -106,7 +106,7 @@ function Transfer(props: TransferProps) {
     const transferSmartWalletButtonClick = async () => {
         setTransferLoading(true);
         try {
-            const { amount, collector = `0x${'0'.repeat(40)}` } = transfer;
+            const { amount, collector } = transfer;
             const fees = transfer.fees === '' ? '0' : transfer.fees;
 
             const encodedAbi = (
@@ -128,9 +128,9 @@ function Transfer(props: TransferProps) {
                 tokenAmount: Number(fees),
                 transactionDetails: {
                     retries: 7,
-                    waitForTransactionReceipt: false
+                    ignoreTransactionReceipt: false
                 },
-                collector
+                collectorContract: collector || ZERO_ADDRESS
             };
 
             const result: RelayingResult =
@@ -177,7 +177,7 @@ function Transfer(props: TransferProps) {
                     destinationContract: state.token!.address,
                     relayWorker: process.env.REACT_APP_CONTRACTS_RELAY_WORKER!,
                     tokenAddress: state.token!.address,
-                    collector: transfer.collector || `0x${'0'.repeat(40)}`
+                    collectorContract: transfer.collector || ZERO_ADDRESS
                 };
 
                 const estimate =
@@ -328,7 +328,7 @@ function Transfer(props: TransferProps) {
                             label='Collector'
                             placeholder={`0 ${state.token!.symbol}`}
                             value={transfer.collector}
-                            type='number'
+                            type='text'
                             validate
                             onChange={(event) => {
                                 changeValue(

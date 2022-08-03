@@ -21,6 +21,7 @@ import rLogin from 'src/rLogin';
 import Web3 from 'web3';
 import TransactionHistory from './modals/TransactionHistory';
 import { useStore } from './context/context';
+import PartnerBalances from './components/PartnerBalances';
 
 if (window.ethereum) {
     window.web3 = new Web3(window.ethereum);
@@ -208,6 +209,7 @@ function App() {
                         smartWallets={smartWallets}
                         setModal={setModal}
                     />
+                    <PartnerBalances />
                     <Deploy
                         setUpdateInfo={setUpdateInfo}
                         modal={modal}

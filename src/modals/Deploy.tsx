@@ -122,7 +122,7 @@ function Deploy(props: DeployProps) {
                         tokenAddress: state.token!.address,
                         tokenAmount: Number(fees),
                         transactionDetails: {
-                            waitForTransactionReceipt: false
+                            ignoreTransactionReceipt: false
                         }
                     }
                 );

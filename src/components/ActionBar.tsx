@@ -6,7 +6,6 @@ import 'src/components/ActionBar.css';
 import { Col, Row, Button, Icon } from 'react-materialize';
 import AllowedTokens from 'src/components/AllowedTokens';
 import { useStore } from 'src/context/context';
-import PartnerBalances from './PartnerBalances';
 
 type ActionBarProps = {
     smartWallets: SmartWalletWithBalance[];
@@ -127,12 +126,6 @@ function ActionBar(props: ActionBarProps) {
                             Worker balance: <span>{workerBalance}</span>{' '}
                             {state.token?.symbol}
                         </h6>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col s={12} m={4} offset='m4'>
-                        {/* TODO: To be reviewed */}
-                        <PartnerBalances />
                     </Col>
                 </Row>
             </Col>
