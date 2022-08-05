@@ -73,11 +73,14 @@ function Validate(props: ValidateProps) {
                 dispatch({ type: 'set_loader', loader: false });
                 return;
             }
-            const smartWallet = await state.provider!.validateSmartWallet(
-                validate.address
-            );
+            // Check if it can be re-factored to return a value
+            await state.provider!.validateSmartWallet(validate.address);
             const smartWalletWithBalance = await Utils.setBalance(
-                smartWallet,
+                {
+                    index: -1,
+                    address: validate.address,
+                    deployed: true
+                },
                 state.token!
             );
             const tempSmartWallets = [...smartWallets, smartWalletWithBalance];
@@ -86,7 +89,6 @@ function Validate(props: ValidateProps) {
                 state.account,
                 JSON.stringify(tempSmartWallets)
             );
-            dispatch({ type: 'set_loader', loader: false });
             close();
         } catch (error) {
             const errorObj = error as Error;
@@ -95,6 +97,7 @@ function Validate(props: ValidateProps) {
             }
             console.error(error);
         }
+        dispatch({ type: 'set_loader', loader: false });
         setValidateLoading(false);
     };
 

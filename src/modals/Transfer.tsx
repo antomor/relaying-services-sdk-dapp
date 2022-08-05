@@ -124,7 +124,7 @@ function Transfer(props: TransferProps) {
                 tokenAmount: Number(fees),
                 transactionDetails: {
                     retries: 7,
-                    waitForTransactionReceipt: false
+                    ignoreTransactionReceipt: true
                 }
             };
 

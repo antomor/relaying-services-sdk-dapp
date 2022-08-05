@@ -34,17 +34,12 @@ function ActionBar(props: ActionBarProps) {
             );
             console.log(e);
         }
-        console.log(tempSmartWallets);
-        const tempSmartWalletsWithBalance: SmartWalletWithBalance[] = [];
         for (let i = 0; i < tempSmartWallets.length; i += 1) {
-            // eslint-disable-next-line no-await-in-loop
-            const tempSmartWallet = await Utils.setBalance(
-                tempSmartWallets[i],
-                state.token!
+            Utils.setBalance(tempSmartWallets[i], state.token!).then(
+                (tempSmartWallet) =>
+                    setSmartWallets((prev) => [...prev, tempSmartWallet])
             );
-            tempSmartWalletsWithBalance.push(tempSmartWallet);
         }
-        setSmartWallets(tempSmartWalletsWithBalance);
     };
 
     useEffect(() => {
