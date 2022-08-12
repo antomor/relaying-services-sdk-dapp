@@ -23,9 +23,13 @@ function ActionBar(props: ActionBarProps) {
     const loadSmartWallets = async () => {
         let tempSmartWallets: SmartWallet[] = [];
         try {
-            if (`${state.chainId}.${state.account}` in localStorage) {
+            if (
+                Utils.getChainKey(state.chainId, state.account) in localStorage
+            ) {
                 tempSmartWallets = JSON.parse(
-                    localStorage.getItem(`${state.chainId}.${state.account}`)!
+                    localStorage.getItem(
+                        Utils.getChainKey(state.chainId, state.account)
+                    )!
                 );
             }
         } catch (e) {

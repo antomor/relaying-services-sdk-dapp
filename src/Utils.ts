@@ -117,9 +117,9 @@ class Utils {
     ) {
         let transactions: Transaction[] = [];
         try {
-            if (`${chainId}.${address}` in localStorage) {
+            if (Utils.getChainKey(chainId, address) in localStorage) {
                 transactions = JSON.parse(
-                    localStorage.getItem(`${chainId}.${address}`)!
+                    localStorage.getItem(Utils.getChainKey(chainId, address))!
                 );
             }
         } catch (e) {
@@ -130,7 +130,7 @@ class Utils {
         }
         transactions.push(transaction);
         localStorage.setItem(
-            `${chainId}.${address}`,
+            Utils.getChainKey(chainId, address),
             JSON.stringify(transactions)
         );
     }
@@ -150,6 +150,10 @@ class Utils {
             rbtcBalance: `${Utils.fromWei(rbtcBalance)} RBTC`
         };
         return swWithBalance;
+    }
+
+    static getChainKey(chainId: number, address: string): string {
+        return `${chainId}.${address}`;
     }
 }
 

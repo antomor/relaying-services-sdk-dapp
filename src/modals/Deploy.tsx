@@ -166,7 +166,7 @@ function Deploy(props: DeployProps) {
         if (smartWallet?.deployment) {
             state.smartWallet!.deployed = true;
             localStorage.setItem(
-                `${state.chainId}.${state.account}`,
+                Utils.getChainKey(state.chainId, state.account),
                 JSON.stringify(smartWallets)
             );
             close();
