@@ -81,6 +81,7 @@ function Header(props: HeaderProps) {
                                 onClick={reload}
                                 floating
                                 tooltip='Refresh information'
+                                disabled={!state.connected}
                             >
                                 <Icon className='material-icons'>update</Icon>
                             </Button>

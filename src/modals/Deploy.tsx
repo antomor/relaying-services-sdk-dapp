@@ -165,7 +165,10 @@ function Deploy(props: DeployProps) {
         const smartWallet = await relaySmartWalletDeployment(deploy.fees);
         if (smartWallet?.deployment) {
             state.smartWallet!.deployed = true;
-            localStorage.setItem(state.account, JSON.stringify(smartWallets));
+            localStorage.setItem(
+                `${state.account}-${state.chainId}`,
+                JSON.stringify(smartWallets)
+            );
             close();
         }
 

@@ -133,7 +133,7 @@ function Transfer(props: TransferProps) {
             const txHash: string = result
                 .transaction!.hash(true)
                 .toString('hex');
-            Utils.addTransaction(state.smartWallet!.address, {
+            Utils.addTransaction(state.smartWallet!.address, state.chainId, {
                 date: new Date(),
                 id: txHash,
                 type: `Transfer ${

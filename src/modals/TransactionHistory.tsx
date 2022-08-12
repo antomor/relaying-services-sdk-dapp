@@ -19,10 +19,12 @@ function TransactionHistory(props: TransactionHistoryProps) {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
 
     useEffect(() => {
-        if (state.smartWallet?.address! in localStorage) {
+        if (`${state.smartWallet?.address!}-${state.chainId}` in localStorage) {
             try {
                 const localTransactions: Transaction[] = JSON.parse(
-                    localStorage.getItem(state.smartWallet?.address!)!
+                    localStorage.getItem(
+                        `${state.smartWallet?.address!}-${state.chainId}`
+                    )!
                 );
                 setTransactions(localTransactions);
             } catch (e) {

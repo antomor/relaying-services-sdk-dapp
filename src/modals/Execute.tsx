@@ -123,7 +123,7 @@ function Execute(props: ExecuteProps) {
                     }
                 }
             );
-        Utils.addTransaction(state.smartWallet!.address, {
+        Utils.addTransaction(state.smartWallet!.address, state.chainId, {
             date: new Date(),
             id: transaction.transactionHash,
             type: 'Execute RBTC'
@@ -179,11 +179,15 @@ function Execute(props: ExecuteProps) {
                     .transaction!.hash(true)
                     .toString('hex');
 
-                Utils.addTransaction(state.smartWallet!.address, {
-                    date: new Date(),
-                    id: txHash,
-                    type: `Execute ${state.token!.symbol}`
-                });
+                Utils.addTransaction(
+                    state.smartWallet!.address,
+                    state.chainId,
+                    {
+                        date: new Date(),
+                        id: txHash,
+                        type: `Execute ${state.token!.symbol}`
+                    }
+                );
                 close();
                 setUpdateInfo(true);
             }

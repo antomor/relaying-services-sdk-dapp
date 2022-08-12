@@ -110,11 +110,17 @@ class Utils {
         );
     }
 
-    static addTransaction(address: string, transaction: Transaction) {
+    static addTransaction(
+        address: string,
+        chainId: number,
+        transaction: Transaction
+    ) {
         let transactions: Transaction[] = [];
         try {
-            if (address in localStorage) {
-                transactions = JSON.parse(localStorage.getItem(address)!);
+            if (`${address}-${chainId}` in localStorage) {
+                transactions = JSON.parse(
+                    localStorage.getItem(`${address}-${chainId}`)!
+                );
             }
         } catch (e) {
             console.log(
@@ -123,7 +129,10 @@ class Utils {
             console.log(e);
         }
         transactions.push(transaction);
-        localStorage.setItem(address, JSON.stringify(transactions));
+        localStorage.setItem(
+            `${address}-${chainId}`,
+            JSON.stringify(transactions)
+        );
     }
 
     static async getSmartWalletBalance(
