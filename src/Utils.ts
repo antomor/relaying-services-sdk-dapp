@@ -126,7 +126,7 @@ class Utils {
         localStorage.setItem(address, JSON.stringify(transactions));
     }
 
-    static async setBalance(
+    static async getSmartWalletBalance(
         smartWallet: SmartWallet,
         token: Token
     ): Promise<SmartWalletWithBalance> {

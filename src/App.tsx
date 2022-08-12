@@ -132,6 +132,7 @@ function App() {
         dispatch({ type: 'set_loader', loader: true });
         await initProvider();
         await refreshAccount();
+        setUpdateInfo(true);
         dispatch({ type: 'set_loader', loader: false });
     };
 

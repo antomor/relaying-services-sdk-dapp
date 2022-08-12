@@ -56,7 +56,6 @@ function Validate(props: ValidateProps) {
 
     const validateSmartWallets = (address: string): Boolean => {
         for (let i = 0; i < smartWallets.length; i += 1) {
-            console.log(smartWallets[i].address, address);
             if (smartWallets[i].address === address) {
                 alert('Smart Wallet already included');
                 return true;
@@ -75,7 +74,7 @@ function Validate(props: ValidateProps) {
             }
             // Check if it can be re-factored to return a value
             await state.provider!.validateSmartWallet(validate.address);
-            const smartWalletWithBalance = await Utils.setBalance(
+            const smartWalletWithBalance = await Utils.getSmartWalletBalance(
                 {
                     index: -1,
                     address: validate.address,
@@ -118,7 +117,7 @@ function Validate(props: ValidateProps) {
                 dispatch({ type: 'set_loader', loader: false });
                 return;
             }
-            const smartWalletWithBalance = await Utils.setBalance(
+            const smartWalletWithBalance = await Utils.getSmartWalletBalance(
                 smartWallet,
                 state.token!
             );

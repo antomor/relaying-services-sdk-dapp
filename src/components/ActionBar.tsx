@@ -34,8 +34,9 @@ function ActionBar(props: ActionBarProps) {
             );
             console.log(e);
         }
+        setSmartWallets([]);
         for (let i = 0; i < tempSmartWallets.length; i += 1) {
-            Utils.setBalance(tempSmartWallets[i], state.token!).then(
+            Utils.getSmartWalletBalance(tempSmartWallets[i], state.token!).then(
                 (tempSmartWallet) =>
                     setSmartWallets((prev) => [...prev, tempSmartWallet])
             );
