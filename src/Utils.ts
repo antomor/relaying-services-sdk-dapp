@@ -117,9 +117,9 @@ class Utils {
     ) {
         let transactions: Transaction[] = [];
         try {
-            if (`${address}-${chainId}` in localStorage) {
+            if (`${chainId}.${address}` in localStorage) {
                 transactions = JSON.parse(
-                    localStorage.getItem(`${address}-${chainId}`)!
+                    localStorage.getItem(`${chainId}.${address}`)!
                 );
             }
         } catch (e) {
@@ -130,7 +130,7 @@ class Utils {
         }
         transactions.push(transaction);
         localStorage.setItem(
-            `${address}-${chainId}`,
+            `${chainId}.${address}`,
             JSON.stringify(transactions)
         );
     }
