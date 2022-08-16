@@ -24,7 +24,8 @@ function ActionBar(props: ActionBarProps) {
         let tempSmartWallets: SmartWallet[] = [];
         try {
             if (
-                Utils.getTransactionKey(state.chainId, state.account) in localStorage
+                Utils.getTransactionKey(state.chainId, state.account) in
+                localStorage
             ) {
                 tempSmartWallets = JSON.parse(
                     localStorage.getItem(

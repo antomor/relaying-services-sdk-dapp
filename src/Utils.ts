@@ -119,7 +119,9 @@ class Utils {
         try {
             if (Utils.getTransactionKey(chainId, address) in localStorage) {
                 transactions = JSON.parse(
-                    localStorage.getItem(Utils.getTransactionKey(chainId, address))!
+                    localStorage.getItem(
+                        Utils.getTransactionKey(chainId, address)
+                    )!
                 );
             }
         } catch (e) {
