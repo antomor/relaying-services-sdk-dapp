@@ -9,6 +9,7 @@ import { useStore } from 'src/context/context';
 
 type DeployProps = {
     smartWallets: SmartWalletWithBalance[];
+    setUpdateInfo: Dispatch<SetStateAction<boolean>>;
     modal: Modals;
     setModal: Dispatch<SetStateAction<Modals>>;
 };
@@ -25,7 +26,7 @@ type DeployInfoKey = keyof DeployInfo;
 function Deploy(props: DeployProps) {
     const { state } = useStore();
 
-    const { smartWallets, modal, setModal } = props;
+    const { smartWallets, setUpdateInfo, modal, setModal } = props;
 
     const [deploy, setDeploy] = useState<DeployInfo>({
         fees: '0',
@@ -170,6 +171,7 @@ function Deploy(props: DeployProps) {
                 JSON.stringify(smartWallets)
             );
             close();
+            setUpdateInfo(true);
         }
 
         setDeployLoading(false);

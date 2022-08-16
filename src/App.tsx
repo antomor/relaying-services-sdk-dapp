@@ -209,6 +209,7 @@ function App() {
                     />
                     <Deploy
                         smartWallets={smartWallets}
+                        setUpdateInfo={setUpdateInfo}
                         modal={modal}
                         setModal={setModal}
                     />
