@@ -3,7 +3,8 @@
   "version": "0.0.1-alpha.1",
   "private": true,
   "dependencies": {
-    "@rsksmart/rif-relay-sdk": "github:rsksmart/rif-relay-sdk#feature/PP-204",
+    "@openeth/truffle-typings": "0.0.6",
+    "@rsksmart/rif-relay-sdk": "0.0.1-alpha.7",
     "@rsksmart/rlogin": "^1.4.0-beta.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",

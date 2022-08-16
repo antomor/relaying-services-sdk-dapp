@@ -117,9 +117,9 @@ class Utils {
     ) {
         let transactions: Transaction[] = [];
         try {
-            if (Utils.getChainKey(chainId, address) in localStorage) {
+            if (Utils.getTransactionKey(chainId, address) in localStorage) {
                 transactions = JSON.parse(
-                    localStorage.getItem(Utils.getChainKey(chainId, address))!
+                    localStorage.getItem(Utils.getTransactionKey(chainId, address))!
                 );
             }
         } catch (e) {
@@ -130,7 +130,7 @@ class Utils {
         }
         transactions.push(transaction);
         localStorage.setItem(
-            Utils.getChainKey(chainId, address),
+            Utils.getTransactionKey(chainId, address),
             JSON.stringify(transactions)
         );
     }
@@ -152,7 +152,7 @@ class Utils {
         return swWithBalance;
     }
 
-    static getChainKey(chainId: number, address: string): string {
+    static getTransactionKey(chainId: number, address: string): string {
         return `${chainId}.${address}`;
     }
 }

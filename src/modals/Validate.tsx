@@ -85,7 +85,7 @@ function Validate(props: ValidateProps) {
             const tempSmartWallets = [...smartWallets, smartWalletWithBalance];
             setSmartWallets(tempSmartWallets);
             localStorage.setItem(
-                Utils.getChainKey(state.chainId, state.account),
+                Utils.getTransactionKey(state.chainId, state.account),
                 JSON.stringify(tempSmartWallets)
             );
             close();
@@ -128,7 +128,7 @@ function Validate(props: ValidateProps) {
                 ];
                 setSmartWallets(tempSmartWallets);
                 localStorage.setItem(
-                    Utils.getChainKey(state.chainId, state.account),
+                    Utils.getTransactionKey(state.chainId, state.account),
                     JSON.stringify(tempSmartWallets)
                 );
             } else {
