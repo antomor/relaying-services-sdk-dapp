@@ -5,7 +5,7 @@ import {
     RelayingResult
 } from '@rsksmart/rif-relay-sdk';
 import { Modals } from 'src/types';
-import Utils, { TRIF_PRICE, ZERO_ADDRESS } from 'src/Utils';
+import Utils, { TRIF_PRICE } from 'src/Utils';
 import 'src/modals/Transfer.css';
 import {
     Modal,
@@ -30,7 +30,6 @@ type TransferInfo = {
     check: boolean;
     address: string;
     amount: string;
-    collector: string;
 };
 
 type TransferInfoKey = keyof TransferInfo;
@@ -48,7 +47,6 @@ function Transfer(props: TransferProps) {
         fees: '',
         amount: '',
         address: '',
-        collector: ''
     });
 
     const close = () => {
@@ -58,7 +56,6 @@ function Transfer(props: TransferProps) {
             fees: '',
             amount: '',
             address: '',
-            collector: ''
         });
         setEstimateLoading(false);
         setTransferLoading(false);
@@ -106,7 +103,7 @@ function Transfer(props: TransferProps) {
     const transferSmartWalletButtonClick = async () => {
         setTransferLoading(true);
         try {
-            const { amount, collector } = transfer;
+            const { amount } = transfer;
             const fees = transfer.fees === '' ? '0' : transfer.fees;
 
             const encodedAbi = (
@@ -130,7 +127,6 @@ function Transfer(props: TransferProps) {
                     retries: 7,
                     ignoreTransactionReceipt: false
                 },
-                collectorContract: collector || ZERO_ADDRESS
             };
 
             const result: RelayingResult =
@@ -175,9 +171,7 @@ function Transfer(props: TransferProps) {
                     smartWalletAddress: state.smartWallet!.address,
                     tokenFees: '1',
                     destinationContract: state.token!.address,
-                    relayWorker: process.env.REACT_APP_CONTRACTS_RELAY_WORKER!,
                     tokenAddress: state.token!.address,
-                    collectorContract: transfer.collector || ZERO_ADDRESS
                 };
 
                 const estimate =
@@ -320,21 +314,6 @@ function Transfer(props: TransferProps) {
                             validate
                             onChange={(event) => {
                                 changeValue(event.currentTarget.value, 'fees');
-                            }}
-                        />
-                    </Col>
-                    <Col s={10}>
-                        <TextInput
-                            label='Collector'
-                            placeholder={`0 ${state.token!.symbol}`}
-                            value={transfer.collector}
-                            type='text'
-                            validate
-                            onChange={(event) => {
-                                changeValue(
-                                    event.currentTarget.value,
-                                    'collector'
-                                );
                             }}
                         />
                     </Col>

@@ -53,6 +53,7 @@ function ActionBar(props: ActionBarProps) {
                 const deployed = await state.provider!.isSmartWalletDeployed(
                     swAddress.address
                 );
+                console.log({deployed})
                 if (deployed) {
                     // eslint-disable-next-line no-await-in-loop
                     const smartWalletWithBalance = await setBalance(swAddress);
@@ -98,7 +99,7 @@ function ActionBar(props: ActionBarProps) {
     };
 
     return (
-        <Row className='space-row valign-wrapper'>
+        <Row className='space-row'>
             <Col s={2}>
                 <Button
                     waves='light'
