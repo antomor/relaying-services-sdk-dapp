@@ -7,7 +7,7 @@ See [RIF Relay](https://github.com/rsksmart/rif-relay) project.
 
 ## Pre-Requisites
 
-* [NodeJS Version v12.18.3 or higher](https://nodejs.org/en/download/).
+* [NodeJS Version v16.14.2 or higher](https://nodejs.org/en/download/).
 * [RSKj Node Running](https://github.com/rsksmart/rskj).
 * [RIF Relay Contracts](https://github.com/anarancio/rif-relay-contracts) deployed.
 * [An allowed Token](https://github.com/anarancio/rif-relay-contracts#allowing-tokens).
