@@ -53,7 +53,6 @@ function ActionBar(props: ActionBarProps) {
                 const deployed = await state.provider!.isSmartWalletDeployed(
                     swAddress.address
                 );
-                console.log({deployed})
                 if (deployed) {
                     // eslint-disable-next-line no-await-in-loop
                     const smartWalletWithBalance = await setBalance(swAddress);
