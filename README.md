@@ -67,6 +67,15 @@ npm start
 
 4. Open a browser and navigate to http://localhost:3000
 
+## Runnig the sample dApp as a Docker container
+
+You can run the sample dApp as a Docker container. Docker and Docker compose should be installed.
+The steps are the same as indicated [here](#running-the-sample-dapp). The difference is in the step 2. Instead of npm start, run this:
+
+```bash
+docker-compose build && docker-compose up
+```
+
 ## Troubleshooting
 ### Error On Transaction Nonce
 When using the RSK Regtest enviroment, it may happen that the transaction nonce is wrong. This is due to a MetaMask problem in which it saves the nonce locally and when you reset the chain the nonce is changed.
