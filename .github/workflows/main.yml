@@ -1,5 +1,7 @@
-name: CI for Relaying-Services-SDK-DAPP
+name: CI for RIF-Relay-Sample-Dapp
+
 on: [push]
+
 jobs:
     check-linting:
         runs-on: ubuntu-latest

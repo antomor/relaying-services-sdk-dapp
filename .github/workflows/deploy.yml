@@ -1,4 +1,4 @@
-name: RIF Relay UI deploy
+name: CD for RIF-Relay-Sample-Dapp
 
 on:
   push:
@@ -13,6 +13,13 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.QA_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.QA_AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.QA_AWS_REGION }}
 
     - name: Setup Node 14
       uses: actions/setup-node@v1
@@ -21,18 +28,11 @@ jobs:
 
     - name: Install dependencies
       run: |
-        npm ci
+        npm install
 
     - name: Build site
       run: |
         npm run build
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.QA_AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.QA_AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.QA_AWS_REGION }}
 
     - name: Deploy site to S3
       run: |
