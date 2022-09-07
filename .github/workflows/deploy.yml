@@ -21,10 +21,10 @@ jobs:
         aws-secret-access-key: ${{ secrets.QA_AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.QA_AWS_REGION }}
 
-    - name: Setup Node 14
+    - name: Setup Node 16
       uses: actions/setup-node@v1
       with:
-        node-version: '14'
+        node-version: '16'
 
     - name: Install dependencies
       run: |
