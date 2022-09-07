@@ -5,8 +5,7 @@ on:
     branches: [dev, PP-435/dapp-cd]
 
 jobs:
-  deploy-develop:
-    name: RIF Relay UI - Deploy
+  deploy:
     runs-on: ubuntu-latest
     environment: QA
 
