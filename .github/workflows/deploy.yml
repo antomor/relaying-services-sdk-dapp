@@ -2,7 +2,7 @@ name: CD for RIF-Relay-Sample-Dapp
 
 on:
   push:
-    branches: [dev, PP-435/dapp-cd]
+    branches: [dev]
 
 jobs:
   deploy:
