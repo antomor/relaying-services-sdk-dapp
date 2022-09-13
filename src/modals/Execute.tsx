@@ -249,12 +249,9 @@ function Execute(props: ExecuteProps) {
                     changeValue(result, 'fees');
                     console.log('Estimated direct SWCall cost: ', result);
                 } else {
-                    const relayWorker =
-                        process.env.REACT_APP_CONTRACTS_RELAY_WORKER!;
 
                     const gasEstimationOpts: RelayGasEstimationOptions = {
                         destinationContract,
-                        relayWorker,
                         smartWalletAddress: swAddress,
                         tokenFees: '0',
                         abiEncodedTx: funcData,

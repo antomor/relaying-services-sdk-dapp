@@ -98,7 +98,7 @@ function ActionBar(props: ActionBarProps) {
     };
 
     return (
-        <Row className='space-row valign-wrapper'>
+        <Row className='space-row'>
             <Col s={2}>
                 <Button
                     waves='light'

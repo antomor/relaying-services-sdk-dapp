@@ -56,7 +56,6 @@ function Deploy(props: DeployProps) {
             const opts: RelayGasEstimationOptions = {
                 abiEncodedTx: '0x',
                 destinationContract: ZERO_ADDRESS,
-                relayWorker: process.env.REACT_APP_CONTRACTS_RELAY_WORKER!,
                 smartWalletAddress: state.smartWallet!.address,
                 tokenFees: '1',
                 isSmartWalletDeploy: true,
