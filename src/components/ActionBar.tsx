@@ -1,74 +1,57 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { SmartWallet } from '@rsksmart/rif-relay-sdk';
-import { SmartWalletWithBalance } from 'src/types';
+import { Modals, SmartWalletWithBalance } from 'src/types';
 import Utils, { TRIF_PRICE } from 'src/Utils';
 import 'src/components/ActionBar.css';
 import { Col, Row, Button, Icon } from 'react-materialize';
 import AllowedTokens from 'src/components/AllowedTokens';
 import { useStore } from 'src/context/context';
+import { SmartWallet } from '@rsksmart/rif-relay-sdk';
 
 type ActionBarProps = {
-    smartWallets: SmartWalletWithBalance[];
     setSmartWallets: Dispatch<SetStateAction<SmartWalletWithBalance[]>>;
     updateInfo: boolean;
+    setModal: Dispatch<SetStateAction<Modals>>;
 };
 
 function ActionBar(props: ActionBarProps) {
-    const { smartWallets, setSmartWallets, updateInfo } = props;
+    const { setSmartWallets, updateInfo, setModal } = props;
 
     const [workerBalance, setWorkerBalance] = useState('0');
 
-    const { state, dispatch } = useStore();
+    const { state } = useStore();
 
-    const setBalance = async (
-        smartWallet: SmartWallet
-    ): Promise<SmartWalletWithBalance> => {
-        const balance = await Utils.tokenBalance(
-            smartWallet.address,
-            state.token!.address
-        );
-        const rbtcBalance = await Utils.getBalance(smartWallet.address);
-        const swWithBalance = {
-            ...smartWallet,
-            balance: `${Utils.fromWei(balance)} ${state.token!.symbol}`,
-            rbtcBalance: `${Utils.fromWei(rbtcBalance)} RBTC`
-        };
-        return swWithBalance;
-    };
-
-    useEffect(() => {
-        if (!state.account || !state.provider || !state.token) {
-            return;
-        }
-        (async () => {
-            let index: number = 0;
-            let found: boolean = true;
-            const tempSmartWallets: SmartWalletWithBalance[] = [];
-            while (found) {
-                // eslint-disable-next-line no-await-in-loop
-                const swAddress = await state.provider!.generateSmartWallet(
-                    index + 1
+    const loadSmartWallets = async () => {
+        let tempSmartWallets: SmartWallet[] = [];
+        try {
+            if (
+                Utils.getTransactionKey(state.chainId, state.account) in
+                localStorage
+            ) {
+                tempSmartWallets = JSON.parse(
+                    localStorage.getItem(
+                        Utils.getTransactionKey(state.chainId, state.account)
+                    )!
                 );
-                // eslint-disable-next-line no-await-in-loop
-                const deployed = await state.provider!.isSmartWalletDeployed(
-                    swAddress.address
-                );
-                if (deployed) {
-                    // eslint-disable-next-line no-await-in-loop
-                    const smartWalletWithBalance = await setBalance(swAddress);
-                    tempSmartWallets.push(smartWalletWithBalance);
-                    index += 1;
-                } else {
-                    setSmartWallets(tempSmartWallets);
-                    found = false;
-                }
             }
-        })();
-    }, [state.account, state.token, updateInfo]);
+        } catch (e) {
+            console.log(
+                'Failed trying to read smart wallets, erased all previous smart wallets'
+            );
+            console.log(e);
+        }
+        setSmartWallets([]);
+        for (let i = 0; i < tempSmartWallets.length; i += 1) {
+            Utils.getSmartWalletBalance(tempSmartWallets[i], state.token!).then(
+                (tempSmartWallet) =>
+                    setSmartWallets((prev) => [...prev, tempSmartWallet])
+            );
+        }
+    };
 
     useEffect(() => {
         (async () => {
             if (state.token) {
+                await loadSmartWallets();
                 const workerAddress =
                     process.env.REACT_APP_CONTRACTS_RELAY_WORKER!;
                 const currentWorkerBalance = parseFloat(
@@ -84,26 +67,17 @@ function ActionBar(props: ActionBarProps) {
         })();
     }, [state.token, updateInfo]);
 
-    const create = async () => {
-        if (state.provider) {
-            dispatch({ type: 'set_loader', loader: true });
-            const smartWallet = await state.provider.generateSmartWallet(
-                smartWallets.length + 1
-            );
-
-            const smartWalletWithBalance = await setBalance(smartWallet);
-            setSmartWallets([...smartWallets, smartWalletWithBalance]);
-            dispatch({ type: 'set_loader', loader: false });
-        }
+    const createSmartWallet = async () => {
+        setModal((prev) => ({ ...prev, validate: true }));
     };
 
     return (
-        <Row className='space-row'>
+        <Row className='space-row vertical-align'>
             <Col s={2}>
                 <Button
                     waves='light'
                     className='indigo accent-2'
-                    onClick={create}
+                    onClick={createSmartWallet}
                     disabled={!state.token}
                 >
                     New Smart Wallet

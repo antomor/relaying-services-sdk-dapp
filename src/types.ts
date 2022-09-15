@@ -17,6 +17,7 @@ export interface Modals {
     receive: boolean;
     transfer: boolean;
     transactions: boolean;
+    validate: boolean;
 }
 
 export interface Transaction {

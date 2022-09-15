@@ -1,3 +1,7 @@
+.brand-logo {
+    display: flex;
+}
+
 .brand-logo img {
     width: 85px;
     height: auto;
@@ -6,9 +10,15 @@
 }
 
 .brand-logo span {
-    display: inline;
     color: black;
-    float: right;
+    line-height: 72px;
+}
+
+.nav {
+    color: #fff;
+    background-color: #ee6e73;
+    width: 100%;
+    height: 72px;
 }
 
 .connected-network {
@@ -17,4 +27,16 @@
 
 .material-icons {
     line-height: inherit !important;
+}
+
+.data {
+    width: 100%;
+}
+
+.data .address {
+    text-align: end;
+}
+
+.data .connect {
+    text-align: end;
 }

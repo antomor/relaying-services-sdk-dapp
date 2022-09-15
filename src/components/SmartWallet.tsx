@@ -46,8 +46,8 @@ function SmartWallet(props: SmartWalletProps) {
                 </Col>
             </Row>
             {smartWallets.map((smartWallet: SmartWalletWithBalance) => (
-                <Row key={smartWallet.index} className='space-row'>
-                    <Row className='teal lighten-4'>
+                <Row key={smartWallet.address} className='space-row'>
+                    <Row className='teal vertical-align lighten-4'>
                         <Col s={1}>
                             <Button
                                 waves='light'

@@ -21,6 +21,7 @@ import rLogin from 'src/rLogin';
 import Web3 from 'web3';
 import TransactionHistory from './modals/TransactionHistory';
 import { useStore } from './context/context';
+import Validate from './modals/Validate';
 import PartnerBalances from './components/PartnerBalances';
 
 if (window.ethereum) {
@@ -43,7 +44,8 @@ function App() {
         execute: false,
         receive: false,
         transfer: false,
-        transactions: false
+        transactions: false,
+        validate: false
     });
 
     const [smartWallets, setSmartWallets] = useState<SmartWalletWithBalance[]>(
@@ -131,6 +133,7 @@ function App() {
         dispatch({ type: 'set_loader', loader: true });
         await initProvider();
         await refreshAccount();
+        setUpdateInfo(true);
         dispatch({ type: 'set_loader', loader: false });
     };
 
@@ -189,17 +192,13 @@ function App() {
     return (
         <div className='App'>
             <Loading />
-            <Header
-                // eslint-disable-next-line react/jsx-no-bind
-                connect={connect}
-                setUpdateInfo={setUpdateInfo}
-            />
+            <Header connect={connect} setUpdateInfo={setUpdateInfo} />
 
             {state.provider && (
                 <ActionBar
-                    smartWallets={smartWallets}
                     setSmartWallets={setSmartWallets}
                     updateInfo={updateInfo}
+                    setModal={setModal}
                 />
             )}
 
@@ -211,6 +210,7 @@ function App() {
                     />
                     <PartnerBalances />
                     <Deploy
+                        smartWallets={smartWallets}
                         setUpdateInfo={setUpdateInfo}
                         modal={modal}
                         setModal={setModal}
@@ -227,6 +227,12 @@ function App() {
                         setModal={setModal}
                     />
                     <TransactionHistory modal={modal} setModal={setModal} />
+                    <Validate
+                        smartWallets={smartWallets}
+                        setSmartWallets={setSmartWallets}
+                        modal={modal}
+                        setModal={setModal}
+                    />
                 </div>
             )}
         </div>

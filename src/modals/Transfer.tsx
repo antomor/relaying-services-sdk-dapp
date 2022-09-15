@@ -46,7 +46,7 @@ function Transfer(props: TransferProps) {
         check: false,
         fees: '',
         amount: '',
-        address: '',
+        address: ''
     });
 
     const close = () => {
@@ -55,7 +55,7 @@ function Transfer(props: TransferProps) {
             check: false,
             fees: '',
             amount: '',
-            address: '',
+            address: ''
         });
         setEstimateLoading(false);
         setTransferLoading(false);
@@ -94,7 +94,6 @@ function Transfer(props: TransferProps) {
 
     const pasteRecipientAddress = async () => {
         const address = await navigator.clipboard.readText();
-        console.log(address);
         if (Utils.checkAddress(address.toLowerCase())) {
             changeValue(address, 'address');
         }
@@ -125,8 +124,8 @@ function Transfer(props: TransferProps) {
                 tokenAmount: Number(fees),
                 transactionDetails: {
                     retries: 7,
-                    ignoreTransactionReceipt: false
-                },
+                    ignoreTransactionReceipt: true
+                }
             };
 
             const result: RelayingResult =
@@ -134,7 +133,7 @@ function Transfer(props: TransferProps) {
             const txHash: string = result
                 .transaction!.hash(true)
                 .toString('hex');
-            Utils.addTransaction(state.smartWallet!.address, {
+            Utils.addTransaction(state.smartWallet!.address, state.chainId, {
                 date: new Date(),
                 id: txHash,
                 type: `Transfer ${
@@ -171,7 +170,7 @@ function Transfer(props: TransferProps) {
                     smartWalletAddress: state.smartWallet!.address,
                     tokenFees: '1',
                     destinationContract: state.token!.address,
-                    tokenAddress: state.token!.address,
+                    tokenAddress: state.token!.address
                 };
 
                 const estimate =

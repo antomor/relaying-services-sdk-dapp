@@ -7,7 +7,7 @@ See [RIF Relay](https://github.com/rsksmart/rif-relay) project.
 
 ## Pre-Requisites
 
-* [NodeJS Version v12.18.3 or higher](https://nodejs.org/en/download/).
+* [NodeJS Version v16.14.2 or higher](https://nodejs.org/en/download/).
 * [RSKj Node Running](https://github.com/rsksmart/rskj).
 * [RIF Relay Contract](https://github.com/anarancio/rif-relay-contracts) deployed.
 * [Current Token Allowed](https://github.com/anarancio/rif-relay-contracts#allowing-tokens).
@@ -71,6 +71,15 @@ npm start
 3. Ensure that MetaMask is configured to use the same network where you deployed the contracts (e.g. Regtest or Testnet).
 
 4. Open a browser and navigate to http://localhost:3000
+
+## Runnig the sample dApp as a Docker container
+
+You can run the sample dApp as a Docker container. Docker and Docker compose should be installed.
+The steps are the same as indicated [here](#running-the-sample-dapp). The difference is in the step 2. Instead of npm start, run this:
+
+```bash
+docker-compose build && docker-compose up
+```
 
 ## Troubleshooting
 ### Error On Transaction Nonce

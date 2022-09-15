@@ -9,3 +9,8 @@
 .input-field {
     width: 100%;
 }
+
+.vertical-align {
+    display: flex;
+    align-items: center;
+}
