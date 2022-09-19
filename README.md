@@ -67,7 +67,7 @@ npm start
 
 4. Open a browser and navigate to http://localhost:3000
 
-## Runnig the sample dApp as a Docker container
+## Running the sample dApp as a Docker container
 
 You can run the sample dApp as a Docker container. Docker and Docker compose should be installed.
 The steps are the same as indicated [here](#running-the-sample-dapp). The difference is in the step 2. Instead of npm start, run this:

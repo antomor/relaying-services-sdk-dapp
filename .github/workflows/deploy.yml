@@ -31,7 +31,7 @@ jobs:
 
     - name: Build site
       run: |
-        npm run build
+        npm run build:qa
 
     - name: Deploy site to S3
       run: |
