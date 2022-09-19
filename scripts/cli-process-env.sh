@@ -4,7 +4,7 @@
 # https://create-react-app.dev/docs/adding-custom-environment-variables/
 # and especially the parts where it explains all the files that are used:
 # https://create-react-app.dev/docs/adding-custom-environment-variables/#what-other-env-files-can-be-used
-# For semplicity, we create the '.env' file only, so be sure you don't have any other file locally with highest priority.
+# For semplicity, we create the '.env' file only, so be sure you don't have any other file locally with higher priority.
 
 ENV_VALUE="$1" 
 
