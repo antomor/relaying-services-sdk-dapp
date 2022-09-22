@@ -34,6 +34,9 @@ function AllowedTokens({ updateInfo }: AllowedTokensProps) {
     };
 
     useEffect(() => {
+        if (!updateInfo) {
+            return;
+        }
         reload();
     }, [updateInfo]);
 

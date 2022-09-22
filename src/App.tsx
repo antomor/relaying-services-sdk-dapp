@@ -146,6 +146,7 @@ function App() {
                 const login = connect.provider;
 
                 login.on('accountsChanged', async (/* accounts */) => {
+                    setSmartWallets([]);
                     await reload();
                 });
 
@@ -196,6 +197,7 @@ function App() {
 
             {state.provider && (
                 <ActionBar
+                    smartWallets={smartWallets}
                     setSmartWallets={setSmartWallets}
                     updateInfo={updateInfo}
                     setModal={setModal}

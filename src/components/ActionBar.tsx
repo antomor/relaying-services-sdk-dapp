@@ -8,12 +8,18 @@ import { useStore } from 'src/context/context';
 import { SmartWallet } from '@rsksmart/rif-relay-sdk';
 
 type ActionBarProps = {
+    smartWallets: SmartWalletWithBalance[];
     setSmartWallets: Dispatch<SetStateAction<SmartWalletWithBalance[]>>;
     updateInfo: boolean;
     setModal: Dispatch<SetStateAction<Modals>>;
 };
 
-function ActionBar({ setSmartWallets, updateInfo, setModal }: ActionBarProps) {
+function ActionBar({
+    smartWallets,
+    setSmartWallets,
+    updateInfo,
+    setModal
+}: ActionBarProps) {
     const { state } = useStore();
 
     const loadSmartWallets = async () => {
@@ -35,17 +41,25 @@ function ActionBar({ setSmartWallets, updateInfo, setModal }: ActionBarProps) {
             );
             console.log(e);
         }
+        tempSmartWallets.push(...smartWallets);
         for (let i = 0; i < tempSmartWallets.length; i += 1) {
             Utils.getSmartWalletBalance(tempSmartWallets[i], state.token!).then(
                 (tempSmartWallet) => {
-                    setSmartWallets((prev) =>
-                        prev.map((x) => {
-                            if (x.address === tempSmartWallet.address) {
-                                return tempSmartWallet;
-                            }
-                            return x;
-                        })
+                    const exists = smartWallets.find(
+                        (x) => x.address === tempSmartWallet.address
                     );
+                    if (exists) {
+                        setSmartWallets((prev) =>
+                            prev.map((x) => {
+                                if (x.address === tempSmartWallet.address) {
+                                    return tempSmartWallet;
+                                }
+                                return x;
+                            })
+                        );
+                    } else {
+                        setSmartWallets((prev) => [...prev, tempSmartWallet]);
+                    }
                 }
             );
         }
