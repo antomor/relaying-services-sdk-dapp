@@ -5,29 +5,34 @@ import Utils from '../Utils';
 type PartnerBalanceProp = {
     label: string;
     balance: string;
+    symbol: string;
 };
-function PartnerBalance({ label, balance }: PartnerBalanceProp) {
+
+function PartnerBalance({ label, balance, symbol }: PartnerBalanceProp) {
     return (
         <li className='collection-item'>
             <div>
                 {label}
                 <span className='secondary-content'>
-                    <span id='worker-balance'>{balance}</span> tRIF
+                    <span id='worker-balance'>{balance}</span> {symbol}
                 </span>
             </div>
         </li>
     );
 }
 
-const getTokenBalance = async (address: string, token: string) => {
+const getTokenBalance = async (
+    address: string,
+    token: string
+): Promise<Partner> => {
     try {
         const balance = parseFloat(
             Utils.fromWei(await Utils.tokenBalance(address, token))
         ).toFixed(4);
-        return balance;
+        return { address, balance };
     } catch (error) {
         console.error(error);
-        return '0';
+        return { address, balance: '0' };
     }
 };
 
@@ -48,46 +53,57 @@ const getUpdatedBalances = async (token: string) => {
     return newBalanceState;
 };
 
-type BalancesState = {
-    worker: string;
-    collector: string;
-    partners: string[];
+type Partner = {
+    address: string;
+    balance: string;
 };
 
-function PartnerBalances() {
+type BalancesState = {
+    worker: Partner;
+    collector: Partner;
+    partners: Partner[];
+};
+
+type PartnerBalancesProp = {
+    updateInfo: boolean;
+};
+
+function PartnerBalances({ updateInfo }: PartnerBalancesProp) {
     const [balances, setBalances] = useState<BalancesState>({
-        worker: '0',
-        collector: '0',
+        worker: { address: '', balance: '0' },
+        collector: { address: '', balance: '0' },
         partners: []
     });
 
     const { state } = useStore();
 
     useEffect(() => {
-        let isMounted = true;
         getUpdatedBalances(state.token!.address).then((newBalances) => {
-            if (isMounted) {
-                setBalances(newBalances);
-            }
+            setBalances(newBalances);
         });
-        return () => {
-            isMounted = false;
-        };
-    }, [setBalances]);
+    }, [updateInfo]);
 
     return (
         <ul className='collection with-header' style={{ textAlign: 'left' }}>
             <li className='collection-header'>
                 <h4>Balances</h4>
             </li>
-            <PartnerBalance label='Worker' balance={balances.worker} />
-            <PartnerBalance label='Collector' balance={balances.collector} />
-            {balances.partners.map((partnerBalance, index) => (
+            <PartnerBalance
+                label='Worker'
+                balance={balances!.worker.balance}
+                symbol={state.token!.symbol}
+            />
+            <PartnerBalance
+                label='Collector'
+                balance={balances!.collector.balance}
+                symbol={state.token!.symbol}
+            />
+            {balances!.partners.map((partner, index) => (
                 <PartnerBalance
-                    // eslint-disable-next-line react/no-array-index-key
-                    key={index}
+                    key={partner.address}
                     label={`Partner #${index + 1}`}
-                    balance={partnerBalance}
+                    balance={partner.balance}
+                    symbol={state.token!.symbol}
                 />
             ))}
         </ul>

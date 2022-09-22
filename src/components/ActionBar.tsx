@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 import { Modals, SmartWalletWithBalance } from 'src/types';
 import Utils, { TRIF_PRICE } from 'src/Utils';
 import 'src/components/ActionBar.css';
@@ -13,11 +13,7 @@ type ActionBarProps = {
     setModal: Dispatch<SetStateAction<Modals>>;
 };
 
-function ActionBar(props: ActionBarProps) {
-    const { setSmartWallets, updateInfo, setModal } = props;
-
-    const [workerBalance, setWorkerBalance] = useState('0');
-
+function ActionBar({ setSmartWallets, updateInfo, setModal }: ActionBarProps) {
     const { state } = useStore();
 
     const loadSmartWallets = async () => {
@@ -39,30 +35,29 @@ function ActionBar(props: ActionBarProps) {
             );
             console.log(e);
         }
-        setSmartWallets([]);
         for (let i = 0; i < tempSmartWallets.length; i += 1) {
             Utils.getSmartWalletBalance(tempSmartWallets[i], state.token!).then(
-                (tempSmartWallet) =>
-                    setSmartWallets((prev) => [...prev, tempSmartWallet])
+                (tempSmartWallet) => {
+                    setSmartWallets((prev) =>
+                        prev.map((x) => {
+                            if (x.address === tempSmartWallet.address) {
+                                return tempSmartWallet;
+                            }
+                            return x;
+                        })
+                    );
+                }
             );
         }
     };
 
     useEffect(() => {
+        if (!updateInfo) {
+            return;
+        }
         (async () => {
             if (state.token) {
                 await loadSmartWallets();
-                const workerAddress =
-                    process.env.REACT_APP_CONTRACTS_RELAY_WORKER!;
-                const currentWorkerBalance = parseFloat(
-                    Utils.fromWei(
-                        await Utils.tokenBalance(
-                            workerAddress,
-                            state.token!.address
-                        )
-                    )
-                ).toFixed(4);
-                setWorkerBalance(currentWorkerBalance);
             }
         })();
     }, [state.token, updateInfo]);
@@ -73,7 +68,7 @@ function ActionBar(props: ActionBarProps) {
 
     return (
         <Row className='space-row vertical-align'>
-            <Col s={2}>
+            <Col s={3}>
                 <Button
                     waves='light'
                     className='indigo accent-2'
@@ -84,24 +79,13 @@ function ActionBar(props: ActionBarProps) {
                     <Icon right>add_circle_outline</Icon>
                 </Button>
             </Col>
-            <Col s={5}>
+            <Col s={6}>
                 <AllowedTokens updateInfo={updateInfo} />
             </Col>
-            <Col s={5}>
-                <Row>
-                    <Col s={6}>
-                        <h6>
-                            {state.token?.symbol} price:{' '}
-                            <span>{TRIF_PRICE}</span> RBTC
-                        </h6>
-                    </Col>
-                    <Col s={6}>
-                        <h6>
-                            Worker balance: <span>{workerBalance}</span>{' '}
-                            {state.token?.symbol}
-                        </h6>
-                    </Col>
-                </Row>
+            <Col s={3}>
+                <h6>
+                    {state.token?.symbol} price: <span>{TRIF_PRICE}</span> RBTC
+                </h6>
             </Col>
         </Row>
     );

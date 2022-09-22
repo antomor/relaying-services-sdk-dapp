@@ -21,7 +21,6 @@ function Header(props: HeaderProps) {
             return;
         }
         (async () => {
-            console.log(state.account);
             const currentBalance = await Utils.getBalance(state.account);
             const balanceConverted = Utils.fromWei(currentBalance);
             setBalance(`${balanceConverted} RBTC  `);

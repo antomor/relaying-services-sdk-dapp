@@ -7,9 +7,7 @@ type AllowedTokensProps = {
     updateInfo: boolean;
 };
 
-function AllowedTokens(props: AllowedTokensProps) {
-    const { updateInfo } = props;
-
+function AllowedTokens({ updateInfo }: AllowedTokensProps) {
     const { state, dispatch } = useStore();
 
     const [allowedTokens, setAllowedTokens] = useState<Array<string>>([]);
@@ -36,9 +34,6 @@ function AllowedTokens(props: AllowedTokensProps) {
     };
 
     useEffect(() => {
-        if (updateInfo) {
-            return;
-        }
         reload();
     }, [updateInfo]);
 

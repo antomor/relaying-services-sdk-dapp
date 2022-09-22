@@ -208,7 +208,7 @@ function App() {
                         smartWallets={smartWallets}
                         setModal={setModal}
                     />
-                    <PartnerBalances />
+                    <PartnerBalances updateInfo={updateInfo} />
                     <Deploy
                         smartWallets={smartWallets}
                         setUpdateInfo={setUpdateInfo}
