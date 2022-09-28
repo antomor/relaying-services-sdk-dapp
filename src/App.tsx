@@ -1,23 +1,22 @@
-import { useState } from 'react';
-import 'src/App.css';
-
+import { useEffect } from 'react';
 import {
     DefaultRelayingServices,
     EnvelopingConfig,
-    RelayingServicesAddresses
+    RelayingServicesAddresses,
+    SmartWallet
 } from '@rsksmart/rif-relay-sdk';
 
 import ActionBar from 'src/components/ActionBar';
 import Header from 'src/components/Header';
-import SmartWallet from 'src/components/SmartWallet';
+import SmartWallets from 'src/components/SmartWallets';
 import Deploy from 'src/modals/Deploy';
 import Execute from 'src/modals/Execute';
 import Loading from 'src/modals/Loading';
 import Receive from 'src/modals/Receive';
 import Transfer from 'src/modals/Transfer';
 import rLogin from 'src/rLogin';
-import { Modals } from 'src/types';
 import Utils from 'src/Utils';
+import 'src/App.css';
 import Web3 from 'web3';
 import PartnerBalances from './components/PartnerBalances';
 import { useStore } from './context/context';
@@ -38,35 +37,7 @@ function getEnvParamAsInt(value: string | undefined): number | undefined {
 
 function App() {
     const { state, dispatch } = useStore();
-    const { chainId, account, token, smartWallets, isReady } = state;
-
-    const [modal, setModal] = useState<Modals>({
-        deploy: false,
-        execute: false,
-        receive: false,
-        transfer: false,
-        transactions: false,
-        validate: false
-    });
-
-    // const [smartWallets, setSmartWallets] = useState<SmartWalletWithBalance[]>(
-    //     []
-    // );
-
-    const [updateInfo, setUpdateInfo] = useState(false);
-
-    // useEffect(() => {
-    //     if (!updateInfo) {
-    //         return;
-    //     }
-    //     (async () => {
-    //         dispatch({ type: 'set_loader', loader: true });
-    //         setTimeout(() => {
-    //             setUpdateInfo(false);
-    //             dispatch({ type: 'set_loader', loader: false });
-    //         }, 100);
-    //     })();
-    // }, [updateInfo]);
+    const { chainId, account, isReady } = state;
 
     const initProvider = async () => {
         try {
@@ -124,6 +95,14 @@ function App() {
         }
     };
 
+    useEffect(() => {
+        const wallets: SmartWallet[] = Utils.getLocalSmartWallets(
+            chainId,
+            account
+        );
+        dispatch({ type: 'set_smart_wallets', smartWallets: wallets });
+    }, [chainId, account]);
+
     const refreshAccount = async () => {
         const accounts = await Utils.getAccounts();
         const currentAccount = accounts[0];
@@ -134,7 +113,6 @@ function App() {
         dispatch({ type: 'set_loader', show: true });
         await initProvider();
         await refreshAccount();
-        setUpdateInfo(true);
         dispatch({ type: 'set_loader', show: false });
     };
 
@@ -147,7 +125,6 @@ function App() {
                 const login = connect.provider;
 
                 login.on('accountsChanged', async (/* accounts */) => {
-                    setSmartWallets([]);
                     await reload();
                 });
 
@@ -194,48 +171,20 @@ function App() {
     return (
         <div className='App'>
             {!isReady ?? <Loading />}
-            <Header connect={connect} setUpdateInfo={setUpdateInfo} />
+            <Header connect={connect} />
 
-            {state.provider && (
-                <ActionBar
-                    smartWallets={smartWallets}
-                    setSmartWallets={setSmartWallets}
-                    updateInfo={updateInfo}
-                    setModal={setModal}
-                />
-            )}
+            {state.provider && <ActionBar />}
 
             {state.token && (
                 <div>
-                    <SmartWallet
-                        smartWallets={smartWallets}
-                        setModal={setModal}
-                    />
-                    <PartnerBalances updateInfo={updateInfo} />
-                    <Deploy
-                        smartWallets={smartWallets}
-                        setUpdateInfo={setUpdateInfo}
-                        modal={modal}
-                        setModal={setModal}
-                    />
-                    <Receive modal={modal} setModal={setModal} />
-                    <Transfer
-                        setUpdateInfo={setUpdateInfo}
-                        modal={modal}
-                        setModal={setModal}
-                    />
-                    <Execute
-                        setUpdateInfo={setUpdateInfo}
-                        modal={modal}
-                        setModal={setModal}
-                    />
-                    <TransactionHistory modal={modal} setModal={setModal} />
-                    <Validate
-                        smartWallets={smartWallets}
-                        setSmartWallets={setSmartWallets}
-                        modal={modal}
-                        setModal={setModal}
-                    />
+                    <SmartWallets />
+                    <PartnerBalances />
+                    <Deploy />
+                    <Receive />
+                    <Transfer />
+                    <Execute />
+                    <TransactionHistory />
+                    <Validate />
                 </div>
             )}
         </div>

@@ -2,7 +2,7 @@ import 'src/modals/Loading.css';
 
 function Loading() {
     return (
-        <div className={'holder'}>
+        <div className='holder'>
             <div className='subholder'>
                 <span className='font-weight-bold pt-0'>Loading...</span>
                 <div className='pb-5 lds-ring d-inline-block position-relative'>

@@ -1,10 +1,9 @@
-import { Dispatch, SetStateAction, useState } from 'react';
+import { useState } from 'react';
 import {
     RelayGasEstimationOptions,
     RelayingTransactionOptions,
     RelayingResult
 } from '@rsksmart/rif-relay-sdk';
-import { Modals } from 'src/types';
 import Utils, { TRIF_PRICE } from 'src/Utils';
 import 'src/modals/Transfer.css';
 import {
@@ -19,12 +18,6 @@ import {
 import LoadingButton from 'src/modals/LoadingButton';
 import { useStore } from 'src/context/context';
 
-type TransferProps = {
-    setUpdateInfo: Dispatch<SetStateAction<boolean>>;
-    modal: Modals;
-    setModal: Dispatch<SetStateAction<Modals>>;
-};
-
 type TransferInfo = {
     fees: string;
     check: boolean;
@@ -34,10 +27,10 @@ type TransferInfo = {
 
 type TransferInfoKey = keyof TransferInfo;
 
-function Transfer(props: TransferProps) {
-    const { state } = useStore();
+function Transfer() {
+    const { state, dispatch } = useStore();
 
-    const { setUpdateInfo, modal, setModal } = props;
+    const { modals } = state;
 
     const [transferLoading, setTransferLoading] = useState(false);
     const [estimateLoading, setEstimateLoading] = useState(false);
@@ -50,7 +43,7 @@ function Transfer(props: TransferProps) {
     });
 
     const close = () => {
-        setModal((prev) => ({ ...prev, transfer: false }));
+        dispatch({ type: 'set_modals', modal: { transfer: false } });
         setTransfer({
             check: false,
             fees: '',
@@ -80,7 +73,6 @@ function Transfer(props: TransferProps) {
                     data: '0x'
                 });
                 close();
-                setUpdateInfo(true);
             } catch (error) {
                 const errorObj = error as Error;
                 if (errorObj.message) {
@@ -141,7 +133,6 @@ function Transfer(props: TransferProps) {
                 }`
             });
             close();
-            setUpdateInfo(true);
         } catch (error) {
             const errorObj = error as Error;
             if (errorObj.message) {
@@ -241,7 +232,7 @@ function Transfer(props: TransferProps) {
 
     return (
         <Modal
-            open={modal.transfer}
+            open={modals.transfer}
             options={{
                 onCloseEnd: () => close()
             }}

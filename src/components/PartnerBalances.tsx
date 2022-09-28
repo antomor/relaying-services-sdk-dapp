@@ -64,11 +64,7 @@ type BalancesState = {
     partners: Partner[];
 };
 
-type PartnerBalancesProp = {
-    updateInfo: boolean;
-};
-
-function PartnerBalances({ updateInfo }: PartnerBalancesProp) {
+function PartnerBalances() {
     const [balances, setBalances] = useState<BalancesState>({
         worker: { address: '', balance: '0' },
         collector: { address: '', balance: '0' },
@@ -81,7 +77,7 @@ function PartnerBalances({ updateInfo }: PartnerBalancesProp) {
         getUpdatedBalances(state.token!.address).then((newBalances) => {
             setBalances(newBalances);
         });
-    }, [updateInfo]);
+    }, []);
 
     return (
         <ul className='collection with-header' style={{ textAlign: 'left' }}>

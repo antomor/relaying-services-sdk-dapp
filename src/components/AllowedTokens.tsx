@@ -3,29 +3,27 @@ import { Select } from 'react-materialize';
 import { useStore } from 'src/context/context';
 import Utils from 'src/Utils';
 
-type AllowedTokensProps = {
-    updateInfo: boolean;
-};
-
-function AllowedTokens({ updateInfo }: AllowedTokensProps) {
+function AllowedTokens() {
     const { state, dispatch } = useStore();
+
+    const { token, provider } = state;
 
     const [allowedTokens, setAllowedTokens] = useState<Array<string>>([]);
 
-    const setToken = async (token: string) => {
-        const symbol: string = await Utils.tokenSymbol(token);
-        const decimals: number = await Utils.tokenDecimals(token);
+    const setToken = async (newToken: string) => {
+        const symbol: string = await Utils.tokenSymbol(newToken);
+        const decimals: number = await Utils.tokenDecimals(newToken);
         dispatch({
             type: 'set_token',
-            token: { address: token, symbol, decimals }
+            token: { address: newToken, symbol, decimals }
         });
     };
 
     const reload = async () => {
-        const tokens = await state.provider!.getAllowedTokens();
+        const tokens = await provider!.getAllowedTokens();
         if (tokens.length > 0) {
             setAllowedTokens(tokens);
-            if (!state.token) {
+            if (!token) {
                 setToken(tokens[0]);
             }
         } else {
@@ -34,11 +32,8 @@ function AllowedTokens({ updateInfo }: AllowedTokensProps) {
     };
 
     useEffect(() => {
-        if (!updateInfo) {
-            return;
-        }
         reload();
-    }, [updateInfo]);
+    }, [token]);
 
     const handleChange = (event: any) => {
         setToken(event.target.value);

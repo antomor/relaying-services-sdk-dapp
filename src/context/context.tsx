@@ -10,8 +10,16 @@ const initialState: State = {
     loader: false,
     token: undefined,
     smartWallet: undefined,
-
-    isReady: true
+    isReady: true,
+    modals: {
+        deploy: false,
+        execute: false,
+        receive: false,
+        transfer: false,
+        transactions: false,
+        validate: false
+    },
+    smartWallets: []
 };
 
 const Context = createContext<{ state: State; dispatch: Dispatch } | undefined>(

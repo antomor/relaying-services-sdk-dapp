@@ -5,14 +5,15 @@ import {
     SET_CONNECTED_ACTION,
     SET_LOADER_ACTION,
     SET_PROVIDER_ACTION,
-    SET_SMART_WALLET_ACTION,
     SET_TOKEN_ACTION,
+    SET_SMART_WALLET_ACTION,
+    SET_SMART_WALLETS_ACTION,
+    ADD_SMART_WALLET_ACTION,
+    SET_MODALS_ACTION,
     State
 } from 'src/context/types';
-import { Token } from 'src/types';
-import Utils from 'src/Utils';
 
-const StoreReducer = async (state: State, action: Action) => {
+const StoreReducer = (state: State, action: Action) => {
     switch (action.type) {
         case SET_ACCOUNT_ACTION:
             return {
@@ -25,7 +26,6 @@ const StoreReducer = async (state: State, action: Action) => {
                 connected: action.connected
             };
         case SET_PROVIDER_ACTION:
-            console.log(action.provider);
             return {
                 ...state,
                 provider: action.provider
@@ -48,14 +48,22 @@ const StoreReducer = async (state: State, action: Action) => {
         case SET_SMART_WALLET_ACTION:
             return {
                 ...state,
-                smartWallet: {
-                    ...action.smartWallet,
-                    balance: await Utils.getSmartWalletBalance(
-                        action.smartWallet,
-                        state.token as Token
-                    )
-                },
-                loader: false
+                smartWallet: action.smartWallet
+            };
+        case SET_SMART_WALLETS_ACTION:
+            return {
+                ...state,
+                smartWallets: action.smartWallets
+            };
+        case ADD_SMART_WALLET_ACTION:
+            return {
+                ...state,
+                smartWallets: [...state.smartWallets, action.smartWallet]
+            };
+        case SET_MODALS_ACTION:
+            return {
+                ...state,
+                modals: { ...state.modals, ...action.modal }
             };
         default:
             return state;

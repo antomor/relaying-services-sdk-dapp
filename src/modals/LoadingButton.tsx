@@ -7,7 +7,7 @@ function LoadingButton({ show }: LoadingButtonProps) {
         <img
             alt='loading'
             className={`loading ${!show ? 'hide' : ''}`}
-            src='images/loading.gif'
+            src='images/loading2.gif'
         />
     );
 }

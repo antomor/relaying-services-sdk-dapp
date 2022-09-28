@@ -1,18 +1,10 @@
-import { Dispatch, SetStateAction, useState } from 'react';
+import { useState } from 'react';
 import { RelayGasEstimationOptions } from '@rsksmart/rif-relay-sdk';
 import { Modal, Col, Row, TextInput, Button } from 'react-materialize';
 import Utils, { TRIF_PRICE, ZERO_ADDRESS } from 'src/Utils';
-import { Modals, SmartWalletWithBalance } from 'src/types';
 import 'src/modals/Deploy.css';
 import LoadingButton from 'src/modals/LoadingButton';
 import { useStore } from 'src/context/context';
-
-type DeployProps = {
-    smartWallets: SmartWalletWithBalance[];
-    setUpdateInfo: Dispatch<SetStateAction<boolean>>;
-    modal: Modals;
-    setModal: Dispatch<SetStateAction<Modals>>;
-};
 
 type DeployInfo = {
     fees: string;
@@ -23,10 +15,10 @@ type DeployInfo = {
 
 type DeployInfoKey = keyof DeployInfo;
 
-function Deploy(props: DeployProps) {
-    const { state } = useStore();
+function Deploy() {
+    const { state, dispatch } = useStore();
 
-    const { smartWallets, setUpdateInfo, modal, setModal } = props;
+    const { chainId, account, smartWallet, token, provider, modals } = state;
 
     const [deploy, setDeploy] = useState<DeployInfo>({
         fees: '0',
@@ -57,16 +49,14 @@ function Deploy(props: DeployProps) {
             const opts: RelayGasEstimationOptions = {
                 abiEncodedTx: '0x',
                 destinationContract: ZERO_ADDRESS,
-                smartWalletAddress: state.smartWallet!.address,
+                smartWalletAddress: smartWallet!.address,
                 tokenFees: '1',
                 isSmartWalletDeploy: true,
-                index: state.smartWallet!.index.toString(),
-                tokenAddress: state.token!.address
+                index: smartWallet!.index.toString(),
+                tokenAddress: token!.address
             };
 
-            const estimate = await state.provider!.estimateMaxPossibleRelayGas(
-                opts
-            );
+            const estimate = await provider!.estimateMaxPossibleRelayGas(opts);
 
             if (estimate) {
                 const costInRBTC = await Utils.fromWei(estimate.toString());
@@ -74,7 +64,7 @@ function Deploy(props: DeployProps) {
 
                 const costInTrif = parseFloat(costInRBTC) / TRIF_PRICE;
                 const tokenContract = await Utils.getTokenContract(
-                    state.token!.address
+                    token!.address
                 );
                 const ritTokenDecimals = await tokenContract.methods
                     .decimals()
@@ -99,7 +89,7 @@ function Deploy(props: DeployProps) {
     };
 
     const checkSmartWalletDeployment = async (txHash: string) => {
-        const receipt = await state.provider!.getTransactionReceipt(txHash);
+        const receipt = await provider!.getTransactionReceipt(txHash);
         if (receipt === null) {
             return false;
         }
@@ -111,15 +101,15 @@ function Deploy(props: DeployProps) {
 
     const relaySmartWalletDeployment = async (tokenAmount: string | number) => {
         try {
-            const isTokenAllowed = await state.provider!.isAllowedToken(
-                state.token!.address
+            const isTokenAllowed = await provider!.isAllowedToken(
+                token!.address
             );
             if (isTokenAllowed) {
                 const fees = await Utils.toWei(`${tokenAmount}`);
-                const smartWallet = await state.provider!.deploySmartWallet(
-                    state.smartWallet!,
+                const newSmartWallet = await provider!.deploySmartWallet(
+                    smartWallet!,
                     {
-                        tokenAddress: state.token!.address,
+                        tokenAddress: token!.address,
                         tokenAmount: Number(fees),
                         transactionDetails: {
                             ignoreTransactionReceipt: true
@@ -127,12 +117,12 @@ function Deploy(props: DeployProps) {
                     }
                 );
                 const smartWalledIsDeployed = await checkSmartWalletDeployment(
-                    smartWallet.deployment?.deployTransaction!
+                    newSmartWallet.deployment?.deployTransaction!
                 );
                 if (!smartWalledIsDeployed) {
                     throw new Error('SmartWallet: deployment failed');
                 }
-                return smartWallet;
+                return newSmartWallet;
             }
             throw new Error(
                 'SmartWallet: was not created because Verifier does not accept the specified token for payment'
@@ -148,7 +138,7 @@ function Deploy(props: DeployProps) {
     };
 
     const close = () => {
-        setModal((prev) => ({ ...prev, deploy: false }));
+        dispatch({ type: 'set_modals', modal: { deploy: false } });
         setDeploy({
             fees: '0',
             check: false,
@@ -162,17 +152,12 @@ function Deploy(props: DeployProps) {
         deploy.tokenGas = deploy.tokenGas === '' ? '0' : deploy.tokenGas;
 
         setDeployLoading(true);
-        const smartWallet = await relaySmartWalletDeployment(deploy.fees);
-        if (smartWallet?.deployment) {
-            state.smartWallet!.deployed = true;
-            localStorage.setItem(
-                Utils.getTransactionKey(state.chainId, state.account),
-                JSON.stringify(smartWallets)
-            );
+        const newSmartWallet = await relaySmartWalletDeployment(deploy.fees);
+        if (newSmartWallet?.deployment) {
+            smartWallet!.deployed = true;
+            Utils.addLocalSmartWallet(chainId, account, smartWallet!);
             close();
-            setUpdateInfo(true);
         }
-
         setDeployLoading(false);
     };
 
@@ -206,7 +191,7 @@ function Deploy(props: DeployProps) {
 
     return (
         <Modal
-            open={modal.deploy}
+            open={modals.deploy}
             options={{
                 onCloseEnd: () => close()
             }}
@@ -216,7 +201,7 @@ function Deploy(props: DeployProps) {
                 <form>
                     <Col s={8}>
                         <TextInput
-                            label={`Fees (${state.token!.symbol})`}
+                            label={`Fees (${token!.symbol})`}
                             placeholder='0'
                             value={deploy.fees}
                             type='number'

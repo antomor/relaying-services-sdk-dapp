@@ -4,7 +4,7 @@ import {
 } from '@rsksmart/rif-relay-sdk';
 import { AbiItem } from 'web3-utils';
 import ERC20Abi from 'src/contracts/ERC20Abi.json';
-import { SmartWalletWithBalance, Token, Transaction } from 'src/types';
+import { Transaction } from 'src/types';
 
 export const TRIF_PRICE = 0.000005739;
 export const TRIF_TOKEN_DECIMALS = 18;
@@ -110,6 +110,43 @@ class Utils {
         );
     }
 
+    static getLocalSmartWallets(
+        chainId: number,
+        account: string
+    ): SmartWallet[] {
+        let wallets: SmartWallet[] = [];
+        try {
+            if (Utils.getTransactionKey(chainId, account) in localStorage) {
+                wallets = JSON.parse(
+                    localStorage.getItem(
+                        Utils.getTransactionKey(chainId, account)
+                    )!
+                );
+            }
+        } catch (e) {
+            console.log(
+                'Failed trying to read smart wallets, erased all previous smart wallets'
+            );
+            console.log(e);
+        }
+        return wallets;
+    }
+
+    static addLocalSmartWallet(
+        chainId: number,
+        account: string,
+        smartWallet: SmartWallet
+    ) {
+        const wallets: SmartWallet[] = Utils.getLocalSmartWallets(
+            chainId,
+            account
+        );
+        localStorage.setItem(
+            Utils.getTransactionKey(chainId, account),
+            JSON.stringify([...wallets, smartWallet])
+        );
+    }
+
     static addTransaction(
         address: string,
         chainId: number,
@@ -135,23 +172,6 @@ class Utils {
             Utils.getTransactionKey(chainId, address),
             JSON.stringify(transactions)
         );
-    }
-
-    static async getSmartWalletBalance(
-        smartWallet: SmartWallet,
-        token: Token
-    ): Promise<SmartWalletWithBalance> {
-        const balance = await Utils.tokenBalance(
-            smartWallet.address,
-            token.address
-        );
-        const rbtcBalance = await Utils.getBalance(smartWallet.address);
-        const swWithBalance = {
-            ...smartWallet,
-            balance: `${Utils.fromWei(balance)} ${token.symbol}`,
-            rbtcBalance: `${Utils.fromWei(rbtcBalance)} RBTC`
-        };
-        return swWithBalance;
     }
 
     static getTransactionKey(chainId: number, address: string): string {

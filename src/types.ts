@@ -1,10 +1,3 @@
-import { SmartWallet } from '@rsksmart/rif-relay-sdk';
-
-export interface SmartWalletWithBalance extends SmartWallet {
-    balance: string;
-    rbtcBalance: string;
-}
-
 export interface Token {
     address: string;
     symbol: string;
