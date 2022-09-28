@@ -9,8 +9,10 @@ import {
     SET_TOKEN_ACTION,
     State
 } from 'src/context/types';
+import { Token } from 'src/types';
+import Utils from 'src/Utils';
 
-const StoreReducer = (state: State, action: Action) => {
+const StoreReducer = async (state: State, action: Action) => {
     switch (action.type) {
         case SET_ACCOUNT_ACTION:
             return {
@@ -36,7 +38,7 @@ const StoreReducer = (state: State, action: Action) => {
         case SET_LOADER_ACTION:
             return {
                 ...state,
-                loader: action.loader
+                loader: action.show
             };
         case SET_TOKEN_ACTION:
             return {
@@ -46,7 +48,14 @@ const StoreReducer = (state: State, action: Action) => {
         case SET_SMART_WALLET_ACTION:
             return {
                 ...state,
-                smartWallet: action.smartWallet
+                smartWallet: {
+                    ...action.smartWallet,
+                    balance: await Utils.getSmartWalletBalance(
+                        action.smartWallet,
+                        state.token as Token
+                    )
+                },
+                loader: false
             };
         default:
             return state;

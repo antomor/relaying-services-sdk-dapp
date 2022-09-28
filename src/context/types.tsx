@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
 import { RelayingServices } from '@rsksmart/rif-relay-sdk';
+import { ReactNode } from 'react';
 import { SmartWalletWithBalance, Token } from 'src/types';
 
 export const SET_ACCOUNT_ACTION = 'set_account';
@@ -15,7 +15,7 @@ export type Action =
     | { type: typeof SET_CONNECTED_ACTION; connected: boolean }
     | { type: typeof SET_PROVIDER_ACTION; provider: RelayingServices }
     | { type: typeof SET_CHAIN_ID_ACTION; chainId: number }
-    | { type: typeof SET_LOADER_ACTION; loader: boolean }
+    | { type: typeof SET_LOADER_ACTION; show: boolean }
     | { type: typeof SET_TOKEN_ACTION; token: Token }
     | {
           type: typeof SET_SMART_WALLET_ACTION;

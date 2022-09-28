@@ -1,11 +1,11 @@
+import { SmartWallet } from '@rsksmart/rif-relay-sdk';
 import { Dispatch, SetStateAction, useEffect } from 'react';
-import { Modals, SmartWalletWithBalance } from 'src/types';
-import Utils, { TRIF_PRICE } from 'src/Utils';
+import { Button, Col, Icon, Row } from 'react-materialize';
 import 'src/components/ActionBar.css';
-import { Col, Row, Button, Icon } from 'react-materialize';
 import AllowedTokens from 'src/components/AllowedTokens';
 import { useStore } from 'src/context/context';
-import { SmartWallet } from '@rsksmart/rif-relay-sdk';
+import { Modals, SmartWalletWithBalance } from 'src/types';
+import Utils, { TRIF_PRICE } from 'src/Utils';
 
 type ActionBarProps = {
     smartWallets: SmartWalletWithBalance[];
@@ -20,18 +20,20 @@ function ActionBar({
     updateInfo,
     setModal
 }: ActionBarProps) {
-    const { state } = useStore();
+    const {
+        state: { token, account, chainId }
+    } = useStore();
 
-    const loadSmartWallets = async () => {
+    useEffect(() => {
+        if (!updateInfo || !token) {
+            return;
+        }
         let tempSmartWallets: SmartWallet[] = [];
         try {
-            if (
-                Utils.getTransactionKey(state.chainId, state.account) in
-                localStorage
-            ) {
+            if (Utils.getTransactionKey(chainId, account) in localStorage) {
                 tempSmartWallets = JSON.parse(
                     localStorage.getItem(
-                        Utils.getTransactionKey(state.chainId, state.account)
+                        Utils.getTransactionKey(chainId, account)
                     )!
                 );
             }
@@ -42,8 +44,9 @@ function ActionBar({
             console.log(e);
         }
         tempSmartWallets.push(...smartWallets);
+
         for (let i = 0; i < tempSmartWallets.length; i += 1) {
-            Utils.getSmartWalletBalance(tempSmartWallets[i], state.token!).then(
+            Utils.getSmartWalletBalance(tempSmartWallets[i], token!).then(
                 (tempSmartWallet) => {
                     const exists = smartWallets.find(
                         (x) => x.address === tempSmartWallet.address
@@ -63,18 +66,7 @@ function ActionBar({
                 }
             );
         }
-    };
-
-    useEffect(() => {
-        if (!updateInfo) {
-            return;
-        }
-        (async () => {
-            if (state.token) {
-                await loadSmartWallets();
-            }
-        })();
-    }, [state.token, updateInfo]);
+    }, [token, updateInfo]);
 
     const createSmartWallet = async () => {
         setModal((prev) => ({ ...prev, validate: true }));

@@ -1,6 +1,6 @@
-import { createContext, useReducer, useContext, useMemo } from 'react';
+import { createContext, useContext, useMemo, useReducer } from 'react';
 import StoreReducer from 'src/context/reducer';
-import { ProviderProps, State, Dispatch } from 'src/context/types';
+import { Dispatch, ProviderProps, State } from 'src/context/types';
 
 const initialState: State = {
     account: '',
@@ -9,7 +9,9 @@ const initialState: State = {
     chainId: 0,
     loader: false,
     token: undefined,
-    smartWallet: undefined
+    smartWallet: undefined,
+
+    isReady: true
 };
 
 const Context = createContext<{ state: State; dispatch: Dispatch } | undefined>(

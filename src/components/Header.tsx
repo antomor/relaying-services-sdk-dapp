@@ -1,8 +1,8 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import Utils from 'src/Utils';
+import { Button, Col, Icon, Row } from 'react-materialize';
 import 'src/components/Header.css';
-import { Row, Col, Button, Icon } from 'react-materialize';
 import { useStore } from 'src/context/context';
+import Utils from 'src/Utils';
 
 type HeaderProps = {
     connect: () => Promise<void>;
@@ -10,7 +10,7 @@ type HeaderProps = {
 };
 
 function Header(props: HeaderProps) {
-    const { state } = useStore();
+    const { state, dispatch } = useStore();
 
     const { connect, setUpdateInfo } = props;
 
@@ -27,8 +27,11 @@ function Header(props: HeaderProps) {
         })();
     }, [state.account]);
 
-    const reload = async () => {
-        setUpdateInfo(true);
+    const reload = () => {
+        dispatch({
+            type: 'set_loader',
+            show: true
+        });
     };
 
     return (

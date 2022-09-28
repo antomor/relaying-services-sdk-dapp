@@ -1,16 +1,16 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import {
-    Modal,
-    Col,
-    Row,
-    TextInput,
     Button,
+    Col,
+    Icon,
+    Modal,
+    Row,
     Switch,
-    Icon
+    TextInput
 } from 'react-materialize';
-import { Modals, SmartWalletWithBalance } from 'src/types';
-import LoadingButton from 'src/modals/LoadingButton';
 import { useStore } from 'src/context/context';
+import LoadingButton from 'src/modals/LoadingButton';
+import { Modals, SmartWalletWithBalance } from 'src/types';
 import Utils from 'src/Utils';
 
 type ValidateProps = {
@@ -66,9 +66,9 @@ function Validate(props: ValidateProps) {
     const importSmartWallet = async () => {
         setValidateLoading(true);
         try {
-            dispatch({ type: 'set_loader', loader: true });
+            dispatch({ type: 'set_loader', show: true });
             if (validateSmartWallets(validate.address)) {
-                dispatch({ type: 'set_loader', loader: false });
+                dispatch({ type: 'set_loader', show: false });
                 return;
             }
             // TO-DO: Check if it can be re-factored to return a value
@@ -95,7 +95,7 @@ function Validate(props: ValidateProps) {
             }
             console.error(error);
         }
-        dispatch({ type: 'set_loader', loader: false });
+        dispatch({ type: 'set_loader', show: false });
         setValidateLoading(false);
     };
 
@@ -108,12 +108,12 @@ function Validate(props: ValidateProps) {
 
     const createSmartWallet = async () => {
         if (state.provider) {
-            dispatch({ type: 'set_loader', loader: true });
+            dispatch({ type: 'set_loader', show: true });
             const smartWallet = await state.provider.generateSmartWallet(
                 Number(validate.address)
             );
             if (validateSmartWallets(smartWallet.address)) {
-                dispatch({ type: 'set_loader', loader: false });
+                dispatch({ type: 'set_loader', show: false });
                 return;
             }
             const smartWalletWithBalance = await Utils.getSmartWalletBalance(
@@ -133,7 +133,7 @@ function Validate(props: ValidateProps) {
             } else {
                 setSmartWallets((prev) => [...prev, smartWalletWithBalance]);
             }
-            dispatch({ type: 'set_loader', loader: false });
+            dispatch({ type: 'set_loader', show: false });
             close();
         }
     };

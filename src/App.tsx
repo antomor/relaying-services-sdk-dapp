@@ -1,28 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import 'src/App.css';
 
 import {
     DefaultRelayingServices,
-    RelayingServicesAddresses,
-    EnvelopingConfig
+    EnvelopingConfig,
+    RelayingServicesAddresses
 } from '@rsksmart/rif-relay-sdk';
 
+import ActionBar from 'src/components/ActionBar';
 import Header from 'src/components/Header';
 import SmartWallet from 'src/components/SmartWallet';
-import ActionBar from 'src/components/ActionBar';
 import Deploy from 'src/modals/Deploy';
+import Execute from 'src/modals/Execute';
+import Loading from 'src/modals/Loading';
 import Receive from 'src/modals/Receive';
 import Transfer from 'src/modals/Transfer';
-import Loading from 'src/modals/Loading';
-import Execute from 'src/modals/Execute';
-import Utils from 'src/Utils';
-import { Modals, SmartWalletWithBalance } from 'src/types';
 import rLogin from 'src/rLogin';
+import { Modals } from 'src/types';
+import Utils from 'src/Utils';
 import Web3 from 'web3';
-import TransactionHistory from './modals/TransactionHistory';
-import { useStore } from './context/context';
-import Validate from './modals/Validate';
 import PartnerBalances from './components/PartnerBalances';
+import { useStore } from './context/context';
+import TransactionHistory from './modals/TransactionHistory';
+import Validate from './modals/Validate';
 
 if (window.ethereum) {
     window.web3 = new Web3(window.ethereum);
@@ -38,6 +38,7 @@ function getEnvParamAsInt(value: string | undefined): number | undefined {
 
 function App() {
     const { state, dispatch } = useStore();
+    const { chainId, account, token, smartWallets, isReady } = state;
 
     const [modal, setModal] = useState<Modals>({
         deploy: false,
@@ -48,24 +49,24 @@ function App() {
         validate: false
     });
 
-    const [smartWallets, setSmartWallets] = useState<SmartWalletWithBalance[]>(
-        []
-    );
+    // const [smartWallets, setSmartWallets] = useState<SmartWalletWithBalance[]>(
+    //     []
+    // );
 
     const [updateInfo, setUpdateInfo] = useState(false);
 
-    useEffect(() => {
-        if (!updateInfo) {
-            return;
-        }
-        (async () => {
-            dispatch({ type: 'set_loader', loader: true });
-            setTimeout(() => {
-                setUpdateInfo(false);
-                dispatch({ type: 'set_loader', loader: false });
-            }, 100);
-        })();
-    }, [updateInfo]);
+    // useEffect(() => {
+    //     if (!updateInfo) {
+    //         return;
+    //     }
+    //     (async () => {
+    //         dispatch({ type: 'set_loader', loader: true });
+    //         setTimeout(() => {
+    //             setUpdateInfo(false);
+    //             dispatch({ type: 'set_loader', loader: false });
+    //         }, 100);
+    //     })();
+    // }, [updateInfo]);
 
     const initProvider = async () => {
         try {
@@ -130,11 +131,11 @@ function App() {
     };
 
     const reload = async () => {
-        dispatch({ type: 'set_loader', loader: true });
+        dispatch({ type: 'set_loader', show: true });
         await initProvider();
         await refreshAccount();
         setUpdateInfo(true);
-        dispatch({ type: 'set_loader', loader: false });
+        dispatch({ type: 'set_loader', show: false });
     };
 
     const connectToRLogin = async () => {
@@ -186,13 +187,13 @@ function App() {
         } catch (error) {
             console.log(error);
             console.warn('User denied account access');
-            dispatch({ type: 'set_loader', loader: false });
+            dispatch({ type: 'set_loader', show: false });
         }
     };
 
     return (
         <div className='App'>
-            <Loading />
+            {!isReady ?? <Loading />}
             <Header connect={connect} setUpdateInfo={setUpdateInfo} />
 
             {state.provider && (
