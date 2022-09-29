@@ -11,7 +11,7 @@ import {
 import LoadingButton from 'src/modals/LoadingButton';
 import Utils from 'src/Utils';
 import { useStore } from 'src/context/context';
-import { SmartWallet } from '@rsksmart/rif-relay-sdk';
+import { SmartWalletWithBalance } from 'src/types';
 
 type ValidateInfo = {
     check: boolean;
@@ -66,10 +66,12 @@ function Validate() {
             }
             // TO-DO: Check if it can be re-factored to return a value
             await state.provider!.validateSmartWallet(validate.address);
-            const smartWallet: SmartWallet = {
+            const smartWallet: SmartWalletWithBalance = {
                 index: -1,
                 address: validate.address,
-                deployed: true
+                deployed: true,
+                tokenBalance: '0',
+                rbtcBalance: '0'
             };
             dispatch({ type: 'add_smart_wallet', smartWallet });
             Utils.addLocalSmartWallet(chainId, account, smartWallet);
@@ -94,7 +96,7 @@ function Validate() {
 
     const createSmartWallet = async () => {
         if (state.provider) {
-            dispatch({ type: 'set_loader', show: true });
+            // dispatch({ type: 'set_loader', show: true });
             const smartWallet = await state.provider.generateSmartWallet(
                 Number(validate.address)
             );
@@ -102,14 +104,19 @@ function Validate() {
                 dispatch({ type: 'set_loader', show: false });
                 return;
             }
+            const newSmartWallet = {
+                ...smartWallet,
+                tokenBalance: '0',
+                rbtcBalance: '0'
+            };
             dispatch({
                 type: 'add_smart_wallet',
-                smartWallet
+                smartWallet: newSmartWallet
             });
             if (smartWallet.deployed) {
-                Utils.addLocalSmartWallet(chainId, account, smartWallet);
+                Utils.addLocalSmartWallet(chainId, account, newSmartWallet);
             }
-            dispatch({ type: 'set_loader', show: false });
+            // dispatch({ type: 'set_loader', show: false });
             close();
         }
     };

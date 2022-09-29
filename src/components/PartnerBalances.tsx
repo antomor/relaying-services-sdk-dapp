@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
 import { useStore } from 'src/context/context';
-import Utils from '../Utils';
 
 type PartnerBalanceProp = {
     label: string;
@@ -21,63 +19,10 @@ function PartnerBalance({ label, balance, symbol }: PartnerBalanceProp) {
     );
 }
 
-const getTokenBalance = async (
-    address: string,
-    token: string
-): Promise<Partner> => {
-    try {
-        const balance = parseFloat(
-            Utils.fromWei(await Utils.tokenBalance(address, token))
-        ).toFixed(4);
-        return { address, balance };
-    } catch (error) {
-        console.error(error);
-        return { address, balance: '0' };
-    }
-};
-
-const getUpdatedBalances = async (token: string) => {
-    const workerAddr = process.env.REACT_APP_CONTRACTS_RELAY_WORKER!;
-    const collectorAddr = process.env.REACT_APP_CONTRACTS_COLLECTOR!;
-    const partnerAddresses = Utils.getPartners();
-    const addresses = [workerAddr, collectorAddr, ...partnerAddresses];
-    const updatedBalances = await Promise.all(
-        addresses.map((address) => getTokenBalance(address, token))
-    );
-    const [worker, collector, ...partnerBalances] = updatedBalances;
-    const newBalanceState = {
-        worker,
-        collector,
-        partners: partnerBalances
-    };
-    return newBalanceState;
-};
-
-type Partner = {
-    address: string;
-    balance: string;
-};
-
-type BalancesState = {
-    worker: Partner;
-    collector: Partner;
-    partners: Partner[];
-};
-
 function PartnerBalances() {
-    const [balances, setBalances] = useState<BalancesState>({
-        worker: { address: '', balance: '0' },
-        collector: { address: '', balance: '0' },
-        partners: []
-    });
-
     const { state } = useStore();
 
-    useEffect(() => {
-        getUpdatedBalances(state.token!.address).then((newBalances) => {
-            setBalances(newBalances);
-        });
-    }, []);
+    const { worker, collector, partners, token } = state;
 
     return (
         <ul className='collection with-header' style={{ textAlign: 'left' }}>
@@ -86,15 +31,15 @@ function PartnerBalances() {
             </li>
             <PartnerBalance
                 label='Worker'
-                balance={balances!.worker.balance}
-                symbol={state.token!.symbol}
+                balance={worker!.balance}
+                symbol={token!.symbol}
             />
             <PartnerBalance
                 label='Collector'
-                balance={balances!.collector.balance}
-                symbol={state.token!.symbol}
+                balance={collector!.balance}
+                symbol={token!.symbol}
             />
-            {balances!.partners.map((partner, index) => (
+            {partners.map((partner, index) => (
                 <PartnerBalance
                     key={partner.address}
                     label={`Partner #${index + 1}`}

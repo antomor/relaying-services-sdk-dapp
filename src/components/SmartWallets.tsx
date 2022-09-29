@@ -1,55 +1,27 @@
-import { Modals } from 'src/types';
+import { Modals, SmartWalletWithBalance } from 'src/types';
 import 'src/components/SmartWallets.css';
 import { Col, Row, Button, Icon } from 'react-materialize';
 import { useStore } from 'src/context/context';
-import { useEffect, useCallback, useState } from 'react';
-import Utils from 'src/Utils';
-import type { SmartWallet as SmartWalletType } from '@rsksmart/rif-relay-sdk';
-import LoadingButton from 'src/modals/LoadingButton';
 
 type ModalsKey = keyof Modals;
 
-type SmartWalletProp = {
-    smartWallet: SmartWalletType;
+type SmartWalletComponentProp = {
+    smartWallet: SmartWalletWithBalance;
 };
 
-function SmartWallet({ smartWallet }: SmartWalletProp) {
-    const [tokenBalance, setTokenBalance] = useState('-');
-    const [tokenLoader, setTokenLoader] = useState(false);
-    const [rbtcBalance, setRbtcBalance] = useState('-');
-    const [rbtcLoader, setRbtcLoader] = useState(false);
-
+function SmartWalletComponent({ smartWallet }: SmartWalletComponentProp) {
     const { state, dispatch } = useStore();
 
     const { token } = state;
-
-    const updateTokenBalance = useCallback(async () => {
-        setTokenLoader(true);
-        const newBalance = await Utils.tokenBalance(
-            smartWallet.address,
-            token!.address
-        );
-        setTokenBalance(`${Utils.fromWei(newBalance)} ${token!.symbol}`);
-        setTokenLoader(false);
-    }, [token]);
-
-    const updateRbtcBalance = useCallback(async () => {
-        setRbtcLoader(true);
-        const newBalance = await Utils.getBalance(smartWallet.address);
-        setRbtcBalance(`${Utils.fromWei(newBalance)} RBTC`);
-        setRbtcLoader(false);
-    }, [token]);
-
-    useEffect(() => {
-        updateRbtcBalance();
-        updateTokenBalance();
-    }, [token]);
 
     async function copySmartWalletAddress(address: string) {
         await navigator.clipboard.writeText(address);
     }
 
-    function openModal(newSmartWallet: SmartWalletType, modal: ModalsKey) {
+    function openModal(
+        newSmartWallet: SmartWalletWithBalance,
+        modal: ModalsKey
+    ) {
         dispatch({ type: 'set_smart_wallet', smartWallet: newSmartWallet });
         dispatch({ type: 'set_modals', modal: { [modal]: true } });
     }
@@ -89,18 +61,10 @@ function SmartWallet({ smartWallet }: SmartWalletProp) {
                 </Button>
             </Col>
             <Col s={2}>
-                {rbtcLoader ? (
-                    <LoadingButton show={tokenLoader} />
-                ) : (
-                    <h6>{tokenBalance}</h6>
-                )}
+                <h6>{`${smartWallet.tokenBalance!} ${token!.symbol}`}</h6>
             </Col>
             <Col s={2}>
-                {rbtcLoader ? (
-                    <LoadingButton show={rbtcLoader} />
-                ) : (
-                    <h6>{rbtcBalance}</h6>
-                )}
+                <h6>{`${smartWallet.rbtcBalance!} RBTC`}</h6>
             </Col>
             <Col s={3}>
                 <Row>
@@ -190,9 +154,9 @@ function SmartWallets() {
                     </h6>
                 </Col>
             </Row>
-            {smartWallets.map((smartWallet: SmartWalletType) => (
+            {smartWallets.map((smartWallet: SmartWalletWithBalance) => (
                 <Row key={smartWallet.address} className='space-row'>
-                    <SmartWallet smartWallet={smartWallet} />
+                    <SmartWalletComponent smartWallet={smartWallet} />
                 </Row>
             ))}
         </div>

@@ -9,8 +9,10 @@ import {
     SET_SMART_WALLET_ACTION,
     SET_SMART_WALLETS_ACTION,
     ADD_SMART_WALLET_ACTION,
+    UPDATE_SMART_WALLET_ACTION,
     SET_MODALS_ACTION,
-    State
+    State,
+    SET_PARTNERS_ACTION
 } from 'src/context/types';
 
 const StoreReducer = (state: State, action: Action) => {
@@ -60,10 +62,26 @@ const StoreReducer = (state: State, action: Action) => {
                 ...state,
                 smartWallets: [...state.smartWallets, action.smartWallet]
             };
+        case UPDATE_SMART_WALLET_ACTION:
+            return {
+                ...state,
+                smartWallets: state.smartWallets.map((wallet) =>
+                    wallet.address === action.smartWallet.address
+                        ? action.smartWallet
+                        : wallet
+                )
+            };
         case SET_MODALS_ACTION:
             return {
                 ...state,
                 modals: { ...state.modals, ...action.modal }
+            };
+        case SET_PARTNERS_ACTION:
+            return {
+                ...state,
+                worker: action.worker,
+                collector: action.collector,
+                partners: action.partners
             };
         default:
             return state;

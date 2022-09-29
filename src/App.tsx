@@ -2,8 +2,7 @@ import { useEffect } from 'react';
 import {
     DefaultRelayingServices,
     EnvelopingConfig,
-    RelayingServicesAddresses,
-    SmartWallet
+    RelayingServicesAddresses
 } from '@rsksmart/rif-relay-sdk';
 
 import ActionBar from 'src/components/ActionBar';
@@ -22,6 +21,7 @@ import PartnerBalances from './components/PartnerBalances';
 import { useStore } from './context/context';
 import TransactionHistory from './modals/TransactionHistory';
 import Validate from './modals/Validate';
+import { SmartWalletWithBalance } from './types';
 
 if (window.ethereum) {
     window.web3 = new Web3(window.ethereum);
@@ -37,7 +37,19 @@ function getEnvParamAsInt(value: string | undefined): number | undefined {
 
 function App() {
     const { state, dispatch } = useStore();
-    const { chainId, account, isReady } = state;
+    const { chainId, account, loader } = state;
+
+    useEffect(() => {
+        const workerAddr = process.env.REACT_APP_CONTRACTS_RELAY_WORKER!;
+        const collectorAddr = process.env.REACT_APP_CONTRACTS_COLLECTOR!;
+        // const partnerAddresses = Utils.getPartners();
+        dispatch({
+            type: 'set_partners',
+            worker: { address: workerAddr, balance: '0' },
+            collector: { address: collectorAddr, balance: '0' },
+            partners: []
+        });
+    }, []);
 
     const initProvider = async () => {
         try {
@@ -96,11 +108,12 @@ function App() {
     };
 
     useEffect(() => {
-        const wallets: SmartWallet[] = Utils.getLocalSmartWallets(
+        const wallets: SmartWalletWithBalance[] = Utils.getLocalSmartWallets(
             chainId,
             account
         );
         dispatch({ type: 'set_smart_wallets', smartWallets: wallets });
+        // dispatch({ type: 'set_loader', show: true });
     }, [chainId, account]);
 
     const refreshAccount = async () => {
@@ -170,7 +183,7 @@ function App() {
 
     return (
         <div className='App'>
-            {!isReady ?? <Loading />}
+            {!!loader && <Loading />}
             <Header connect={connect} />
 
             {state.provider && <ActionBar />}

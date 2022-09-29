@@ -4,7 +4,7 @@ import {
 } from '@rsksmart/rif-relay-sdk';
 import { AbiItem } from 'web3-utils';
 import ERC20Abi from 'src/contracts/ERC20Abi.json';
-import { Transaction } from 'src/types';
+import { SmartWalletWithBalance, Transaction } from 'src/types';
 
 export const TRIF_PRICE = 0.000005739;
 export const TRIF_TOKEN_DECIMALS = 18;
@@ -113,8 +113,8 @@ class Utils {
     static getLocalSmartWallets(
         chainId: number,
         account: string
-    ): SmartWallet[] {
-        let wallets: SmartWallet[] = [];
+    ): SmartWalletWithBalance[] {
+        let wallets: SmartWalletWithBalance[] = [];
         try {
             if (Utils.getTransactionKey(chainId, account) in localStorage) {
                 wallets = JSON.parse(
