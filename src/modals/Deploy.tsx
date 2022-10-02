@@ -157,6 +157,7 @@ function Deploy() {
             smartWallet!.deployed = true;
             Utils.addLocalSmartWallet(chainId, account, smartWallet!);
             close();
+            dispatch({ type: 'reload', reload: true });
         }
         setDeployLoading(false);
     };

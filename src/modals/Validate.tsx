@@ -36,10 +36,11 @@ function Validate() {
         if (!validate.check && prop === 'address' && Number(value) < 0) {
             return;
         }
-        setValidate((prev) => ({ ...prev, [prop]: value }));
+        setValidate((prev: ValidateInfo) => ({ ...prev, [prop]: value }));
     };
 
     const close = () => {
+        dispatch({ type: 'set_loader', loader: false });
         dispatch({ type: 'set_modals', modal: { validate: false } });
         setValidate({
             check: false,
@@ -48,8 +49,11 @@ function Validate() {
     };
 
     const validateSmartWallets = (address: string): Boolean => {
-        const existing = smartWallets.find((x) => x.address === address);
+        const existing = smartWallets.find(
+            (x: SmartWalletWithBalance) => x.address === address
+        );
         if (existing) {
+            dispatch({ type: 'set_loader', loader: false });
             alert('Smart Wallet already included');
             return true;
         }
@@ -59,9 +63,8 @@ function Validate() {
     const importSmartWallet = async () => {
         setValidateLoading(true);
         try {
-            dispatch({ type: 'set_loader', show: true });
+            dispatch({ type: 'set_loader', loader: true });
             if (validateSmartWallets(validate.address)) {
-                dispatch({ type: 'set_loader', show: false });
                 return;
             }
             // TO-DO: Check if it can be re-factored to return a value
@@ -74,16 +77,18 @@ function Validate() {
                 rbtcBalance: '0'
             };
             dispatch({ type: 'add_smart_wallet', smartWallet });
+            dispatch({ type: 'reload', reload: true });
             Utils.addLocalSmartWallet(chainId, account, smartWallet);
             close();
         } catch (error) {
+            dispatch({ type: 'set_loader', loader: false });
             const errorObj = error as Error;
             if (errorObj.message) {
                 alert(errorObj.message);
             }
             console.error(error);
         }
-        dispatch({ type: 'set_loader', show: false });
+        dispatch({ type: 'set_loader', loader: false });
         setValidateLoading(false);
     };
 
@@ -101,7 +106,6 @@ function Validate() {
                 Number(validate.address)
             );
             if (validateSmartWallets(smartWallet.address)) {
-                dispatch({ type: 'set_loader', show: false });
                 return;
             }
             const newSmartWallet = {
@@ -113,6 +117,7 @@ function Validate() {
                 type: 'add_smart_wallet',
                 smartWallet: newSmartWallet
             });
+            dispatch({ type: 'reload', reload: true });
             if (smartWallet.deployed) {
                 Utils.addLocalSmartWallet(chainId, account, newSmartWallet);
             }
@@ -121,7 +126,7 @@ function Validate() {
         }
     };
 
-    const handleDeployButtonClick = () => {
+    const handleValidateButtonClick = () => {
         if (validate.check) {
             importSmartWallet();
         } else {
@@ -135,7 +140,7 @@ function Validate() {
                 flat
                 node='button'
                 waves='green'
-                onClick={handleDeployButtonClick}
+                onClick={handleValidateButtonClick}
                 disabled={validateLoading}
             >
                 {validate.check ? 'Import' : 'Create'}

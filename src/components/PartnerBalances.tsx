@@ -34,19 +34,22 @@ function PartnerBalances() {
                 balance={worker!.balance}
                 symbol={token!.symbol}
             />
-            <PartnerBalance
-                label='Collector'
-                balance={collector!.balance}
-                symbol={token!.symbol}
-            />
-            {partners.map((partner, index) => (
+            {collector && (
                 <PartnerBalance
-                    key={partner.address}
-                    label={`Partner #${index + 1}`}
-                    balance={partner.balance}
-                    symbol={state.token!.symbol}
+                    label='Collector'
+                    balance={collector.balance}
+                    symbol={token!.symbol}
                 />
-            ))}
+            )}
+            {partners &&
+                partners.map((partner, index) => (
+                    <PartnerBalance
+                        key={partner.address}
+                        label={`Partner #${index + 1}`}
+                        balance={partner.balance}
+                        symbol={state.token!.symbol}
+                    />
+                ))}
         </ul>
     );
 }

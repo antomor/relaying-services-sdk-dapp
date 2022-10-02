@@ -11,8 +11,8 @@ function AllowedTokens() {
     const [allowedTokens, setAllowedTokens] = useState<Array<string>>([]);
 
     const setToken = async (newToken: string) => {
-        const symbol: string = await Utils.tokenSymbol(newToken);
-        const decimals: number = await Utils.tokenDecimals(newToken);
+        const symbol: string = await Utils.getTokenSymbol(newToken);
+        const decimals: number = await Utils.getTokenDecimals(newToken);
         dispatch({
             type: 'set_token',
             token: { address: newToken, symbol, decimals }

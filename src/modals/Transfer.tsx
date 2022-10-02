@@ -115,8 +115,7 @@ function Transfer() {
                 tokenAddress: state.token!.address,
                 tokenAmount: Number(fees),
                 transactionDetails: {
-                    retries: 7,
-                    ignoreTransactionReceipt: true
+                    retries: 7
                 }
             };
 
@@ -132,6 +131,7 @@ function Transfer() {
                     transfer.check ? 'RBTC' : state.token!.symbol
                 }`
             });
+            dispatch({ type: 'reload', reload: true });
             close();
         } catch (error) {
             const errorObj = error as Error;

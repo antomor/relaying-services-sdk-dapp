@@ -18,7 +18,7 @@ const initialState: State = {
     loader: false,
     token: undefined,
     smartWallet: undefined,
-    isReady: true,
+    reload: false,
     modals: {
         deploy: false,
         execute: false,
@@ -40,48 +40,73 @@ const Context = createContext<{ state: State; dispatch: Dispatch } | undefined>(
 function StoreProvider({ children }: ProviderProps) {
     const [state, dispatch] = useReducer(StoreReducer, initialState);
 
-    const { smartWallets, token, loader, worker, collector } = state;
+    const { smartWallets, token, reload, worker, collector, partners } = state;
 
-    const refreshSmartWallets = () => {
-        smartWallets.forEach(async (smartWallet) => {
-            const newSmartWallet = {
-                ...smartWallet,
-                rbtcBalance: Utils.fromWei(
-                    await Utils.getBalance(smartWallet.address)
+    const getSmartWalletBalance = async (
+        smartWalelt: SmartWalletWithBalance,
+        tokenAddress: string
+    ) => {
+        try {
+            const [tokenBalance, rbtcBalance] = await Promise.all([
+                await Utils.getTokenBalance(
+                    smartWalelt.address,
+                    tokenAddress,
+                    true
                 ),
-                tokenBalance: Utils.fromWei(
-                    await Utils.tokenBalance(
-                        smartWallet.address,
-                        token!.address
-                    )
-                )
-            } as SmartWalletWithBalance;
+                await Utils.getBalance(smartWalelt.address, true)
+            ]);
+            return {
+                ...smartWalelt,
+                tokenBalance,
+                rbtcBalance
+            };
+        } catch (error) {
+            console.error(error);
+            return {
+                ...smartWalelt,
+                tokenBalance: '-',
+                rbtcBalance: '-'
+            };
+        }
+    };
 
-            dispatch({
-                type: 'update_smart_wallet',
-                smartWallet: newSmartWallet
-            });
+    const refreshSmartWallets = async () => {
+        const updatedBalances = await Promise.all(
+            smartWallets.map((wallet) =>
+                getSmartWalletBalance(wallet, token!.address)
+            )
+        );
+        dispatch({
+            type: 'set_smart_wallets',
+            smartWallets: updatedBalances
         });
     };
 
-    const getTokenBalance = async (address: string, tokenAddress: string) => {
+    const getPartnerBalance = async (address: string, tokenAddress: string) => {
         try {
-            const balance = Utils.fromWei(
-                await Utils.tokenBalance(address, tokenAddress)
+            const balance = await Utils.getTokenBalance(
+                address,
+                tokenAddress,
+                true
             );
             return { address, balance };
         } catch (error) {
             console.error(error);
-            return { address, balance: '0' };
+            return { address, balance: '-' };
         }
     };
 
     const refreshPartnersBalances = async () => {
-        if (worker && collector && token) {
-            const localPartners: Partner[] = [worker, collector];
+        if (worker && token) {
+            let localPartners: Partner[];
+            if (collector) {
+                localPartners = [worker, collector, ...partners];
+            } else {
+                localPartners = [worker];
+            }
             const updatedBalances = await Promise.all(
                 localPartners.map((partner) =>
-                    getTokenBalance(partner.address, token.address)
+                    getPartnerBalance(partner.address, token.address)
                 )
             );
             const [newWorker, newCollector, ...newPartners] = updatedBalances;
@@ -95,15 +120,15 @@ function StoreProvider({ children }: ProviderProps) {
     };
 
     useEffect(() => {
-        if (loader || token) {
-            dispatch({
-                type: 'set_loader',
-                show: false
-            });
+        if (reload || token) {
             refreshSmartWallets();
             refreshPartnersBalances();
+            dispatch({
+                type: 'reload',
+                reload: false
+            });
         }
-    }, [token, loader]);
+    }, [token, reload]);
 
     const value = useMemo(() => ({ state, dispatch }), [state]);
     return <Context.Provider value={value}>{children}</Context.Provider>;

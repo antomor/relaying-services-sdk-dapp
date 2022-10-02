@@ -137,7 +137,7 @@ function Execute() {
     };
 
     const changeValue = <T,>(value: T, prop: ExecuteInfoKey) => {
-        setExecute((prev) => ({ ...prev, [prop]: value }));
+        setExecute((prev: ExecuteInfo) => ({ ...prev, [prop]: value }));
     };
 
     const handleExecuteSmartWalletButtonClick = async () => {
@@ -181,6 +181,7 @@ function Execute() {
                         type: `Execute ${state.token!.symbol}`
                     }
                 );
+                dispatch({ type: 'reload', reload: true });
                 close();
             }
         } catch (error) {
@@ -219,7 +220,7 @@ function Execute() {
             const swAddress = state.smartWallet!.address;
 
             // for estimation we will use an eight of the user's token balance, it's just to estimate the gas cost
-            const tokenBalance = await Utils.tokenBalance(
+            const tokenBalance = await Utils.getTokenBalance(
                 swAddress,
                 state.token!.address
             );
@@ -278,7 +279,7 @@ function Execute() {
                         'TRIf price in Wei:',
                         tRifPriceInWei.toString()
                     );
-                    const tokenDecimals = await Utils.tokenDecimals(
+                    const tokenDecimals = await Utils.getTokenDecimals(
                         state.token!.address
                     );
                     console.log('TRIF Decimals: ', tokenDecimals);

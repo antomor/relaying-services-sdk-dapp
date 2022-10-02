@@ -21,7 +21,7 @@ import PartnerBalances from './components/PartnerBalances';
 import { useStore } from './context/context';
 import TransactionHistory from './modals/TransactionHistory';
 import Validate from './modals/Validate';
-import { SmartWalletWithBalance } from './types';
+import { Partner, SmartWalletWithBalance } from './types';
 
 if (window.ethereum) {
     window.web3 = new Web3(window.ethereum);
@@ -41,13 +41,22 @@ function App() {
 
     useEffect(() => {
         const workerAddr = process.env.REACT_APP_CONTRACTS_RELAY_WORKER!;
-        const collectorAddr = process.env.REACT_APP_CONTRACTS_COLLECTOR!;
-        // const partnerAddresses = Utils.getPartners();
+        const collectorAddr = process.env.REACT_APP_CONTRACTS_COLLECTOR;
+        const partnerAddresses = Utils.getPartners();
+        const partners = partnerAddresses
+            ? partnerAddresses.map<Partner>((address) => ({
+                  address,
+                  balance: '0'
+              }))
+            : [];
+
         dispatch({
             type: 'set_partners',
             worker: { address: workerAddr, balance: '0' },
-            collector: { address: collectorAddr, balance: '0' },
-            partners: []
+            collector: collectorAddr
+                ? { address: collectorAddr, balance: '0' }
+                : undefined,
+            partners
         });
     }, []);
 
@@ -95,7 +104,6 @@ function App() {
                 customSmartWalletRelayVerifier: '',
                 sampleRecipient: ''
             };
-
             // Get an RIF Relay RelayProvider instance and assign it to Web3 to use RIF Relay transparently
             const relayingServices = new DefaultRelayingServices(web3);
             await relayingServices.initialize(config, contractAddresses, {
@@ -113,8 +121,7 @@ function App() {
             account
         );
         dispatch({ type: 'set_smart_wallets', smartWallets: wallets });
-        // dispatch({ type: 'set_loader', show: true });
-    }, [chainId, account]);
+    }, [account, chainId]);
 
     const refreshAccount = async () => {
         const accounts = await Utils.getAccounts();
@@ -123,10 +130,10 @@ function App() {
     };
 
     const reload = async () => {
-        dispatch({ type: 'set_loader', show: true });
+        dispatch({ type: 'set_loader', loader: true });
         await initProvider();
         await refreshAccount();
-        dispatch({ type: 'set_loader', show: false });
+        dispatch({ type: 'set_loader', loader: false });
     };
 
     const connectToRLogin = async () => {
@@ -177,7 +184,7 @@ function App() {
         } catch (error) {
             console.log(error);
             console.warn('User denied account access');
-            dispatch({ type: 'set_loader', show: false });
+            dispatch({ type: 'set_loader', loader: false });
         }
     };
 

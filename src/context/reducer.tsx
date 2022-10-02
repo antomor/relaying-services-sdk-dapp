@@ -1,5 +1,6 @@
 import {
     Action,
+    RELOAD_ACTION,
     SET_ACCOUNT_ACTION,
     SET_CHAIN_ID_ACTION,
     SET_CONNECTED_ACTION,
@@ -11,12 +12,17 @@ import {
     ADD_SMART_WALLET_ACTION,
     UPDATE_SMART_WALLET_ACTION,
     SET_MODALS_ACTION,
-    State,
-    SET_PARTNERS_ACTION
+    SET_PARTNERS_ACTION,
+    State
 } from 'src/context/types';
 
 const StoreReducer = (state: State, action: Action) => {
     switch (action.type) {
+        case RELOAD_ACTION:
+            return {
+                ...state,
+                reload: action.reload
+            };
         case SET_ACCOUNT_ACTION:
             return {
                 ...state,
@@ -40,7 +46,7 @@ const StoreReducer = (state: State, action: Action) => {
         case SET_LOADER_ACTION:
             return {
                 ...state,
-                loader: action.show
+                loader: action.loader
             };
         case SET_TOKEN_ACTION:
             return {

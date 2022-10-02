@@ -11,22 +11,29 @@ export const TRIF_TOKEN_DECIMALS = 18;
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 class Utils {
-    static async tokenSymbol(token: string) {
+    static async getTokenSymbol(token: string) {
         const tokenContract = this.getTokenContract(token);
         const symbol = await tokenContract.methods.symbol().call();
         return symbol;
     }
 
-    static async tokenDecimals(token: string) {
+    static async getTokenDecimals(token: string) {
         // TODO: we may want to change this to support multiple tokens
         const tokenContract = this.getTokenContract(token);
         const balance = await tokenContract.methods.decimals().call();
         return balance;
     }
 
-    static async tokenBalance(address: string, token: string) {
+    static async getTokenBalance(
+        address: string,
+        token: string,
+        formatted?: boolean
+    ): Promise<string> {
         const tokenContract = this.getTokenContract(token);
         const balance = await tokenContract.methods.balanceOf(address).call();
+        if (formatted) {
+            return Utils.fromWei(balance);
+        }
         return balance;
     }
 
@@ -38,8 +45,14 @@ class Utils {
         return tokenContract;
     }
 
-    static async getBalance(address: string) {
+    static async getBalance(
+        address: string,
+        formatted?: boolean
+    ): Promise<string> {
         const balance = await web3.eth.getBalance(address);
+        if (formatted) {
+            return Utils.fromWei(balance);
+        }
         return balance;
     }
 
@@ -178,10 +191,9 @@ class Utils {
         return `${chainId}.${address}`;
     }
 
-    static getPartners() {
-        const partnerEnvVar = process.env.REACT_APP_CONTRACTS_PARTNERS!;
-        const partners = partnerEnvVar.split(',');
-        return partners;
+    static getPartners(): Array<string> | undefined {
+        const partnerEnvVar = process.env.REACT_APP_CONTRACTS_PARTNERS;
+        return partnerEnvVar ? partnerEnvVar.split(',') : undefined;
     }
 }
 

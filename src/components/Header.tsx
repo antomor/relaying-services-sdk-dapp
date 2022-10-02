@@ -30,8 +30,8 @@ function Header(props: HeaderProps) {
 
     const reload = () => {
         dispatch({
-            type: 'set_loader',
-            show: true
+            type: 'reload',
+            reload: true
         });
     };
 
