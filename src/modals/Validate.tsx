@@ -101,7 +101,6 @@ function Validate() {
 
     const createSmartWallet = async () => {
         if (state.provider) {
-            // dispatch({ type: 'set_loader', show: true });
             const smartWallet = await state.provider.generateSmartWallet(
                 Number(validate.address)
             );
@@ -121,7 +120,6 @@ function Validate() {
             if (smartWallet.deployed) {
                 Utils.addLocalSmartWallet(chainId, account, newSmartWallet);
             }
-            // dispatch({ type: 'set_loader', show: false });
             close();
         }
     };

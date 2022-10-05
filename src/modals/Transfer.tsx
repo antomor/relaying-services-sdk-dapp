@@ -115,7 +115,8 @@ function Transfer() {
                 tokenAddress: state.token!.address,
                 tokenAmount: Number(fees),
                 transactionDetails: {
-                    retries: 7
+                    retries: 7,
+                    ignoreTransactionReceipt: true
                 }
             };
 
