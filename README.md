@@ -22,7 +22,7 @@ To setup the dApp:
 
 To run the sample dApp follow these steps:
 
-1. Edit the sample dApp config file located in `.env` and add the contract addresses. By default the project imports `.env` on the `npm start`. Look for these lines and modify them accordingly:
+1. Create the `.env` file copying the content from `.env.sample`. Edit the sample dApp config file located in `.env` and add the contract addresses. By default the project imports `.env` on the `npm start`. Look for these lines and modify them accordingly:
 ```
 REACT_APP_CONTRACTS_RELAY_HUB=0xE0825f57Dd05Ef62FF731c27222A86E104CC4Cad
 REACT_APP_CONTRACTS_DEPLOY_VERIFIER=0x1eD614cd3443EFd9c70F04b6d777aed947A4b0c4
@@ -72,7 +72,7 @@ npm start
 
 4. Open a browser and navigate to http://localhost:3000
 
-## Runnig the sample dApp as a Docker container
+## Running the sample dApp as a Docker container
 
 You can run the sample dApp as a Docker container. Docker and Docker compose should be installed.
 The steps are the same as indicated [here](#running-the-sample-dapp). The difference is in the step 2. Instead of npm start, run this:
