@@ -1,11 +1,10 @@
-import { Dispatch, SetStateAction, useState } from 'react';
+import { useState } from 'react';
 import {
     RelayGasEstimationOptions,
     RelayingTransactionOptions,
     RelayingResult
 } from '@rsksmart/rif-relay-sdk';
 import IForwarderAbi from 'src/contracts/IForwarderAbi.json';
-import { Modals } from 'src/types';
 import 'src/modals/Execute.css';
 import {
     Modal,
@@ -21,12 +20,6 @@ import { AbiItem, toBN } from 'web3-utils';
 import LoadingButton from 'src/modals/LoadingButton';
 import { useStore } from 'src/context/context';
 
-type ExecuteProps = {
-    setUpdateInfo: Dispatch<SetStateAction<boolean>>;
-    modal: Modals;
-    setModal: Dispatch<SetStateAction<Modals>>;
-};
-
 type ExecuteInfo = {
     fees: string;
     check: boolean;
@@ -38,9 +31,9 @@ type ExecuteInfo = {
 
 type ExecuteInfoKey = keyof ExecuteInfo;
 
-function Execute(props: ExecuteProps) {
-    const { state } = useStore();
-    const { setUpdateInfo, modal, setModal } = props;
+function Execute() {
+    const { state, dispatch } = useStore();
+    const { modals } = state;
     const [results, setResults] = useState('');
     const [execute, setExecute] = useState<ExecuteInfo>({
         check: false,
@@ -131,7 +124,7 @@ function Execute(props: ExecuteProps) {
     };
 
     const close = () => {
-        setModal((prev) => ({ ...prev, execute: false }));
+        dispatch({ type: 'set_modals', modal: { execute: false } });
         setResults('');
         setExecute({
             check: false,
@@ -144,7 +137,7 @@ function Execute(props: ExecuteProps) {
     };
 
     const changeValue = <T,>(value: T, prop: ExecuteInfoKey) => {
-        setExecute((prev) => ({ ...prev, [prop]: value }));
+        setExecute((prev: ExecuteInfo) => ({ ...prev, [prop]: value }));
     };
 
     const handleExecuteSmartWalletButtonClick = async () => {
@@ -188,8 +181,8 @@ function Execute(props: ExecuteProps) {
                         type: `Execute ${state.token!.symbol}`
                     }
                 );
+                dispatch({ type: 'reload', reload: true });
                 close();
-                setUpdateInfo(true);
             }
         } catch (error) {
             const errorObj = error as Error;
@@ -227,7 +220,7 @@ function Execute(props: ExecuteProps) {
             const swAddress = state.smartWallet!.address;
 
             // for estimation we will use an eight of the user's token balance, it's just to estimate the gas cost
-            const tokenBalance = await Utils.tokenBalance(
+            const tokenBalance = await Utils.getTokenBalance(
                 swAddress,
                 state.token!.address
             );
@@ -286,7 +279,7 @@ function Execute(props: ExecuteProps) {
                         'TRIf price in Wei:',
                         tRifPriceInWei.toString()
                     );
-                    const tokenDecimals = await Utils.tokenDecimals(
+                    const tokenDecimals = await Utils.getTokenDecimals(
                         state.token!.address
                     );
                     console.log('TRIF Decimals: ', tokenDecimals);
@@ -361,7 +354,7 @@ function Execute(props: ExecuteProps) {
 
     return (
         <Modal
-            open={modal.execute}
+            open={modals.execute}
             options={{
                 onCloseEnd: () => close()
             }}

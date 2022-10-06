@@ -1,28 +1,27 @@
-import { useState, useEffect } from 'react';
-import 'src/App.css';
-
+import { useEffect } from 'react';
 import {
     DefaultRelayingServices,
-    RelayingServicesAddresses,
-    EnvelopingConfig
+    EnvelopingConfig,
+    RelayingServicesAddresses
 } from '@rsksmart/rif-relay-sdk';
 
-import Header from 'src/components/Header';
-import SmartWallet from 'src/components/SmartWallet';
 import ActionBar from 'src/components/ActionBar';
+import Header from 'src/components/Header';
+import SmartWallets from 'src/components/SmartWallets';
 import Deploy from 'src/modals/Deploy';
+import Execute from 'src/modals/Execute';
+import Loading from 'src/modals/Loading';
 import Receive from 'src/modals/Receive';
 import Transfer from 'src/modals/Transfer';
-import Loading from 'src/modals/Loading';
-import Execute from 'src/modals/Execute';
-import Utils from 'src/Utils';
-import { Modals, SmartWalletWithBalance } from 'src/types';
 import rLogin from 'src/rLogin';
+import Utils from 'src/Utils';
+import 'src/App.css';
 import Web3 from 'web3';
-import TransactionHistory from './modals/TransactionHistory';
-import { useStore } from './context/context';
-import Validate from './modals/Validate';
 import PartnerBalances from './components/PartnerBalances';
+import { useStore } from './context/context';
+import TransactionHistory from './modals/TransactionHistory';
+import Validate from './modals/Validate';
+import { Partner, SmartWalletWithBalance } from './types';
 
 if (window.ethereum) {
     window.web3 = new Web3(window.ethereum);
@@ -38,34 +37,28 @@ function getEnvParamAsInt(value: string | undefined): number | undefined {
 
 function App() {
     const { state, dispatch } = useStore();
-
-    const [modal, setModal] = useState<Modals>({
-        deploy: false,
-        execute: false,
-        receive: false,
-        transfer: false,
-        transactions: false,
-        validate: false
-    });
-
-    const [smartWallets, setSmartWallets] = useState<SmartWalletWithBalance[]>(
-        []
-    );
-
-    const [updateInfo, setUpdateInfo] = useState(false);
+    const { chainId, account, loader } = state;
 
     useEffect(() => {
-        if (!updateInfo) {
-            return;
-        }
-        (async () => {
-            dispatch({ type: 'set_loader', loader: true });
-            setTimeout(() => {
-                setUpdateInfo(false);
-                dispatch({ type: 'set_loader', loader: false });
-            }, 100);
-        })();
-    }, [updateInfo]);
+        const workerAddr = process.env.REACT_APP_CONTRACTS_RELAY_WORKER!;
+        const collectorAddr = process.env.REACT_APP_CONTRACTS_COLLECTOR;
+        const partnerAddresses = Utils.getPartners();
+        const partners = partnerAddresses
+            ? partnerAddresses.map<Partner>((address) => ({
+                  address,
+                  balance: '0'
+              }))
+            : [];
+
+        dispatch({
+            type: 'set_partners',
+            worker: { address: workerAddr, balance: '0' },
+            collector: collectorAddr
+                ? { address: collectorAddr, balance: '0' }
+                : undefined,
+            partners
+        });
+    }, []);
 
     const initProvider = async () => {
         try {
@@ -111,7 +104,6 @@ function App() {
                 customSmartWalletRelayVerifier: '',
                 sampleRecipient: ''
             };
-
             // Get an RIF Relay RelayProvider instance and assign it to Web3 to use RIF Relay transparently
             const relayingServices = new DefaultRelayingServices(web3);
             await relayingServices.initialize(config, contractAddresses, {
@@ -123,6 +115,14 @@ function App() {
         }
     };
 
+    useEffect(() => {
+        const wallets: SmartWalletWithBalance[] = Utils.getLocalSmartWallets(
+            chainId,
+            account
+        );
+        dispatch({ type: 'set_smart_wallets', smartWallets: wallets });
+    }, [account, chainId]);
+
     const refreshAccount = async () => {
         const accounts = await Utils.getAccounts();
         const currentAccount = accounts[0];
@@ -133,7 +133,6 @@ function App() {
         dispatch({ type: 'set_loader', loader: true });
         await initProvider();
         await refreshAccount();
-        setUpdateInfo(true);
         dispatch({ type: 'set_loader', loader: false });
     };
 
@@ -191,48 +190,21 @@ function App() {
 
     return (
         <div className='App'>
-            <Loading />
-            <Header connect={connect} setUpdateInfo={setUpdateInfo} />
+            {!!loader && <Loading />}
+            <Header connect={connect} />
 
-            {state.provider && (
-                <ActionBar
-                    setSmartWallets={setSmartWallets}
-                    updateInfo={updateInfo}
-                    setModal={setModal}
-                />
-            )}
+            {state.provider && <ActionBar />}
 
             {state.token && (
                 <div>
-                    <SmartWallet
-                        smartWallets={smartWallets}
-                        setModal={setModal}
-                    />
+                    <SmartWallets />
                     <PartnerBalances />
-                    <Deploy
-                        smartWallets={smartWallets}
-                        setUpdateInfo={setUpdateInfo}
-                        modal={modal}
-                        setModal={setModal}
-                    />
-                    <Receive modal={modal} setModal={setModal} />
-                    <Transfer
-                        setUpdateInfo={setUpdateInfo}
-                        modal={modal}
-                        setModal={setModal}
-                    />
-                    <Execute
-                        setUpdateInfo={setUpdateInfo}
-                        modal={modal}
-                        setModal={setModal}
-                    />
-                    <TransactionHistory modal={modal} setModal={setModal} />
-                    <Validate
-                        smartWallets={smartWallets}
-                        setSmartWallets={setSmartWallets}
-                        modal={modal}
-                        setModal={setModal}
-                    />
+                    <Deploy />
+                    <Receive />
+                    <Transfer />
+                    <Execute />
+                    <TransactionHistory />
+                    <Validate />
                 </div>
             )}
         </div>

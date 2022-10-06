@@ -1,44 +1,38 @@
-import { Dispatch, SetStateAction } from 'react';
-import { SmartWallet } from '@rsksmart/rif-relay-sdk';
 import { QRCodeSVG } from 'qrcode.react';
 import { Modal, Col, Row } from 'react-materialize';
 import 'src/modals/Receive.css';
-import { Modals } from 'src/types';
+import { useStore } from 'src/context/context';
 
-type ReceiveProps = {
-    currentSmartWallet?: SmartWallet;
-    modal: Modals;
-    setModal: Dispatch<SetStateAction<Modals>>;
-};
+function Receive() {
+    const { state, dispatch } = useStore();
 
-function Receive(props: ReceiveProps) {
-    const { currentSmartWallet, modal, setModal } = props;
+    const { smartWallet, modals } = state;
 
     return (
         <Modal
-            open={modal.receive}
+            open={modals.receive}
             options={{
                 onCloseEnd: () =>
-                    setModal((prev) => ({ ...prev, receive: false }))
+                    dispatch({ type: 'set_modals', modal: { receive: false } })
             }}
         >
             <Row>
                 <Col s={12}>
-                    <h6 className='col s12 center-align'>
-                        {currentSmartWallet ? (
+                    {smartWallet ? (
+                        <h6 className='col s12 center-align'>
                             <span>
                                 <QRCodeSVG
-                                    value={currentSmartWallet.address}
+                                    value={smartWallet.address}
                                     size={256}
                                 />
                                 <br />
                                 <br />
-                                {currentSmartWallet.address}
+                                {smartWallet.address}
                             </span>
-                        ) : (
-                            ''
-                        )}
-                    </h6>
+                        </h6>
+                    ) : (
+                        ''
+                    )}
                 </Col>
             </Row>
         </Modal>

@@ -1,24 +1,17 @@
-import { Dispatch, SetStateAction, useState } from 'react';
+import { useState } from 'react';
 import {
-    Modal,
-    Col,
-    Row,
-    TextInput,
     Button,
+    Col,
+    Icon,
+    Modal,
+    Row,
     Switch,
-    Icon
+    TextInput
 } from 'react-materialize';
-import { Modals, SmartWalletWithBalance } from 'src/types';
 import LoadingButton from 'src/modals/LoadingButton';
-import { useStore } from 'src/context/context';
 import Utils from 'src/Utils';
-
-type ValidateProps = {
-    smartWallets: SmartWalletWithBalance[];
-    setSmartWallets: Dispatch<SetStateAction<SmartWalletWithBalance[]>>;
-    modal: Modals;
-    setModal: Dispatch<SetStateAction<Modals>>;
-};
+import { useStore } from 'src/context/context';
+import { SmartWalletWithBalance } from 'src/types';
 
 type ValidateInfo = {
     check: boolean;
@@ -27,8 +20,10 @@ type ValidateInfo = {
 
 type ValidateInfoKey = keyof ValidateInfo;
 
-function Validate(props: ValidateProps) {
-    const { smartWallets, setSmartWallets, modal, setModal } = props;
+function Validate() {
+    const { state, dispatch } = useStore();
+
+    const { chainId, account, smartWallets, modals } = state;
 
     const [validate, setValidate] = useState<ValidateInfo>({
         check: false,
@@ -37,17 +32,16 @@ function Validate(props: ValidateProps) {
 
     const [validateLoading, setValidateLoading] = useState(false);
 
-    const { state, dispatch } = useStore();
-
     const changeValue = <T,>(value: T, prop: ValidateInfoKey) => {
         if (!validate.check && prop === 'address' && Number(value) < 0) {
             return;
         }
-        setValidate((prev) => ({ ...prev, [prop]: value }));
+        setValidate((prev: ValidateInfo) => ({ ...prev, [prop]: value }));
     };
 
     const close = () => {
-        setModal((prev) => ({ ...prev, validate: false }));
+        dispatch({ type: 'set_loader', loader: false });
+        dispatch({ type: 'set_modals', modal: { validate: false } });
         setValidate({
             check: false,
             address: ''
@@ -55,11 +49,13 @@ function Validate(props: ValidateProps) {
     };
 
     const validateSmartWallets = (address: string): Boolean => {
-        for (let i = 0; i < smartWallets.length; i += 1) {
-            if (smartWallets[i].address === address) {
-                alert('Smart Wallet already included');
-                return true;
-            }
+        const existing = smartWallets.find(
+            (x: SmartWalletWithBalance) => x.address === address
+        );
+        if (existing) {
+            dispatch({ type: 'set_loader', loader: false });
+            alert('Smart Wallet already included');
+            return true;
         }
         return false;
     };
@@ -69,27 +65,23 @@ function Validate(props: ValidateProps) {
         try {
             dispatch({ type: 'set_loader', loader: true });
             if (validateSmartWallets(validate.address)) {
-                dispatch({ type: 'set_loader', loader: false });
                 return;
             }
-            // Check if it can be re-factored to return a value
+            // TO-DO: Check if it can be re-factored to return a value
             await state.provider!.validateSmartWallet(validate.address);
-            const smartWalletWithBalance = await Utils.getSmartWalletBalance(
-                {
-                    index: -1,
-                    address: validate.address,
-                    deployed: true
-                },
-                state.token!
-            );
-            const tempSmartWallets = [...smartWallets, smartWalletWithBalance];
-            setSmartWallets(tempSmartWallets);
-            localStorage.setItem(
-                Utils.getTransactionKey(state.chainId, state.account),
-                JSON.stringify(tempSmartWallets)
-            );
+            const smartWallet: SmartWalletWithBalance = {
+                index: -1,
+                address: validate.address,
+                deployed: true,
+                tokenBalance: '0',
+                rbtcBalance: '0'
+            };
+            dispatch({ type: 'add_smart_wallet', smartWallet });
+            dispatch({ type: 'reload', reload: true });
+            Utils.addLocalSmartWallet(chainId, account, smartWallet);
             close();
         } catch (error) {
+            dispatch({ type: 'set_loader', loader: false });
             const errorObj = error as Error;
             if (errorObj.message) {
                 alert(errorObj.message);
@@ -109,37 +101,30 @@ function Validate(props: ValidateProps) {
 
     const createSmartWallet = async () => {
         if (state.provider) {
-            dispatch({ type: 'set_loader', loader: true });
             const smartWallet = await state.provider.generateSmartWallet(
                 Number(validate.address)
             );
             if (validateSmartWallets(smartWallet.address)) {
-                dispatch({ type: 'set_loader', loader: false });
                 return;
             }
-            const smartWalletWithBalance = await Utils.getSmartWalletBalance(
-                smartWallet,
-                state.token!
-            );
-            if (smartWalletWithBalance.deployed) {
-                const tempSmartWallets = [
-                    ...smartWallets,
-                    smartWalletWithBalance
-                ];
-                setSmartWallets(tempSmartWallets);
-                localStorage.setItem(
-                    Utils.getTransactionKey(state.chainId, state.account),
-                    JSON.stringify(tempSmartWallets)
-                );
-            } else {
-                setSmartWallets((prev) => [...prev, smartWalletWithBalance]);
+            const newSmartWallet = {
+                ...smartWallet,
+                tokenBalance: '0',
+                rbtcBalance: '0'
+            };
+            dispatch({
+                type: 'add_smart_wallet',
+                smartWallet: newSmartWallet
+            });
+            dispatch({ type: 'reload', reload: true });
+            if (smartWallet.deployed) {
+                Utils.addLocalSmartWallet(chainId, account, newSmartWallet);
             }
-            dispatch({ type: 'set_loader', loader: false });
             close();
         }
     };
 
-    const handleDeployButtonClick = () => {
+    const handleValidateButtonClick = () => {
         if (validate.check) {
             importSmartWallet();
         } else {
@@ -153,7 +138,7 @@ function Validate(props: ValidateProps) {
                 flat
                 node='button'
                 waves='green'
-                onClick={handleDeployButtonClick}
+                onClick={handleValidateButtonClick}
                 disabled={validateLoading}
             >
                 {validate.check ? 'Import' : 'Create'}
@@ -167,7 +152,7 @@ function Validate(props: ValidateProps) {
 
     return (
         <Modal
-            open={modal.validate}
+            open={modals.validate}
             options={{
                 onCloseEnd: () => close()
             }}

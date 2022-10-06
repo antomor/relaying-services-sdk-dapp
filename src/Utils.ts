@@ -4,29 +4,36 @@ import {
 } from '@rsksmart/rif-relay-sdk';
 import { AbiItem } from 'web3-utils';
 import ERC20Abi from 'src/contracts/ERC20Abi.json';
-import { SmartWalletWithBalance, Token, Transaction } from 'src/types';
+import { SmartWalletWithBalance, Transaction } from 'src/types';
 
 export const TRIF_PRICE = 0.000005739;
 export const TRIF_TOKEN_DECIMALS = 18;
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 class Utils {
-    static async tokenSymbol(token: string) {
+    static async getTokenSymbol(token: string) {
         const tokenContract = this.getTokenContract(token);
         const symbol = await tokenContract.methods.symbol().call();
         return symbol;
     }
 
-    static async tokenDecimals(token: string) {
+    static async getTokenDecimals(token: string) {
         // TODO: we may want to change this to support multiple tokens
         const tokenContract = this.getTokenContract(token);
         const balance = await tokenContract.methods.decimals().call();
         return balance;
     }
 
-    static async tokenBalance(address: string, token: string) {
+    static async getTokenBalance(
+        address: string,
+        token: string,
+        formatted?: boolean
+    ): Promise<string> {
         const tokenContract = this.getTokenContract(token);
         const balance = await tokenContract.methods.balanceOf(address).call();
+        if (formatted) {
+            return Utils.fromWei(balance);
+        }
         return balance;
     }
 
@@ -38,8 +45,14 @@ class Utils {
         return tokenContract;
     }
 
-    static async getBalance(address: string) {
+    static async getBalance(
+        address: string,
+        formatted?: boolean
+    ): Promise<string> {
         const balance = await web3.eth.getBalance(address);
+        if (formatted) {
+            return Utils.fromWei(balance);
+        }
         return balance;
     }
 
@@ -110,6 +123,43 @@ class Utils {
         );
     }
 
+    static getLocalSmartWallets(
+        chainId: number,
+        account: string
+    ): SmartWalletWithBalance[] {
+        let wallets: SmartWalletWithBalance[] = [];
+        try {
+            if (Utils.getTransactionKey(chainId, account) in localStorage) {
+                wallets = JSON.parse(
+                    localStorage.getItem(
+                        Utils.getTransactionKey(chainId, account)
+                    )!
+                );
+            }
+        } catch (e) {
+            console.log(
+                'Failed trying to read smart wallets, erased all previous smart wallets'
+            );
+            console.log(e);
+        }
+        return wallets;
+    }
+
+    static addLocalSmartWallet(
+        chainId: number,
+        account: string,
+        smartWallet: SmartWallet
+    ) {
+        const wallets: SmartWallet[] = Utils.getLocalSmartWallets(
+            chainId,
+            account
+        );
+        localStorage.setItem(
+            Utils.getTransactionKey(chainId, account),
+            JSON.stringify([...wallets, smartWallet])
+        );
+    }
+
     static addTransaction(
         address: string,
         chainId: number,
@@ -137,31 +187,13 @@ class Utils {
         );
     }
 
-    static async getSmartWalletBalance(
-        smartWallet: SmartWallet,
-        token: Token
-    ): Promise<SmartWalletWithBalance> {
-        const balance = await Utils.tokenBalance(
-            smartWallet.address,
-            token.address
-        );
-        const rbtcBalance = await Utils.getBalance(smartWallet.address);
-        const swWithBalance = {
-            ...smartWallet,
-            balance: `${Utils.fromWei(balance)} ${token.symbol}`,
-            rbtcBalance: `${Utils.fromWei(rbtcBalance)} RBTC`
-        };
-        return swWithBalance;
-    }
-
     static getTransactionKey(chainId: number, address: string): string {
         return `${chainId}.${address}`;
     }
 
-    static getPartners() {
-        const partnerEnvVar = process.env.REACT_APP_CONTRACTS_PARTNERS!;
-        const partners = partnerEnvVar.split(',');
-        return partners;
+    static getPartners(): Array<string> | undefined {
+        const partnerEnvVar = process.env.REACT_APP_CONTRACTS_PARTNERS;
+        return partnerEnvVar ? partnerEnvVar.split(',') : undefined;
     }
 }
 

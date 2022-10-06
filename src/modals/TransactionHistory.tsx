@@ -1,18 +1,13 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, Col, Row, Table, Button, Icon } from 'react-materialize';
-import { Modals, Transaction } from 'src/types';
+import { Transaction } from 'src/types';
 import Utils from 'src/Utils';
 import { useStore } from 'src/context/context';
 
-type TransactionHistoryProps = {
-    modal: Modals;
-    setModal: Dispatch<SetStateAction<Modals>>;
-};
+function TransactionHistory() {
+    const { state, dispatch } = useStore();
 
-function TransactionHistory(props: TransactionHistoryProps) {
-    const { state } = useStore();
-
-    const { modal, setModal } = props;
+    const { modals } = state;
 
     const columns: string[] = ['No', 'Date', 'Transaction', 'Type', 'Action'];
 
@@ -71,10 +66,13 @@ function TransactionHistory(props: TransactionHistoryProps) {
 
     return (
         <Modal
-            open={modal.transactions}
+            open={modals.transactions}
             options={{
                 onCloseEnd: () =>
-                    setModal((prev) => ({ ...prev, transactions: false }))
+                    dispatch({
+                        type: 'set_modals',
+                        modal: { transactions: false }
+                    })
             }}
         >
             <Row>

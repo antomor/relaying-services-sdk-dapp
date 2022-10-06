@@ -1,27 +1,32 @@
 import { SmartWallet } from '@rsksmart/rif-relay-sdk';
 
 export interface SmartWalletWithBalance extends SmartWallet {
-    balance: string;
+    tokenBalance: string;
     rbtcBalance: string;
 }
 
-export interface Token {
+export type Partner = {
+    address: string;
+    balance: string;
+};
+
+export type Token = {
     address: string;
     symbol: string;
     decimals: number;
-}
+};
 
-export interface Modals {
+export type Modals = {
     deploy: boolean;
     execute: boolean;
     receive: boolean;
     transfer: boolean;
     transactions: boolean;
     validate: boolean;
-}
+};
 
-export interface Transaction {
+export type Transaction = {
     date: Date;
     id: string;
     type: string;
-}
+};
