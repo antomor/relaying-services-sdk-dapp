@@ -11,7 +11,7 @@ type HeaderProps = {
 function Header(props: HeaderProps) {
     const { state, dispatch } = useStore();
 
-    const { account, connected, chainId } = state;
+    const { account, connected, chainId, reload } = state;
 
     const { connect } = props;
 
@@ -23,12 +23,11 @@ function Header(props: HeaderProps) {
         }
         (async () => {
             const currentBalance = await Utils.getBalance(account);
-            const balanceConverted = Utils.fromWei(currentBalance);
-            setBalance(`${balanceConverted} RBTC  `);
+            setBalance(`${currentBalance} RBTC  `);
         })();
-    }, [account]);
+    }, [account, reload]);
 
-    const reload = () => {
+    const reloadComponents = () => {
         dispatch({
             type: 'reload',
             reload: true
@@ -81,7 +80,7 @@ function Header(props: HeaderProps) {
                         <Col s={1} className='refresh'>
                             <Button
                                 waves='light'
-                                onClick={reload}
+                                onClick={reloadComponents}
                                 floating
                                 tooltip='Refresh information'
                                 disabled={!connected}

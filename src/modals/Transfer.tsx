@@ -96,13 +96,10 @@ function Transfer() {
         setTransferLoading(true);
         try {
             const { amount } = transfer;
-            const fees = transfer.fees === '' ? '0' : transfer.fees;
+            const tokenAmount = transfer.fees === '' ? '0' : transfer.fees;
 
             const encodedAbi = token!.instance.contract.methods
-                .transfer(
-                    transfer.address,
-                    await Utils.toWei(amount.toString())
-                )
+                .transfer(transfer.address, amount.toString())
                 .encodeABI();
 
             const relayTrxOpts: RelayingTransactionOptions = {
@@ -112,8 +109,9 @@ function Transfer() {
                     data: encodedAbi
                 },
                 tokenAddress: token!.instance.address,
-                tokenAmount: Number(fees),
+                tokenAmount,
                 transactionDetails: {
+                    to: token!.instance.address,
                     retries: 7,
                     ignoreTransactionReceipt: true
                 }
@@ -147,10 +145,7 @@ function Transfer() {
             setEstimateLoading(true);
             try {
                 const encodedTransferFunction = token!.instance.contract.methods
-                    .transfer(
-                        transfer.address,
-                        await Utils.toWei(transfer.amount.toString() || '0')
-                    )
+                    .transfer(transfer.address, transfer.amount)
                     .encodeABI();
 
                 const opts: RelayGasEstimationOptions = {

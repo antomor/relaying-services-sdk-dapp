@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button, Col, Icon, Row } from 'react-materialize';
 import 'src/components/ActionBar.css';
 import AllowedTokens from 'src/components/AllowedTokens';
@@ -7,7 +7,7 @@ import { useStore } from 'src/context/context';
 function ActionBar() {
     const { state, dispatch } = useStore();
 
-    const { token, provider } = state;
+    const { token, provider, reload } = state;
 
     const [tokenPrice, setTokenPrice] = useState('0');
 
@@ -15,16 +15,16 @@ function ActionBar() {
         dispatch({ type: 'set_modals', modal: { validate: true } });
     };
 
-    const reloadTokenPrice = async () => {
-        const price = await provider!.getErc20TokenPrice(token!);
-        setTokenPrice(price.toString());
-    };
-
-    useEffect(() => {
+    const reloadTokenPrice = useCallback(async () => {
         if (token) {
-            reloadTokenPrice();
+            const price = await provider!.getERC20TokenPrice(token!, 'RBTC');
+            setTokenPrice(price.toString());
         }
     }, [token]);
+
+    useEffect(() => {
+        reloadTokenPrice();
+    }, [token, reload]);
 
     return (
         <Row className='space-row vertical-align'>

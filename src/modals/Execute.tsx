@@ -47,6 +47,12 @@ function Execute() {
     const [executeLoading, setExecuteLoading] = useState(false);
     const [estimateLoading, setEstimateLoading] = useState(false);
 
+    const checkAddress = (address: string) => {
+        if (!Utils.checkAddress(address.toLowerCase())) {
+            throw Error('Contract address is not valid');
+        }
+    };
+
     const calculateAbiEncodedFunction = () => {
         const contractFunction = execute.function.trim();
         const functionSig =
@@ -78,6 +84,19 @@ function Execute() {
         return funcData;
     };
 
+    const close = () => {
+        dispatch({ type: 'set_modals', modal: { execute: false } });
+        setResults('');
+        setExecute({
+            check: false,
+            show: false,
+            address: '',
+            value: '',
+            function: '',
+            fees: ''
+        });
+    };
+
     const relayTransactionDirectExecution = async (
         toAddress: string,
         swAddress: string,
@@ -88,7 +107,7 @@ function Execute() {
             swAddress
         );
 
-        const transaction = await swContract.methods
+        const transaction = swContract.methods
             .directExecute(toAddress, abiEncodedTx)
             .send(
                 {
@@ -113,6 +132,8 @@ function Execute() {
                         console.log(trxData);
                         if (execute.show) {
                             setResults(JSON.stringify(transaction));
+                        } else {
+                            close();
                         }
                     }
                 }
@@ -124,19 +145,6 @@ function Execute() {
         });
     };
 
-    const close = () => {
-        dispatch({ type: 'set_modals', modal: { execute: false } });
-        setResults('');
-        setExecute({
-            check: false,
-            show: false,
-            address: '',
-            value: '',
-            function: '',
-            fees: ''
-        });
-    };
-
     const changeValue = <T,>(value: T, prop: ExecuteInfoKey) => {
         setExecute((prev: ExecuteInfo) => ({ ...prev, [prop]: value }));
     };
@@ -144,6 +152,7 @@ function Execute() {
     const handleExecuteSmartWalletButtonClick = async () => {
         setExecuteLoading(true);
         try {
+            checkAddress(execute.address);
             const funcData = calculateAbiEncodedFunction();
             const destinationContract = execute.address;
             const swAddress = smartWallet!.address;
@@ -155,15 +164,18 @@ function Execute() {
                     funcData
                 );
             } else {
-                const fees = execute.fees === '' ? '0' : execute.fees;
+                const tokenAmount = execute.fees === '' ? '0' : execute.fees;
                 const relayTransactionOpts: RelayingTransactionOptions = {
                     unsignedTx: {
                         data: funcData,
                         to: execute.address
                     },
                     smartWallet: smartWallet!,
-                    tokenAmount: Number(fees),
-                    tokenAddress: token!.instance.address
+                    tokenAmount,
+                    tokenAddress: token!.instance.address,
+                    transactionDetails: {
+                        to: execute.address
+                    }
                 };
                 const result: RelayingResult = await provider!.relayTransaction(
                     relayTransactionOpts
@@ -179,7 +191,11 @@ function Execute() {
                     type: `Execute ${token!.symbol}`
                 });
                 dispatch({ type: 'reload', reload: true });
-                close();
+                if (execute.show) {
+                    setResults(JSON.stringify(result?.transaction));
+                } else {
+                    close();
+                }
             }
         } catch (error) {
             const errorObj = error as Error;
@@ -195,7 +211,7 @@ function Execute() {
         swAddress: string,
         toAddress: string,
         abiEncodedTx: string
-    ) => {
+    ): Promise<BN> => {
         const swContract = new web3.eth.Contract(
             IForwarderAbi as AbiItem[],
             swAddress
@@ -210,6 +226,7 @@ function Execute() {
     const handleEstimateSmartWalletButtonClick = async () => {
         setEstimateLoading(true);
         try {
+            checkAddress(execute.address);
             const funcData = calculateAbiEncodedFunction();
             const destinationContract = execute.address;
             const swAddress = smartWallet!.address;
@@ -220,7 +237,7 @@ function Execute() {
                     destinationContract,
                     funcData
                 );
-                changeValue(result, 'fees');
+                changeValue(result.toString(), 'fees');
             } else {
                 const opts: RelayGasEstimationOptions = {
                     destinationContract,
@@ -381,14 +398,16 @@ function Execute() {
                         />
                     </Col>
                     <Col s={12}>
-                        <span
-                            style={{
-                                wordBreak: 'break-all',
-                                width: 'inherit'
-                            }}
-                        >
-                            {results}
-                        </span>
+                        {execute.show && (
+                            <span
+                                style={{
+                                    wordBreak: 'break-all',
+                                    width: 'inherit'
+                                }}
+                            >
+                                {results}
+                            </span>
+                        )}
                     </Col>
                 </form>
             </Row>

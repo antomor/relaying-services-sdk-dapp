@@ -86,18 +86,17 @@ function Deploy() {
         return receipt.status;
     };
 
-    const relaySmartWalletDeployment = async (tokenAmount: string | number) => {
+    const relaySmartWalletDeployment = async (tokenAmount: string) => {
         try {
             const isTokenAllowed = await provider!.isAllowedToken(
                 token!.instance.address
             );
             if (isTokenAllowed) {
-                const fees = await Utils.toWei(`${tokenAmount}`);
                 const newSmartWallet = await provider!.deploySmartWallet(
                     smartWallet!,
                     {
                         tokenAddress: token!.instance.address,
-                        tokenAmount: Number(fees),
+                        tokenAmount,
                         transactionDetails: {
                             ignoreTransactionReceipt: true
                         }

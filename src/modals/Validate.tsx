@@ -194,8 +194,8 @@ function Validate() {
                     </Col>
                     <Col s={4}>
                         <Switch
-                            offLabel='Create smart wallet'
-                            onLabel='Import smart wallet'
+                            offLabel='Deploy'
+                            onLabel='Import'
                             checked={validate.check}
                             onChange={(event) => {
                                 changeValue(

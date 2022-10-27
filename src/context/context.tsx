@@ -48,8 +48,8 @@ function StoreProvider({ children }: ProviderProps) {
     ) => {
         try {
             const [tokenBalance, rbtcBalance] = await Promise.all([
-                await Utils.getTokenBalance(smartWalelt.address, token!, true),
-                await Utils.getBalance(smartWalelt.address, true)
+                await Utils.getTokenBalance(smartWalelt.address, token!),
+                await Utils.getBalance(smartWalelt.address)
             ]);
             return {
                 ...smartWalelt,
@@ -80,7 +80,7 @@ function StoreProvider({ children }: ProviderProps) {
 
     const getPartnerBalance = async (address: string) => {
         try {
-            const balance = await Utils.getTokenBalance(address, token!, true);
+            const balance = await Utils.getTokenBalance(address, token!);
             return { address, balance };
         } catch (error) {
             console.error(error);
