@@ -15,18 +15,13 @@ function TransactionHistory() {
 
     useEffect(() => {
         if (
-            Utils.getTransactionKey(
-                chainId,
-                smartWallet?.address!
-            ) in localStorage
+            Utils.getTransactionKey(chainId, smartWallet?.address!) in
+            localStorage
         ) {
             try {
                 const localTransactions: Transaction[] = JSON.parse(
                     localStorage.getItem(
-                        Utils.getTransactionKey(
-                            chainId,
-                            smartWallet?.address!
-                        )
+                        Utils.getTransactionKey(chainId, smartWallet?.address!)
                     )!
                 );
                 setTransactions(localTransactions);
@@ -36,7 +31,7 @@ function TransactionHistory() {
         } else {
             setTransactions([]);
         }
-    }, [smartWallet]);
+    }, [smartWallet, chainId]);
 
     const openExplorer = (transaction: Transaction) => {
         Utils.openExplorer(transaction.id);

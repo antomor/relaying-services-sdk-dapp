@@ -44,22 +44,22 @@ function StoreProvider({ children }: ProviderProps) {
     const { smartWallets, token, reload, worker, collector, partners } = state;
 
     const getSmartWalletBalance = async (
-        smartWalelt: SmartWalletWithBalance
-    ) => {
+        smartWallet: SmartWalletWithBalance
+    ): Promise<SmartWalletWithBalance> => {
         try {
             const [tokenBalance, rbtcBalance] = await Promise.all([
-                await Utils.getTokenBalance(smartWalelt.address, token!),
-                await Utils.getBalance(smartWalelt.address)
+                await Utils.getTokenBalance(smartWallet.address, token!),
+                await Utils.getBalance(smartWallet.address)
             ]);
             return {
-                ...smartWalelt,
+                ...smartWallet,
                 tokenBalance,
                 rbtcBalance
             };
         } catch (error) {
             console.error(error);
             return {
-                ...smartWalelt,
+                ...smartWallet,
                 tokenBalance: '-',
                 rbtcBalance: '-'
             };
@@ -69,7 +69,9 @@ function StoreProvider({ children }: ProviderProps) {
     const refreshSmartWallets = useCallback(async () => {
         if (token) {
             const updatedBalances = await Promise.all(
-                smartWallets.map((wallet) => getSmartWalletBalance(wallet))
+                smartWallets.map((wallet: SmartWalletWithBalance) =>
+                    getSmartWalletBalance(wallet)
+                )
             );
             dispatch({
                 type: 'set_smart_wallets',
@@ -120,7 +122,7 @@ function StoreProvider({ children }: ProviderProps) {
                 reload: false
             });
         }
-    }, [token, reload]);
+    }, [refreshSmartWallets, refreshPartnersBalances]);
 
     const value = useMemo(() => ({ state, dispatch }), [state]);
     return <Context.Provider value={value}>{children}</Context.Provider>;

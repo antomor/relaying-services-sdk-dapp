@@ -172,7 +172,7 @@ function App() {
         // TODO refactor this code
         try {
             let isConnected = false;
-            if (connected) {
+            if (!connected) {
                 isConnected = await connectToRLogin();
             }
 

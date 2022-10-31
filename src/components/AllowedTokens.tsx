@@ -21,22 +21,22 @@ function AllowedTokens() {
     };
 
     const reloadTokens = useCallback(async () => {
-        const tokens = await provider!.getAllowedTokens();
-        if (tokens.length > 0) {
-            setAllowedTokens(tokens);
-            if (!token) {
-                setToken(tokens[0]);
+        if (!reload) {
+            const tokens = await provider!.getAllowedTokens();
+            if (tokens.length > 0) {
+                setAllowedTokens(tokens);
+                if (!token) {
+                    setToken(tokens[0]);
+                }
+            } else {
+                alert('Not allowed tokens');
             }
-        } else {
-            alert('Not allowed tokens');
         }
     }, [reload]);
 
     useEffect(() => {
-        if (!reload) {
-            reloadTokens();
-        }
-    }, [reload]);
+        reloadTokens();
+    }, [reloadTokens]);
 
     const handleChange = (event: any) => {
         setToken(event.target.value);
