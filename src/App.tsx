@@ -121,7 +121,11 @@ function App() {
             account
         );
         dispatch({ type: 'set_smart_wallets', smartWallets: wallets });
-    }, [account, chainId]);
+        dispatch({
+            type: 'reload',
+            reload: true
+        });
+    }, [account, chainId, dispatch]);
 
     const refreshAccount = async () => {
         const accounts = await Utils.getAccounts();
