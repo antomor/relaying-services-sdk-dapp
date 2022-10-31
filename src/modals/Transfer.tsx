@@ -157,7 +157,7 @@ function Transfer() {
                 };
 
                 const estimation: RelayEstimation =
-                    await provider!.estimateGasRelayLimit(opts);
+                    await provider!.estimateMaxPossibleGas(opts);
 
                 console.log('estimation', estimation);
 

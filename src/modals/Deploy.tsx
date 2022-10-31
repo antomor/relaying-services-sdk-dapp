@@ -54,12 +54,11 @@ function Deploy() {
                 tokenFees: '1',
                 isSmartWalletDeploy: true,
                 index: smartWallet!.index.toString(),
-                tokenAddress: token!.instance.address,
-                isLinearEstimation: false
+                tokenAddress: token!.instance.address
             };
 
             const estimation: RelayEstimation =
-                await provider!.estimateGasRelayLimit(opts);
+                await provider!.estimateMaxPossibleGas(opts);
             console.log('estimation', estimation);
 
             if (estimation) {
