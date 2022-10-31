@@ -7,7 +7,7 @@ import { useStore } from 'src/context/context';
 function TransactionHistory() {
     const { state, dispatch } = useStore();
 
-    const { modals } = state;
+    const { modals, chainId, smartWallet } = state;
 
     const columns: string[] = ['No', 'Date', 'Transaction', 'Type', 'Action'];
 
@@ -16,16 +16,16 @@ function TransactionHistory() {
     useEffect(() => {
         if (
             Utils.getTransactionKey(
-                state.chainId,
-                state.smartWallet?.address!
+                chainId,
+                smartWallet?.address!
             ) in localStorage
         ) {
             try {
                 const localTransactions: Transaction[] = JSON.parse(
                     localStorage.getItem(
                         Utils.getTransactionKey(
-                            state.chainId,
-                            state.smartWallet?.address!
+                            chainId,
+                            smartWallet?.address!
                         )
                     )!
                 );
@@ -36,7 +36,7 @@ function TransactionHistory() {
         } else {
             setTransactions([]);
         }
-    }, [state.smartWallet]);
+    }, [smartWallet]);
 
     const openExplorer = (transaction: Transaction) => {
         Utils.openExplorer(transaction.id);

@@ -37,7 +37,7 @@ function getEnvParamAsInt(value: string | undefined): number | undefined {
 
 function App() {
     const { state, dispatch } = useStore();
-    const { chainId, account, loader } = state;
+    const { chainId, account, loader, connected, provider, token } = state;
 
     useEffect(() => {
         const workerAddr = process.env.REACT_APP_CONTRACTS_RELAY_WORKER!;
@@ -172,7 +172,7 @@ function App() {
         // TODO refactor this code
         try {
             let isConnected = false;
-            if (!state.connected) {
+            if (connected) {
                 isConnected = await connectToRLogin();
             }
 
@@ -193,9 +193,9 @@ function App() {
             {!!loader && <Loading />}
             <Header connect={connect} />
 
-            {state.provider && <ActionBar />}
+            {provider && <ActionBar />}
 
-            {state.token && (
+            {token && (
                 <div>
                     <SmartWallets />
                     <PartnerBalances />

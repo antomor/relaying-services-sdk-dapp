@@ -132,13 +132,13 @@ function SmartWalletComponent({ smartWallet }: SmartWalletComponentProp) {
 function SmartWallets() {
     const { state } = useStore();
 
-    const { smartWallets } = state;
+    const { smartWallets, connected } = state;
 
     return (
         <div className='smart-wallets'>
             <Row
                 className={`grey ${
-                    smartWallets.length <= 0 && state.connected ? '' : 'hide'
+                    smartWallets.length <= 0 && connected ? '' : 'hide'
                 }`}
             >
                 <Col s={12}>
@@ -148,7 +148,7 @@ function SmartWallets() {
                         button.
                     </h6>
                 </Col>
-                <Col s={12} className={`${state.connected ? 'hide' : ''}`}>
+                <Col s={12} className={`${connected ? 'hide' : ''}`}>
                     <h6 className='center-align'>
                         Wallet not connected, please connect.
                     </h6>
