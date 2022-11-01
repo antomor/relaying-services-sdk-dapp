@@ -121,10 +121,6 @@ function App() {
             account
         );
         dispatch({ type: 'set_smart_wallets', smartWallets: wallets });
-        dispatch({
-            type: 'reload',
-            reload: true
-        });
     }, [account, chainId, dispatch]);
 
     const refreshAccount = async () => {
@@ -133,7 +129,7 @@ function App() {
         dispatch({ type: 'set_account', account: currentAccount });
     };
 
-    const reload = async () => {
+    const reloadApp = async () => {
         dispatch({ type: 'set_loader', loader: true });
         await initProvider();
         await refreshAccount();
@@ -149,7 +145,7 @@ function App() {
                 const login = connect.provider;
 
                 login.on('accountsChanged', async (/* accounts */) => {
-                    await reload();
+                    await reloadApp();
                 });
 
                 login.on('chainChanged', async (newChain: string) => {
@@ -181,7 +177,7 @@ function App() {
             }
 
             if (isConnected) {
-                await reload();
+                await reloadApp();
             } else {
                 console.warn('Unable to connect to Metamask');
             }

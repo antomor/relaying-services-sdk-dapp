@@ -17,8 +17,15 @@ function ActionBar() {
 
     const reloadTokenPrice = useCallback(async () => {
         if (token) {
-            const price = await provider!.getERC20TokenPrice(token!, 'RBTC');
-            setTokenPrice(price.toString());
+            try {
+                const price = await provider!.getERC20TokenPrice(
+                    token!,
+                    'RBTC'
+                );
+                setTokenPrice(price.toString());
+            } catch (error) {
+                setTokenPrice('-');
+            }
         }
     }, [token]);
 

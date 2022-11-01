@@ -20,12 +20,22 @@ function AllowedTokens() {
         });
     };
 
+    const verifyToken = (tokens: Array<string>): boolean => {
+        if (!token) {
+            return true;
+        }
+        if (!tokens.includes(token.instance.address)) {
+            return true;
+        }
+        return false;
+    };
+
     const reloadTokens = useCallback(async () => {
         if (!reload) {
             const tokens = await provider!.getAllowedTokens();
             if (tokens.length > 0) {
                 setAllowedTokens(tokens);
-                if (!token) {
+                if (verifyToken(tokens)) {
                     setToken(tokens[0]);
                 }
             } else {
