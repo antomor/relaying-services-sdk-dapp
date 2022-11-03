@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import { Modals, SmartWalletWithBalance, Partner } from 'src/types';
 
 export const RELOAD_ACTION = 'reload';
+export const RELOAD_TOKEN_ACTION = 'reload_token';
 export const SET_ACCOUNT_ACTION = 'set_account';
 export const SET_CONNECTED_ACTION = 'set_connected';
 export const SET_PROVIDER_ACTION = 'set_provider';
@@ -18,6 +19,7 @@ export const SET_PARTNERS_ACTION = 'set_partners';
 
 export type Action =
     | { type: typeof RELOAD_ACTION; reload: boolean }
+    | { type: typeof RELOAD_TOKEN_ACTION; reloadToken: boolean }
     | { type: typeof SET_ACCOUNT_ACTION; account: string }
     | { type: typeof SET_CONNECTED_ACTION; connected: boolean }
     | { type: typeof SET_PROVIDER_ACTION; provider: RelayingServices }
@@ -64,6 +66,7 @@ export type State = {
     token: ERC20Token | undefined;
     smartWallet: SmartWalletWithBalance | undefined;
     reload: boolean;
+    reloadToken: boolean;
     modals: Modals;
     smartWallets: SmartWalletWithBalance[];
     worker: Partner | undefined;

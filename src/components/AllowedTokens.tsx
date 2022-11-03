@@ -5,7 +5,7 @@ import { useStore } from 'src/context/context';
 function AllowedTokens() {
     const { state, dispatch } = useStore();
 
-    const { token, provider, reload } = state;
+    const { token, provider, reloadToken } = state;
 
     const [allowedTokens, setAllowedTokens] = useState<Array<string>>([]);
 
@@ -31,7 +31,7 @@ function AllowedTokens() {
     };
 
     const reloadTokens = useCallback(async () => {
-        if (!reload) {
+        if (reloadToken) {
             const tokens = await provider!.getAllowedTokens();
             if (tokens.length > 0) {
                 setAllowedTokens(tokens);
@@ -42,7 +42,8 @@ function AllowedTokens() {
                 alert('Not allowed tokens');
             }
         }
-    }, [reload]);
+        dispatch({ type: 'reload_token', reloadToken: false });
+    }, [reloadToken]);
 
     useEffect(() => {
         reloadTokens();

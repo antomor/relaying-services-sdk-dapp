@@ -32,6 +32,10 @@ function Header(props: HeaderProps) {
             type: 'reload',
             reload: true
         });
+        dispatch({
+            type: 'reload_token',
+            reloadToken: true
+        });
     };
 
     return (

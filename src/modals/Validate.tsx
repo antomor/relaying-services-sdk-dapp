@@ -25,10 +25,12 @@ function Validate() {
 
     const { chainId, account, smartWallets, modals, provider } = state;
 
-    const [validate, setValidate] = useState<ValidateInfo>({
+    const initialState: ValidateInfo = {
         check: false,
         address: ''
-    });
+    };
+
+    const [validate, setValidate] = useState<ValidateInfo>(initialState);
 
     const [validateLoading, setValidateLoading] = useState(false);
 
@@ -42,10 +44,7 @@ function Validate() {
     const close = () => {
         dispatch({ type: 'set_loader', loader: false });
         dispatch({ type: 'set_modals', modal: { validate: false } });
-        setValidate({
-            check: false,
-            address: ''
-        });
+        setValidate(initialState);
     };
 
     const validateSmartWallets = (address: string): Boolean => {

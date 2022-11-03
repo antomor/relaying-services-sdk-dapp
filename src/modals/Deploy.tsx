@@ -19,14 +19,15 @@ type DeployInfoKey = keyof DeployInfo;
 
 function Deploy() {
     const { state, dispatch } = useStore();
-
     const { chainId, account, smartWallet, token, provider, modals } = state;
 
-    const [deploy, setDeploy] = useState<DeployInfo>({
+    const initialState: DeployInfo = {
         fees: '0',
         tokenGas: 0,
         relayGas: 0
-    });
+    };
+
+    const [deploy, setDeploy] = useState<DeployInfo>(initialState);
 
     const [deployLoading, setDeployLoading] = useState(false);
     const [estimateLoading, setEstimateLoading] = useState(false);
@@ -124,11 +125,7 @@ function Deploy() {
 
     const close = () => {
         dispatch({ type: 'set_modals', modal: { deploy: false } });
-        setDeploy({
-            fees: '0',
-            tokenGas: 0,
-            relayGas: 0
-        });
+        setDeploy(initialState);
     };
 
     const handleDeploySmartWalletButtonClick = async () => {

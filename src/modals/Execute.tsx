@@ -35,15 +35,19 @@ type ExecuteInfoKey = keyof ExecuteInfo;
 function Execute() {
     const { state, dispatch } = useStore();
     const { modals, account, token, smartWallet, provider, chainId } = state;
+
     const [results, setResults] = useState('');
-    const [execute, setExecute] = useState<ExecuteInfo>({
+
+    const initialState: ExecuteInfo = {
         check: false,
         show: false,
         address: '',
         value: '',
         function: '',
         fees: ''
-    });
+    };
+
+    const [execute, setExecute] = useState<ExecuteInfo>(initialState);
     const [executeLoading, setExecuteLoading] = useState(false);
     const [estimateLoading, setEstimateLoading] = useState(false);
 
@@ -87,14 +91,7 @@ function Execute() {
     const close = () => {
         dispatch({ type: 'set_modals', modal: { execute: false } });
         setResults('');
-        setExecute({
-            check: false,
-            show: false,
-            address: '',
-            value: '',
-            function: '',
-            fees: ''
-        });
+        setExecute(initialState);
     };
 
     const relayTransactionDirectExecution = async (

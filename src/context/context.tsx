@@ -20,6 +20,7 @@ const initialState: State = {
     token: undefined,
     smartWallet: undefined,
     reload: false,
+    reloadToken: false,
     modals: {
         deploy: false,
         execute: false,

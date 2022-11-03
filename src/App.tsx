@@ -121,6 +121,7 @@ function App() {
             account
         );
         dispatch({ type: 'set_smart_wallets', smartWallets: wallets });
+        dispatch({ type: 'reload', reload: true });
     }, [account, chainId, dispatch]);
 
     const refreshAccount = async () => {
@@ -133,6 +134,7 @@ function App() {
         dispatch({ type: 'set_loader', loader: true });
         await initProvider();
         await refreshAccount();
+        dispatch({ type: 'reload_token', reloadToken: true });
         dispatch({ type: 'set_loader', loader: false });
     };
 

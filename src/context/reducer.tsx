@@ -1,6 +1,7 @@
 import {
     Action,
     RELOAD_ACTION,
+    RELOAD_TOKEN_ACTION,
     SET_ACCOUNT_ACTION,
     SET_CHAIN_ID_ACTION,
     SET_CONNECTED_ACTION,
@@ -22,6 +23,11 @@ const StoreReducer = (state: State, action: Action) => {
             return {
                 ...state,
                 reload: action.reload
+            };
+        case RELOAD_TOKEN_ACTION:
+            return {
+                ...state,
+                reloadToken: action.reloadToken
             };
         case SET_ACCOUNT_ACTION:
             return {

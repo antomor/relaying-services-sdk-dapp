@@ -36,21 +36,18 @@ function Transfer() {
     const [transferLoading, setTransferLoading] = useState(false);
     const [estimateLoading, setEstimateLoading] = useState(false);
 
-    const [transfer, setTransfer] = useState<TransferInfo>({
+    const initialState: TransferInfo = {
         check: false,
         fees: '',
         amount: '',
         address: ''
-    });
+    };
+
+    const [transfer, setTransfer] = useState<TransferInfo>(initialState);
 
     const close = () => {
         dispatch({ type: 'set_modals', modal: { transfer: false } });
-        setTransfer({
-            check: false,
-            fees: '',
-            amount: '',
-            address: ''
-        });
+        setTransfer(initialState);
         setEstimateLoading(false);
         setTransferLoading(false);
     };
