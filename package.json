@@ -1,6 +1,6 @@
 {
   "name": "@rsksmart/rif-relay-sample-dapp",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "private": true,
   "dependencies": {
     "@openeth/truffle-typings": "0.0.6",
