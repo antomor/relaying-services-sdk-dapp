@@ -3,13 +3,16 @@ import { Button, Col, Icon, Row } from 'react-materialize';
 import 'src/components/ActionBar.css';
 import AllowedTokens from 'src/components/AllowedTokens';
 import { useStore } from 'src/context/context';
+import LoadingButton from 'src/modals/LoadingButton';
 
 function ActionBar() {
     const { state, dispatch } = useStore();
 
     const { token, provider, reload } = state;
 
-    const [tokenPrice, setTokenPrice] = useState('0');
+    const [tokenPrice, setTokenPrice] = useState('-');
+
+    const [priceLoading, setPriceLoading] = useState(false);
 
     const createSmartWallet = async () => {
         dispatch({ type: 'set_modals', modal: { validate: true } });
@@ -17,6 +20,7 @@ function ActionBar() {
 
     const reloadTokenPrice = useCallback(async () => {
         if (token) {
+            setPriceLoading(true);
             try {
                 const price = await provider!.getERC20TokenPrice(
                     token!,
@@ -26,12 +30,13 @@ function ActionBar() {
             } catch (error) {
                 setTokenPrice('-');
             }
+            setPriceLoading(false);
         }
-    }, [token]);
+    }, [token, reload]);
 
     useEffect(() => {
         reloadTokenPrice();
-    }, [token, reload]);
+    }, [reloadTokenPrice]);
 
     return (
         <Row className='space-row vertical-align'>
@@ -50,9 +55,15 @@ function ActionBar() {
                 <AllowedTokens />
             </Col>
             <Col s={3}>
-                <h6>
-                    {token?.symbol} price: <span>{tokenPrice}</span> RBTC
-                </h6>
+                {priceLoading ? (
+                    <LoadingButton show={priceLoading} />
+                ) : (
+                    token && (
+                        <h6>
+                            {token.symbol} price: <span>{tokenPrice}</span> RBTC
+                        </h6>
+                    )
+                )}
             </Col>
         </Row>
     );

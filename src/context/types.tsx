@@ -25,7 +25,7 @@ export type Action =
     | { type: typeof SET_PROVIDER_ACTION; provider: RelayingServices }
     | { type: typeof SET_CHAIN_ID_ACTION; chainId: number }
     | { type: typeof SET_LOADER_ACTION; loader: boolean }
-    | { type: typeof SET_TOKEN_ACTION; token: ERC20Token }
+    | { type: typeof SET_TOKEN_ACTION; token: ERC20Token | undefined }
     | {
           type: typeof SET_SMART_WALLET_ACTION;
           smartWallet: SmartWalletWithBalance;
