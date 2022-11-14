@@ -91,8 +91,7 @@ const StoreReducer = (state: State, action: Action) => {
         case SET_PARTNERS_ACTION:
             return {
                 ...state,
-                worker: action.worker,
-                collector: action.collector,
+                feesReceiver: action.feesReceiver,
                 partners: action.partners
             };
         default:

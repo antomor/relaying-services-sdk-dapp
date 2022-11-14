@@ -167,11 +167,6 @@ class Utils {
     static getTransactionKey(chainId: number, address: string): string {
         return `${chainId}.${address}`;
     }
-
-    static getPartners(): Array<string> | undefined {
-        const partnerEnvVar = process.env.REACT_APP_CONTRACTS_PARTNERS;
-        return partnerEnvVar ? partnerEnvVar.split(',') : undefined;
-    }
 }
 
 export default Utils;

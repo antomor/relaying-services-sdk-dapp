@@ -21,7 +21,7 @@ import PartnerBalances from './components/PartnerBalances';
 import { useStore } from './context/context';
 import TransactionHistory from './modals/TransactionHistory';
 import Validate from './modals/Validate';
-import { Partner, SmartWalletWithBalance } from './types';
+import {  Partner, SmartWalletWithBalance } from './types';
 
 if (window.ethereum) {
     window.web3 = new Web3(window.ethereum);
@@ -38,27 +38,6 @@ function getEnvParamAsInt(value: string | undefined): number | undefined {
 function App() {
     const { state, dispatch } = useStore();
     const { chainId, account, loader, connected, provider, token } = state;
-
-    useEffect(() => {
-        const workerAddr = process.env.REACT_APP_CONTRACTS_RELAY_WORKER!;
-        const collectorAddr = process.env.REACT_APP_CONTRACTS_COLLECTOR;
-        const partnerAddresses = Utils.getPartners();
-        const partners = partnerAddresses
-            ? partnerAddresses.map<Partner>((address) => ({
-                  address,
-                  balance: '0'
-              }))
-            : [];
-
-        dispatch({
-            type: 'set_partners',
-            worker: { address: workerAddr, balance: '0' },
-            collector: collectorAddr
-                ? { address: collectorAddr, balance: '0' }
-                : undefined,
-            partners
-        });
-    }, []);
 
     const initProvider = async () => {
         try {
@@ -110,6 +89,18 @@ function App() {
                 loglevel: 1
             });
             dispatch({ type: 'set_provider', provider: relayingServices });
+            const [feesReceiverAddress, ...partnerAddresses] = await relayingServices.getPartners();
+            const partners = partnerAddresses
+            ? partnerAddresses.map<Partner>((address) => ({
+                  address,
+                  balance: '0'
+              }))
+            : [];
+            dispatch({
+                type: 'set_partners',
+                feesReceiver: { address: feesReceiverAddress, balance: '0' },
+                partners
+            });
         } catch (error) {
             console.error(error);
         }

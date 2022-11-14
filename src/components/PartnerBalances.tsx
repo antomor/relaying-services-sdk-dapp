@@ -22,7 +22,7 @@ function PartnerBalance({ label, balance, symbol }: PartnerBalanceProp) {
 function PartnerBalances() {
     const { state } = useStore();
 
-    const { worker, collector, partners, token } = state;
+    const { feesReceiver, partners, token } = state;
 
     return (
         <ul className='collection with-header' style={{ textAlign: 'left' }}>
@@ -30,17 +30,10 @@ function PartnerBalances() {
                 <h4>Balances</h4>
             </li>
             <PartnerBalance
-                label='Worker'
-                balance={worker!.balance}
+                label='Fees Receiver'
+                balance={feesReceiver!.balance}
                 symbol={token!.symbol!}
             />
-            {collector && (
-                <PartnerBalance
-                    label='Collector'
-                    balance={collector.balance}
-                    symbol={token!.symbol!}
-                />
-            )}
             {partners &&
                 partners.map((partner, index) => (
                     <PartnerBalance

@@ -30,8 +30,7 @@ const initialState: State = {
         validate: false
     },
     smartWallets: [],
-    worker: undefined,
-    collector: undefined,
+    feesReceiver: undefined,
     partners: []
 };
 
@@ -42,7 +41,7 @@ const Context = createContext<{ state: State; dispatch: Dispatch } | undefined>(
 function StoreProvider({ children }: ProviderProps) {
     const [state, dispatch] = useReducer(StoreReducer, initialState);
 
-    const { smartWallets, token, reload, worker, collector, partners } = state;
+    const { smartWallets, token, reload, feesReceiver, partners } = state;
 
     const getSmartWalletBalance = async (
         smartWallet: SmartWalletWithBalance
@@ -92,23 +91,22 @@ function StoreProvider({ children }: ProviderProps) {
     };
 
     const refreshPartnersBalances = useCallback(async () => {
-        if (worker && token) {
+        if (feesReceiver && token) {
             let localPartners: Partner[];
-            if (collector) {
-                localPartners = [worker, collector, ...partners];
+            if (feesReceiver) {
+                localPartners = [feesReceiver, ...partners];
             } else {
-                localPartners = [worker];
+                localPartners = [feesReceiver];
             }
             const updatedBalances = await Promise.all(
                 localPartners.map((partner) =>
                     getPartnerBalance(partner.address)
                 )
             );
-            const [newWorker, newCollector, ...newPartners] = updatedBalances;
+            const [newFeesReceiver, ...newPartners] = updatedBalances;
             dispatch({
                 type: 'set_partners',
-                worker: newWorker,
-                collector: newCollector,
+                feesReceiver: newFeesReceiver,
                 partners: newPartners
             });
         }

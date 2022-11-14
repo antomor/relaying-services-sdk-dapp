@@ -48,8 +48,7 @@ export type Action =
       }
     | {
           type: typeof SET_PARTNERS_ACTION;
-          worker: Partner;
-          collector: Partner | undefined;
+          feesReceiver: Partner;
           partners: Partner[];
       };
 
@@ -69,7 +68,6 @@ export type State = {
     reloadToken: boolean;
     modals: Modals;
     smartWallets: SmartWalletWithBalance[];
-    worker: Partner | undefined;
-    collector: Partner | undefined;
+    feesReceiver: Partner | undefined;
     partners: Partner[];
 };
