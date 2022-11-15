@@ -6,7 +6,7 @@ import {
 import { Modal, Col, Row, TextInput, Button } from 'react-materialize';
 import Utils, { ZERO_ADDRESS } from 'src/Utils';
 import 'src/modals/Deploy.css';
-import LoadingButton from 'src/modals/LoadingButton';
+import LoadingButton from 'src/components/LoadingButton';
 import { useStore } from 'src/context/context';
 
 type DeployInfo = {

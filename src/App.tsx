@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     DefaultRelayingServices,
     EnvelopingConfig,
@@ -17,11 +17,13 @@ import rLogin from 'src/rLogin';
 import Utils from 'src/Utils';
 import 'src/App.css';
 import Web3 from 'web3';
-import PartnerBalances from './components/PartnerBalances';
+
 import { useStore } from './context/context';
 import TransactionHistory from './modals/TransactionHistory';
 import Validate from './modals/Validate';
-import {  Partner, SmartWalletWithBalance } from './types';
+import { SmartWalletWithBalance } from './types';
+import Snackbar from './components/Snackbar';
+import PartnerBalances from './components/PartnerBalances';
 
 if (window.ethereum) {
     window.web3 = new Web3(window.ethereum);
@@ -37,7 +39,10 @@ function getEnvParamAsInt(value: string | undefined): number | undefined {
 
 function App() {
     const { state, dispatch } = useStore();
-    const { chainId, account, loader, connected, provider, token } = state;
+    const { chainId, account, loader, connected, provider, token, reload } =
+        state;
+
+    const [errorMessage, setErrorMessage] = useState('');
 
     const initProvider = async () => {
         try {
@@ -89,18 +94,6 @@ function App() {
                 loglevel: 1
             });
             dispatch({ type: 'set_provider', provider: relayingServices });
-            const [feesReceiverAddress, ...partnerAddresses] = await relayingServices.getPartners();
-            const partners = partnerAddresses
-            ? partnerAddresses.map<Partner>((address) => ({
-                  address,
-                  balance: '0'
-              }))
-            : [];
-            dispatch({
-                type: 'set_partners',
-                feesReceiver: { address: feesReceiverAddress, balance: '0' },
-                partners
-            });
         } catch (error) {
             console.error(error);
         }
@@ -114,6 +107,26 @@ function App() {
         dispatch({ type: 'set_smart_wallets', smartWallets: wallets });
         dispatch({ type: 'reload', reload: true });
     }, [account, chainId, dispatch]);
+
+    const checkServer = useCallback(async () => {
+        if (provider && reload) {
+            try {
+                const { ready } = await provider.getPingResponse();
+                dispatch({ type: 'reload_partners', reloadPartners: true });
+                if (!ready) {
+                    setErrorMessage('Server is not ready');
+                    return;
+                }
+                setErrorMessage('');
+            } catch (error) {
+                setErrorMessage('Server is not reachable');
+            }
+        }
+    }, [reload]);
+
+    useEffect(() => {
+        checkServer();
+    }, [checkServer]);
 
     const refreshAccount = async () => {
         const accounts = await Utils.getAccounts();
@@ -199,6 +212,10 @@ function App() {
                     <TransactionHistory />
                     <Validate />
                 </div>
+            )}
+
+            {errorMessage.length > 0 && (
+                <Snackbar message={errorMessage} position={2} />
             )}
         </div>
     );

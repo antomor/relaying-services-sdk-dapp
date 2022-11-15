@@ -18,7 +18,7 @@ import {
 } from 'react-materialize';
 import Utils from 'src/Utils';
 import { AbiItem } from 'web3-utils';
-import LoadingButton from 'src/modals/LoadingButton';
+import LoadingButton from 'src/components/LoadingButton';
 import { useStore } from 'src/context/context';
 
 type ExecuteInfo = {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Select } from 'react-materialize';
 import { useStore } from 'src/context/context';
+import Snackbar from './Snackbar';
 
 function AllowedTokens() {
     const { state, dispatch } = useStore();
@@ -43,6 +44,7 @@ function AllowedTokens() {
     };
 
     const queryTokens = async () => {
+        dispatch({ type: 'reload_token', reloadToken: false });
         const tokens = await provider!.getAllowedTokens();
         setAllowedTokens(tokens);
         if (tokens.length === 0) {
@@ -73,7 +75,6 @@ function AllowedTokens() {
         if (reloadToken) {
             queryTokens();
         }
-        dispatch({ type: 'reload_token', reloadToken: false });
     }, [reloadToken]);
 
     const handleChange = (event: any) => {
@@ -90,17 +91,7 @@ function AllowedTokens() {
                 ))}
             </Select>
             {showToast && (
-                <span
-                    className='toast'
-                    style={{
-                        position: 'absolute',
-                        bottom: '10%',
-                        right: '45%',
-                        top: 'unset'
-                    }}
-                >
-                    Not allowed tokens{' '}
-                </span>
+                <Snackbar message='Not Allowed Tokens' position={1} />
             )}
         </div>
     );

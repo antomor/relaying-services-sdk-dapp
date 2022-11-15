@@ -1,8 +1,9 @@
 import { RelayingServices, ERC20Token } from '@rsksmart/rif-relay-sdk';
 import { ReactNode } from 'react';
-import { Modals, SmartWalletWithBalance, Partner } from 'src/types';
+import { Modals, SmartWalletWithBalance } from 'src/types';
 
 export const RELOAD_ACTION = 'reload';
+export const RELOAD_PARTNERS_ACTION = 'reload_partners';
 export const RELOAD_TOKEN_ACTION = 'reload_token';
 export const SET_ACCOUNT_ACTION = 'set_account';
 export const SET_CONNECTED_ACTION = 'set_connected';
@@ -15,10 +16,10 @@ export const SET_SMART_WALLETS_ACTION = 'set_smart_wallets';
 export const ADD_SMART_WALLET_ACTION = 'add_smart_wallet';
 export const UPDATE_SMART_WALLET_ACTION = 'update_smart_wallet';
 export const SET_MODALS_ACTION = 'set_modals';
-export const SET_PARTNERS_ACTION = 'set_partners';
 
 export type Action =
     | { type: typeof RELOAD_ACTION; reload: boolean }
+    | { type: typeof RELOAD_PARTNERS_ACTION; reloadPartners: boolean }
     | { type: typeof RELOAD_TOKEN_ACTION; reloadToken: boolean }
     | { type: typeof SET_ACCOUNT_ACTION; account: string }
     | { type: typeof SET_CONNECTED_ACTION; connected: boolean }
@@ -45,11 +46,6 @@ export type Action =
     | {
           type: typeof SET_MODALS_ACTION;
           modal: Partial<Modals>;
-      }
-    | {
-          type: typeof SET_PARTNERS_ACTION;
-          feesReceiver: Partner;
-          partners: Partner[];
       };
 
 export type Dispatch = (action: Action) => void;
@@ -65,9 +61,8 @@ export type State = {
     token: ERC20Token | undefined;
     smartWallet: SmartWalletWithBalance | undefined;
     reload: boolean;
+    reloadPartners: boolean;
     reloadToken: boolean;
     modals: Modals;
     smartWallets: SmartWalletWithBalance[];
-    feesReceiver: Partner | undefined;
-    partners: Partner[];
 };

@@ -3,7 +3,7 @@ import { Button, Col, Icon, Row } from 'react-materialize';
 import 'src/components/ActionBar.css';
 import AllowedTokens from 'src/components/AllowedTokens';
 import { useStore } from 'src/context/context';
-import LoadingButton from 'src/modals/LoadingButton';
+import LoadingButton from 'src/components/LoadingButton';
 
 function ActionBar() {
     const { state, dispatch } = useStore();

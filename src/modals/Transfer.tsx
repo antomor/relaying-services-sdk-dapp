@@ -16,7 +16,7 @@ import {
     Icon,
     Switch
 } from 'react-materialize';
-import LoadingButton from 'src/modals/LoadingButton';
+import LoadingButton from 'src/components/LoadingButton';
 import { useStore } from 'src/context/context';
 
 type TransferInfo = {

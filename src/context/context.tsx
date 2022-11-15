@@ -8,7 +8,7 @@ import {
 } from 'react';
 import StoreReducer from 'src/context/reducer';
 import { Dispatch, ProviderProps, State } from 'src/context/types';
-import { Partner, SmartWalletWithBalance } from 'src/types';
+import { SmartWalletWithBalance } from 'src/types';
 import Utils from 'src/Utils';
 
 const initialState: State = {
@@ -20,6 +20,7 @@ const initialState: State = {
     token: undefined,
     smartWallet: undefined,
     reload: false,
+    reloadPartners: false,
     reloadToken: false,
     modals: {
         deploy: false,
@@ -29,9 +30,7 @@ const initialState: State = {
         transactions: false,
         validate: false
     },
-    smartWallets: [],
-    feesReceiver: undefined,
-    partners: []
+    smartWallets: []
 };
 
 const Context = createContext<{ state: State; dispatch: Dispatch } | undefined>(
@@ -41,7 +40,7 @@ const Context = createContext<{ state: State; dispatch: Dispatch } | undefined>(
 function StoreProvider({ children }: ProviderProps) {
     const [state, dispatch] = useReducer(StoreReducer, initialState);
 
-    const { smartWallets, token, reload, feesReceiver, partners } = state;
+    const { smartWallets, token, reload } = state;
 
     const getSmartWalletBalance = async (
         smartWallet: SmartWalletWithBalance
@@ -67,7 +66,7 @@ function StoreProvider({ children }: ProviderProps) {
     };
 
     const refreshSmartWallets = useCallback(async () => {
-        if (token) {
+        if (token && reload) {
             const updatedBalances = await Promise.all(
                 smartWallets.map((wallet: SmartWalletWithBalance) =>
                     getSmartWalletBalance(wallet)
@@ -80,48 +79,13 @@ function StoreProvider({ children }: ProviderProps) {
         }
     }, [token, reload]);
 
-    const getPartnerBalance = async (address: string) => {
-        try {
-            const balance = await Utils.getTokenBalance(address, token!);
-            return { address, balance };
-        } catch (error) {
-            console.error(error);
-            return { address, balance: '-' };
-        }
-    };
-
-    const refreshPartnersBalances = useCallback(async () => {
-        if (feesReceiver && token) {
-            let localPartners: Partner[];
-            if (feesReceiver) {
-                localPartners = [feesReceiver, ...partners];
-            } else {
-                localPartners = [feesReceiver];
-            }
-            const updatedBalances = await Promise.all(
-                localPartners.map((partner) =>
-                    getPartnerBalance(partner.address)
-                )
-            );
-            const [newFeesReceiver, ...newPartners] = updatedBalances;
-            dispatch({
-                type: 'set_partners',
-                feesReceiver: newFeesReceiver,
-                partners: newPartners
-            });
-        }
-    }, [token, reload]);
-
     useEffect(() => {
-        if (reload || token) {
-            refreshSmartWallets();
-            refreshPartnersBalances();
-            dispatch({
-                type: 'reload',
-                reload: false
-            });
-        }
-    }, [refreshSmartWallets, refreshPartnersBalances]);
+        refreshSmartWallets();
+        dispatch({
+            type: 'reload',
+            reload: false
+        });
+    }, [refreshSmartWallets]);
 
     const value = useMemo(() => ({ state, dispatch }), [state]);
     return <Context.Provider value={value}>{children}</Context.Provider>;

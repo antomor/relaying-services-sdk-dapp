@@ -36,6 +36,10 @@ function Header(props: HeaderProps) {
             type: 'reload_token',
             reloadToken: true
         });
+        dispatch({
+            type: 'reload_partners',
+            reloadPartners: true
+        });
     };
 
     return (

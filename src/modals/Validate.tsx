@@ -8,7 +8,7 @@ import {
     Switch,
     TextInput
 } from 'react-materialize';
-import LoadingButton from 'src/modals/LoadingButton';
+import LoadingButton from 'src/components/LoadingButton';
 import Utils from 'src/Utils';
 import { useStore } from 'src/context/context';
 import { SmartWalletWithBalance } from 'src/types';
