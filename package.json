@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@openeth/truffle-typings": "0.0.6",
-    "@rsksmart/rif-relay-sdk": "github:rsksmart/rif-relay-sdk#PP-504/remove-worker-configuration",
+    "@rsksmart/rif-relay-sdk": "1.0.0-alpha.3",
     "@rsksmart/rlogin": "^1.4.0-beta.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
