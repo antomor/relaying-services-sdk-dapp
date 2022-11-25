@@ -1,13 +1,13 @@
-name: CD for RIF-Relay-Sample-Dapp
+name: Testnet CD
 
 on:
   push:
-    branches: [dev]
+    branches: [dev, PP-575/update-dapp]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: QA
+    environment: TESTNET
 
     steps:
     - name: Checkout
@@ -16,9 +16,9 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.QA_AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.QA_AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.QA_AWS_REGION }}
+        aws-access-key-id: ${{ secrets.TESTNET_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.TESTNET_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.TESTNET_AWS_REGION }}
 
     - name: Setup Node 16
       uses: actions/setup-node@v1
@@ -31,12 +31,12 @@ jobs:
 
     - name: Build site
       run: |
-        npm run build:qa
+        npm run build:TESTNET
 
     - name: Deploy site to S3
       run: |
-        aws s3 sync --delete --only-show-errors build/ ${{ secrets.QA_S3_BUCKET }}
+        aws s3 sync --delete --only-show-errors build/ ${{ secrets.TESTNET_S3_BUCKET }}
 
     - name: Invalidate CloudFront cache
       run: |
-        aws cloudfront create-invalidation --distribution-id ${{ secrets.QA_CLOUDFRONT_DISTRIBUTION }} --paths "/*"
+        aws cloudfront create-invalidation --distribution-id ${{ secrets.TESTNET_CLOUDFRONT_DISTRIBUTION }} --paths "/*"
