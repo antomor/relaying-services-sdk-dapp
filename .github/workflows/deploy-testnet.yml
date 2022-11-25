@@ -1,8 +1,8 @@
 name: Testnet CD
 
 on:
-  push:
-    branches: [dev, PP-575/update-dapp]
+  release:
+    types: [published]
 
 jobs:
   deploy:
