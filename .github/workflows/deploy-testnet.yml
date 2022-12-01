@@ -1,16 +1,9 @@
 name: Testnet CD
 
 on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to run tests against'
-        required: true
-        default: 'TESTNET'
-        type: choice
-        options:
-          - TESTNET
-          - QA
+  push:
+    tags:
+      - '**-beta'
 
 jobs:
   deploy:
