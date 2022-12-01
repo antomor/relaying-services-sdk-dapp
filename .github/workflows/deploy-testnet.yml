@@ -3,7 +3,7 @@ name: Testnet CD
 on:
   push:
     tags:
-      - '**-beta'
+      - '**-beta**'
 
 jobs:
   deploy:
