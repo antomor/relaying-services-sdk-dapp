@@ -1,8 +1,16 @@
 name: Testnet CD
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to run tests against'
+        required: true
+        default: 'TESTNET'
+        type: choice
+        options:
+          - TESTNET
+          - QA
 
 jobs:
   deploy:
