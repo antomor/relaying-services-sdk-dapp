@@ -32,7 +32,7 @@ jobs:
 
     - name: Build site
       run: |
-        npm run build
+        npm run build:testnet
 
     - name: Deploy site to S3
       run: |
