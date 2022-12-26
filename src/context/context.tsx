@@ -7,9 +7,10 @@ import {
     useReducer
 } from 'react';
 import StoreReducer from 'src/context/reducer';
-import { Dispatch, ProviderProps, State } from 'src/context/types';
-import { SmartWalletWithBalance } from 'src/types';
-import Utils from 'src/Utils';
+import type { Dispatch, ProviderProps, State } from 'src/context/types';
+import type { SmartWallet } from 'src/types';
+import { getBalance, getTokenBalance } from 'src/Utils';
+
 
 const initialState: State = {
     account: '',
@@ -30,7 +31,8 @@ const initialState: State = {
         transactions: false,
         validate: false
     },
-    smartWallets: []
+    smartWallets: [],
+    relayClient: undefined
 };
 
 const Context = createContext<{ state: State; dispatch: Dispatch } | undefined>(
@@ -40,15 +42,15 @@ const Context = createContext<{ state: State; dispatch: Dispatch } | undefined>(
 function StoreProvider({ children }: ProviderProps) {
     const [state, dispatch] = useReducer(StoreReducer, initialState);
 
-    const { smartWallets, token, reload } = state;
+    const { smartWallets, token, reload, provider } = state;
 
     const getSmartWalletBalance = async (
-        smartWallet: SmartWalletWithBalance
-    ): Promise<SmartWalletWithBalance> => {
+        smartWallet: SmartWallet
+    ): Promise<SmartWallet> => {
         try {
             const [tokenBalance, rbtcBalance] = await Promise.all([
-                await Utils.getTokenBalance(smartWallet.address, token!),
-                await Utils.getBalance(smartWallet.address)
+                await getTokenBalance(token!, smartWallet.address),
+                await getBalance(provider!, smartWallet.address)
             ]);
             return {
                 ...smartWallet,
@@ -68,7 +70,7 @@ function StoreProvider({ children }: ProviderProps) {
     const refreshSmartWallets = useCallback(async () => {
         if (token && reload) {
             const updatedBalances = await Promise.all(
-                smartWallets.map((wallet: SmartWalletWithBalance) =>
+                smartWallets.map((wallet: SmartWallet) =>
                     getSmartWalletBalance(wallet)
                 )
             );

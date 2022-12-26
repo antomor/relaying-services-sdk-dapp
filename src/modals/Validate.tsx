@@ -9,9 +9,9 @@ import {
     TextInput
 } from 'react-materialize';
 import LoadingButton from 'src/components/LoadingButton';
-import Utils from 'src/Utils';
 import { useStore } from 'src/context/context';
-import { SmartWalletWithBalance } from 'src/types';
+import type { SmartWallet } from 'src/types';
+import { addLocalSmartWallet, addressHasCode, checkAddress } from 'src/Utils';
 
 type ValidateInfo = {
     check: boolean;
@@ -23,7 +23,7 @@ type ValidateInfoKey = keyof ValidateInfo;
 function Validate() {
     const { state, dispatch } = useStore();
 
-    const { chainId, account, smartWallets, modals, provider } = state;
+    const { chainId, account, smartWallets, modals, provider, relayClient } = state;
 
     const initialState: ValidateInfo = {
         check: false,
@@ -47,11 +47,11 @@ function Validate() {
         setValidate(initialState);
     };
 
-    const validateSmartWallets = (address: string): Boolean => {
-        const existing = smartWallets.find(
-            (x: SmartWalletWithBalance) => x.address === address
+    const smartWalletExists = (address: string): Boolean => {
+        const exists = smartWallets.find(
+            (x: SmartWallet) => x.address === address
         );
-        if (existing) {
+        if (exists) {
             dispatch({ type: 'set_loader', loader: false });
             alert('Smart Wallet already included');
             return true;
@@ -63,21 +63,21 @@ function Validate() {
         setValidateLoading(true);
         try {
             dispatch({ type: 'set_loader', loader: true });
-            if (validateSmartWallets(validate.address)) {
+            if (smartWalletExists(validate.address)) {
                 return;
             }
-            // TO-DO: Check if it can be re-factored to return a value
-            await provider!.validateSmartWallet(validate.address);
-            const smartWallet: SmartWalletWithBalance = {
-                index: -1,
-                address: validate.address,
-                deployed: true,
-                tokenBalance: '0',
-                rbtcBalance: '0'
-            };
-            dispatch({ type: 'add_smart_wallet', smartWallet });
-            dispatch({ type: 'reload', reload: true });
-            Utils.addLocalSmartWallet(chainId, account, smartWallet);
+            if (await relayClient!.isSmartWalletOwner(validate.address, account)) {
+                const smartWallet: SmartWallet = {
+                    index: -1,
+                    address: validate.address,
+                    isDeployed: true,
+                    tokenBalance: '0',
+                    rbtcBalance: '0'
+                };
+                dispatch({ type: 'add_smart_wallet', smartWallet });
+                dispatch({ type: 'reload', reload: true });
+                addLocalSmartWallet(chainId, account, smartWallet);
+            }
             close();
         } catch (error) {
             dispatch({ type: 'set_loader', loader: false });
@@ -93,21 +93,26 @@ function Validate() {
 
     const pasteRecipientAddress = async () => {
         const address = await navigator.clipboard.readText();
-        if (Utils.checkAddress(address.toLowerCase())) {
+        if (checkAddress(address.toLowerCase())) {
             changeValue(address, 'address');
         }
     };
 
     const createSmartWallet = async () => {
         if (provider) {
-            const smartWallet = await provider.generateSmartWallet(
-                Number(validate.address)
+            const index =  Number(validate.address);
+            const address = await relayClient!.getSmartWalletAddress(
+                account,
+                index
             );
-            if (validateSmartWallets(smartWallet.address)) {
+            if (smartWalletExists(address)) {
                 return;
             }
-            const newSmartWallet = {
-                ...smartWallet,
+            const isDeployed = await addressHasCode(provider, address);
+            const newSmartWallet: SmartWallet = {
+                address,
+                index,
+                isDeployed,
                 tokenBalance: '0',
                 rbtcBalance: '0'
             };
@@ -116,8 +121,8 @@ function Validate() {
                 smartWallet: newSmartWallet
             });
             dispatch({ type: 'reload', reload: true });
-            if (smartWallet.deployed) {
-                Utils.addLocalSmartWallet(chainId, account, newSmartWallet);
+            if (newSmartWallet.isDeployed) {
+                addLocalSmartWallet(chainId, account, newSmartWallet);
             }
             close();
         }
@@ -162,9 +167,8 @@ function Validate() {
                     <Col s={7}>
                         <TextInput
                             label={validate.check ? 'Address' : 'Index'}
-                            placeholder={`Smart wallet ${
-                                validate.check ? 'address' : 'index'
-                            }`}
+                            placeholder={`Smart wallet ${validate.check ? 'address' : 'index'
+                                }`}
                             value={validate.address}
                             type={validate.check ? 'text' : 'number'}
                             validate

@@ -14,6 +14,7 @@ import {
     ADD_SMART_WALLET_ACTION,
     UPDATE_SMART_WALLET_ACTION,
     SET_MODALS_ACTION,
+    SET_RELAY_CLIENT_ACTION,
     State
 } from 'src/context/types';
 
@@ -92,6 +93,11 @@ const StoreReducer = (state: State, action: Action) => {
             return {
                 ...state,
                 modals: { ...state.modals, ...action.modal }
+            };
+        case SET_RELAY_CLIENT_ACTION:
+            return {
+                ...state,
+                relayClient: action.relayClient
             };
         default:
             return state;

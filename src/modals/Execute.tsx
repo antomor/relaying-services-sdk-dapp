@@ -1,11 +1,4 @@
 import { useState } from 'react';
-import {
-    RelayGasEstimationOptions,
-    RelayingTransactionOptions,
-    RelayingResult,
-    RelayEstimation
-} from '@rsksmart/rif-relay-sdk';
-import IForwarderAbi from 'src/contracts/IForwarderAbi.json';
 import 'src/modals/Execute.css';
 import {
     Modal,
@@ -16,10 +9,12 @@ import {
     Icon,
     Switch
 } from 'react-materialize';
-import Utils from 'src/Utils';
-import { AbiItem } from 'web3-utils';
+import { addTransaction, checkAddress } from 'src/Utils';
 import LoadingButton from 'src/components/LoadingButton';
 import { useStore } from 'src/context/context';
+import { BigNumber, Transaction, utils } from 'ethers';
+import { IForwarder__factory } from '@rsksmart/rif-relay-contracts';
+import type { RelayEstimation, UserDefinedEnvelopingRequest } from '@rsksmart/rif-relay-client';
 
 type ExecuteInfo = {
     fees: string;
@@ -34,16 +29,16 @@ type ExecuteInfoKey = keyof ExecuteInfo;
 
 function Execute() {
     const { state, dispatch } = useStore();
-    const { modals, account, token, smartWallet, provider, chainId } = state;
+    const { modals, account, token, smartWallet, provider, chainId, relayClient } = state;
 
     const [results, setResults] = useState('');
 
     const initialState: ExecuteInfo = {
         check: false,
         show: false,
-        address: '',
-        value: '',
-        function: '',
+        address: '0x1Af2844A588759D0DE58abD568ADD96BB8B3B6D8',
+        value: '0x2250a8CA897d2637284Bd0c6BA59F00215F5d7cd,1000000000000000000',
+        function: 'transfer(address,uint256)',
         fees: ''
     };
 
@@ -51,41 +46,21 @@ function Execute() {
     const [executeLoading, setExecuteLoading] = useState(false);
     const [estimateLoading, setEstimateLoading] = useState(false);
 
-    const checkAddress = (address: string) => {
-        if (!Utils.checkAddress(address.toLowerCase())) {
-            throw Error('Contract address is not valid');
-        }
-    };
-
+    /*     const handleCheckAddress = (address: string) => {
+            if (!checkAddress(address.toLowerCase())) {
+                throw Error('Contract address is not valid');
+            }
+        };
+     */
     const calculateAbiEncodedFunction = () => {
-        const contractFunction = execute.function.trim();
-        const functionSig =
-            web3.eth.abi.encodeFunctionSignature(contractFunction);
+        const functionTrimmed = execute.function.trim();
+        const iface = new utils.Interface([`function ${functionTrimmed}`]);
 
-        const paramsStart = contractFunction.indexOf('(', 0);
-        const paramsEnd = contractFunction.indexOf(')', paramsStart);
+        const [functionName] = functionTrimmed.split(/[()]+/);
 
-        let funcData = functionSig;
+        const functionParams = execute.value.split(',');
 
-        if (paramsEnd > paramsStart + 1) {
-            // There are params
-            const paramsStr = contractFunction.substring(
-                paramsStart + 1,
-                paramsEnd
-            );
-
-            const paramsTypes = paramsStr.split(',');
-            const paramsValues = execute.value.split(',');
-
-            const encodedParamVals = web3.eth.abi.encodeParameters(
-                paramsTypes,
-                paramsValues
-            );
-            funcData = funcData.concat(
-                encodedParamVals.slice(2, encodedParamVals.length)
-            );
-        }
-        return funcData;
+        return iface.encodeFunctionData(functionName!, functionParams);
     };
 
     const close = () => {
@@ -94,50 +69,20 @@ function Execute() {
         setExecute(initialState);
     };
 
-    const relayTransactionDirectExecution = async (
+    const directExecute = async (
         toAddress: string,
         swAddress: string,
         abiEncodedTx: string
     ) => {
-        const swContract = new web3.eth.Contract(
-            IForwarderAbi as AbiItem[],
-            swAddress
-        );
+        const iForwarder = IForwarder__factory.connect(swAddress, provider!.getSigner());
 
-        const transaction = swContract.methods
-            .directExecute(toAddress, abiEncodedTx)
-            .send(
-                {
-                    from: account
-                },
-                // TODO: we may add the types
-                async (error: any, data: any) => {
-                    if (error !== undefined && error !== null) {
-                        throw error;
-                    } else {
-                        const txHash = data;
-                        console.log(`Your TxHash is ${txHash}`);
+        const transaction = await iForwarder.directExecute(toAddress, abiEncodedTx, {
+            gasPrice: '60000000'
+        });
 
-                        // checks to verify that the contract was executed properly
-                        const receipt = await Utils.getReceipt(txHash);
-
-                        console.log(`Your receipt is`);
-                        console.log(receipt);
-
-                        const trxData = await web3.eth.getTransaction(txHash);
-                        console.log('Your tx data is');
-                        console.log(trxData);
-                        if (execute.show) {
-                            setResults(JSON.stringify(transaction));
-                        } else {
-                            close();
-                        }
-                    }
-                }
-            );
-        Utils.addTransaction(smartWallet!.address, chainId, {
+        addTransaction(smartWallet!.address, chainId, {
             date: new Date(),
-            id: transaction.transactionHash,
+            id: transaction.hash,
             type: 'Execute RBTC'
         });
     };
@@ -149,47 +94,45 @@ function Execute() {
     const handleExecuteSmartWalletButtonClick = async () => {
         setExecuteLoading(true);
         try {
-            checkAddress(execute.address);
+
             const funcData = calculateAbiEncodedFunction();
             const destinationContract = execute.address;
             const swAddress = smartWallet!.address;
 
             if (execute.check) {
-                await relayTransactionDirectExecution(
+                await directExecute(
                     destinationContract,
                     swAddress,
                     funcData
                 );
             } else {
                 const tokenAmount = execute.fees === '' ? '0' : execute.fees;
-                const relayTransactionOpts: RelayingTransactionOptions = {
-                    unsignedTx: {
+                const relayTransactionOpts: UserDefinedEnvelopingRequest = {
+                    request: {
+                        from: account,
+                        value: '0',
                         data: funcData,
-                        to: execute.address
+                        to: execute.address,
+                        tokenAmount,
+                        tokenContract: token!.instance.address,
+                        validUntilTime: 0
                     },
-                    smartWallet: smartWallet!,
-                    tokenAmount,
-                    tokenAddress: token!.instance.address,
-                    transactionDetails: {
-                        to: execute.address
+                    relayData: {
+                        callForwarder: smartWallet!.address
                     }
                 };
-                const result: RelayingResult = await provider!.relayTransaction(
-                    relayTransactionOpts
-                );
 
-                const txHash: string = result
-                    .transaction!.hash(true)
-                    .toString('hex');
 
-                Utils.addTransaction(smartWallet!.address, chainId, {
+                const transaction: Transaction = await relayClient!.relayTransaction(relayTransactionOpts, {});
+
+                addTransaction(smartWallet!.address, chainId, {
                     date: new Date(),
-                    id: txHash,
+                    id: transaction.hash!,
                     type: `Execute ${token!.symbol}`
                 });
                 dispatch({ type: 'reload', reload: true });
                 if (execute.show) {
-                    setResults(JSON.stringify(result?.transaction));
+                    setResults(JSON.stringify(transaction));
                 } else {
                     close();
                 }
@@ -208,15 +151,13 @@ function Execute() {
         swAddress: string,
         toAddress: string,
         abiEncodedTx: string
-    ): Promise<BN> => {
-        const swContract = new web3.eth.Contract(
-            IForwarderAbi as AbiItem[],
-            swAddress
-        );
+    ): Promise<BigNumber> => {
 
-        const estimate = await swContract.methods
+        const iForwarder = IForwarder__factory.connect(swAddress, provider!);
+
+        const estimate = await iForwarder.estimateGas
             .directExecute(toAddress, abiEncodedTx)
-            .estimateGas({ from: account });
+
         return estimate;
     };
 
@@ -228,7 +169,7 @@ function Execute() {
             const destinationContract = execute.address;
             const swAddress = smartWallet!.address;
 
-            if (execute.check === true) {
+            if (execute.check) {
                 const result = await estimateDirectExecution(
                     swAddress,
                     destinationContract,
@@ -236,19 +177,28 @@ function Execute() {
                 );
                 changeValue(result.toString(), 'fees');
             } else {
-                const opts: RelayGasEstimationOptions = {
-                    destinationContract,
-                    smartWalletAddress: swAddress,
-                    tokenFees: '0',
-                    abiEncodedTx: funcData,
-                    tokenAddress: token!.instance.address,
-                    isLinearEstimation: true
+
+
+                const relayTransactionOpts: UserDefinedEnvelopingRequest = {
+                    request: {
+                        from: account,
+                        value: '0',
+                        data: funcData,
+                        to: destinationContract,
+                        tokenAmount: '0',
+                        tokenContract: token!.instance.address,
+                        validUntilTime: 0
+                    },
+                    relayData: {
+                        callForwarder: smartWallet!.address
+                    }
                 };
 
-                const estimation: RelayEstimation =
-                    await provider!.estimateMaxPossibleGas(opts);
-
-                console.log('estimation', estimation);
+                const estimation: RelayEstimation = await relayClient!.estimateTransaction(
+                    relayTransactionOpts
+                    ,
+                    {}
+                );
 
                 changeValue(estimation.requiredTokenAmount, 'fees');
             }
@@ -264,7 +214,7 @@ function Execute() {
 
     const pasteRecipientAddress = async () => {
         const address = await navigator.clipboard.readText();
-        if (Utils.checkAddress(address.toLowerCase())) {
+        if (checkAddress(address.toLowerCase())) {
             changeValue(address, 'address');
         }
     };

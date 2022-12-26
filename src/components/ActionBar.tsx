@@ -4,11 +4,12 @@ import 'src/components/ActionBar.css';
 import AllowedTokens from 'src/components/AllowedTokens';
 import { useStore } from 'src/context/context';
 import LoadingButton from 'src/components/LoadingButton';
+import { getERC20TokenPrice } from 'src/Utils';
 
 function ActionBar() {
     const { state, dispatch } = useStore();
 
-    const { token, provider, reload } = state;
+    const { token, reload } = state;
 
     const [tokenPrice, setTokenPrice] = useState('-');
 
@@ -22,7 +23,7 @@ function ActionBar() {
         if (token) {
             setPriceLoading(true);
             try {
-                const price = await provider!.getERC20TokenPrice(
+                const price = await getERC20TokenPrice(
                     token!,
                     'RBTC'
                 );

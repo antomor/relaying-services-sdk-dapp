@@ -1,8 +1,18 @@
-import { SmartWallet } from '@rsksmart/rif-relay-sdk';
+import type { ERC20 } from "@rsksmart/rif-relay-contracts";
 
-export interface SmartWalletWithBalance extends SmartWallet {
+export type SmartWallet = {
+    index: number;
+    address: string;
+    isDeployed: boolean;
     tokenBalance: string;
     rbtcBalance: string;
+}
+
+export type ERC20Token = {
+    instance: ERC20;
+    symbol: string;
+    name: string;
+    decimals: number;
 }
 
 export type Partner = {
@@ -19,7 +29,7 @@ export type Modals = {
     validate: boolean;
 };
 
-export type Transaction = {
+export type LocalTransaction = {
     date: Date;
     id: string;
     type: string;

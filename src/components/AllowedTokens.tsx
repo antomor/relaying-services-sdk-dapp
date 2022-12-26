@@ -1,22 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Select } from 'react-materialize';
 import { useStore } from 'src/context/context';
+import { getAllowedTokens, getERC20Token } from 'src/Utils';
 import Snackbar from './Snackbar';
 
 function AllowedTokens() {
     const { state, dispatch } = useStore();
 
-    const { token, provider, reloadToken } = state;
+    const { token, reloadToken, provider } = state;
 
     const [allowedTokens, setAllowedTokens] = useState<Array<string>>([]);
 
     const [showToast, setShowToast] = useState(false);
 
     const setToken = async (newToken: string) => {
-        const erc20Token = await provider!.getERC20Token(newToken, {
-            decimals: true,
-            symbol: true
-        });
+        const erc20Token = await getERC20Token(provider!, newToken);
         dispatch({
             type: 'set_token',
             token: erc20Token
@@ -45,7 +43,7 @@ function AllowedTokens() {
 
     const queryTokens = async () => {
         dispatch({ type: 'reload_token', reloadToken: false });
-        const tokens = await provider!.getAllowedTokens();
+        const tokens = await getAllowedTokens(provider!);
         setAllowedTokens(tokens);
         if (tokens.length === 0) {
             setShowToast(true);
@@ -60,7 +58,7 @@ function AllowedTokens() {
         }
         if (verifyToken(tokens)) {
             setShowToast(false);
-            setToken(tokens[0]);
+            setToken(tokens[0]!);
         }
     };
 

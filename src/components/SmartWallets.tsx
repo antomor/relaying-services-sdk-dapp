@@ -1,4 +1,4 @@
-import { Modals, SmartWalletWithBalance } from 'src/types';
+import type { Modals, SmartWallet } from 'src/types';
 import 'src/components/SmartWallets.css';
 import { Col, Row, Button, Icon } from 'react-materialize';
 import { useStore } from 'src/context/context';
@@ -6,7 +6,7 @@ import { useStore } from 'src/context/context';
 type ModalsKey = keyof Modals;
 
 type SmartWalletComponentProp = {
-    smartWallet: SmartWalletWithBalance;
+    smartWallet: SmartWallet;
 };
 
 function SmartWalletComponent({ smartWallet }: SmartWalletComponentProp) {
@@ -19,7 +19,7 @@ function SmartWalletComponent({ smartWallet }: SmartWalletComponentProp) {
     }
 
     function openModal(
-        newSmartWallet: SmartWalletWithBalance,
+        newSmartWallet: SmartWallet,
         modal: ModalsKey
     ) {
         dispatch({ type: 'set_smart_wallet', smartWallet: newSmartWallet });
@@ -34,7 +34,7 @@ function SmartWalletComponent({ smartWallet }: SmartWalletComponentProp) {
                     className='indigo accent-2'
                     tooltip='Deploy'
                     floating
-                    disabled={smartWallet.deployed}
+                    disabled={smartWallet.isDeployed}
                     onClick={() => {
                         openModal(smartWallet, 'deploy');
                     }}
@@ -74,7 +74,7 @@ function SmartWalletComponent({ smartWallet }: SmartWalletComponentProp) {
                             className='indigo accent-2'
                             tooltip='Transfer'
                             floating
-                            disabled={!smartWallet.deployed}
+                            disabled={!smartWallet.isDeployed}
                             onClick={() => {
                                 openModal(smartWallet, 'transfer');
                             }}
@@ -101,7 +101,7 @@ function SmartWalletComponent({ smartWallet }: SmartWalletComponentProp) {
                             className='indigo accent-2'
                             tooltip='Execute'
                             floating
-                            disabled={!smartWallet.deployed}
+                            disabled={!smartWallet.isDeployed}
                             onClick={() => {
                                 openModal(smartWallet, 'execute');
                             }}
@@ -115,7 +115,7 @@ function SmartWalletComponent({ smartWallet }: SmartWalletComponentProp) {
                             className='indigo accent-2'
                             tooltip='Transactions'
                             floating
-                            disabled={!smartWallet.deployed}
+                            disabled={!smartWallet.isDeployed}
                             onClick={() => {
                                 openModal(smartWallet, 'transactions');
                             }}
@@ -154,7 +154,7 @@ function SmartWallets() {
                     </h6>
                 </Col>
             </Row>
-            {smartWallets.map((smartWallet: SmartWalletWithBalance) => (
+            {smartWallets.map((smartWallet: SmartWallet) => (
                 <Row key={smartWallet.address} className='space-row'>
                     <SmartWalletComponent smartWallet={smartWallet} />
                 </Row>

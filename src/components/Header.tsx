@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button, Col, Icon, Row } from 'react-materialize';
 import 'src/components/Header.css';
 import { useStore } from 'src/context/context';
-import Utils from 'src/Utils';
+import { getBalance } from 'src/Utils';
 
 type HeaderProps = {
     connect: () => Promise<void>;
@@ -11,7 +11,7 @@ type HeaderProps = {
 function Header(props: HeaderProps) {
     const { state, dispatch } = useStore();
 
-    const { account, connected, chainId, reload } = state;
+    const { account, connected, chainId, reload, provider } = state;
 
     const { connect } = props;
 
@@ -22,7 +22,7 @@ function Header(props: HeaderProps) {
             return;
         }
         (async () => {
-            const currentBalance = await Utils.getBalance(account);
+            const currentBalance = await getBalance(provider!, account);
             setBalance(`${currentBalance} RBTC  `);
         })();
     }, [account, reload]);
@@ -47,7 +47,7 @@ function Header(props: HeaderProps) {
             <Row
                 className={`nav vertical-align ${
                     chainId.toString() ===
-                    process.env.REACT_APP_RIF_RELAY_CHAIN_ID
+                    process.env['REACT_APP_RIF_RELAY_CHAIN_ID']
                         ? 'connected-network'
                         : ''
                 }

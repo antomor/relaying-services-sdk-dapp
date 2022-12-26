@@ -1,11 +1,4 @@
 import { useState } from 'react';
-import {
-    RelayGasEstimationOptions,
-    RelayingTransactionOptions,
-    RelayingResult,
-    RelayEstimation
-} from '@rsksmart/rif-relay-sdk';
-import Utils from 'src/Utils';
 import 'src/modals/Transfer.css';
 import {
     Modal,
@@ -18,6 +11,9 @@ import {
 } from 'react-materialize';
 import LoadingButton from 'src/components/LoadingButton';
 import { useStore } from 'src/context/context';
+import type { Transaction } from 'ethers';
+import type { RelayEstimation, UserDefinedEnvelopingRequest } from '@rsksmart/rif-relay-client';
+import { addTransaction, checkAddress } from 'src/Utils';
 
 type TransferInfo = {
     fees: string;
@@ -31,7 +27,7 @@ type TransferInfoKey = keyof TransferInfo;
 function Transfer() {
     const { state, dispatch } = useStore();
 
-    const { modals, account, token, smartWallet, provider, chainId } = state;
+    const { modals, account, token, smartWallet, provider, chainId, relayClient } = state;
 
     const [transferLoading, setTransferLoading] = useState(false);
     const [estimateLoading, setEstimateLoading] = useState(false);
@@ -63,12 +59,11 @@ function Transfer() {
         if (account) {
             setTransferLoading(true);
             try {
-                const amount = await Utils.toWei(transfer.amount.toString());
-                await Utils.sendTransaction({
+                await provider!.getSigner().sendTransaction({
                     from: account, // currentSmartWallet.address,
                     to: transfer.address,
-                    value: amount,
-                    data: '0x'
+                    value: transfer.amount,
+                    gasPrice: '60000000'
                 });
                 close();
             } catch (error) {
@@ -84,7 +79,7 @@ function Transfer() {
 
     const pasteRecipientAddress = async () => {
         const address = await navigator.clipboard.readText();
-        if (Utils.checkAddress(address.toLowerCase())) {
+        if (checkAddress(address.toLowerCase())) {
             changeValue(address, 'address');
         }
     };
@@ -92,37 +87,37 @@ function Transfer() {
     const transferSmartWalletButtonClick = async () => {
         setTransferLoading(true);
         try {
-            const { amount } = transfer;
             const tokenAmount = transfer.fees === '' ? '0' : transfer.fees;
 
-            const encodedAbi = token!.instance.contract.methods
-                .transfer(transfer.address, amount.toString())
-                .encodeABI();
+            const encodedAbi = token!.instance.interface.encodeFunctionData('transfer', [
+                transfer.address,
+                transfer.amount
+            ]);
 
-            const relayTrxOpts: RelayingTransactionOptions = {
-                smartWallet: smartWallet!,
-                unsignedTx: {
-                    to: transfer.address,
-                    data: encodedAbi
-                },
-                tokenAddress: token!.instance.address,
-                tokenAmount,
-                transactionDetails: {
+            const relayTransactionOpts: UserDefinedEnvelopingRequest = {
+                request: {
+                    from: account,
+                    value: '0',
+                    data: encodedAbi,
                     to: token!.instance.address,
-                    retries: 7,
-                    ignoreTransactionReceipt: true
+                    tokenAmount,
+                    tokenContract: token!.instance.address,
+                    validUntilTime: 0
+                },
+                relayData: {
+                    callForwarder: smartWallet!.address
                 }
             };
-
-            const result: RelayingResult = await provider!.relayTransaction(
-                relayTrxOpts
+           
+            const transaction: Transaction = await relayClient!.relayTransaction(
+                relayTransactionOpts
+                , 
+                {}
             );
-            const txHash: string = result
-                .transaction!.hash(true)
-                .toString('hex');
-            Utils.addTransaction(smartWallet!.address, chainId, {
+        
+            addTransaction(smartWallet!.address, chainId, {
                 date: new Date(),
-                id: txHash,
+                id: transaction.hash!,
                 type: `Transfer ${transfer.check ? 'RBTC' : token!.symbol}`
             });
             dispatch({ type: 'reload', reload: true });
@@ -141,22 +136,31 @@ function Transfer() {
         if (account) {
             setEstimateLoading(true);
             try {
-                const encodedTransferFunction = token!.instance.contract.methods
-                    .transfer(transfer.address, transfer.amount)
-                    .encodeABI();
+                const encodedAbi = token!.instance.interface.encodeFunctionData('transfer', [
+                    transfer.address,
+                    transfer.amount
+                ]);
 
-                const opts: RelayGasEstimationOptions = {
-                    abiEncodedTx: encodedTransferFunction,
-                    smartWalletAddress: smartWallet!.address,
-                    tokenFees: '1',
-                    destinationContract: token!.instance.address,
-                    tokenAddress: token!.instance.address
+                const relayTransactionOpts: UserDefinedEnvelopingRequest = {
+                    request: {
+                        from: account,
+                        value: '0',
+                        data: encodedAbi,
+                        to: token!.instance.address,
+                        tokenAmount: '0',
+                        tokenContract: token!.instance.address,
+                        validUntilTime: 0
+                    },
+                    relayData: {
+                        callForwarder: smartWallet!.address
+                    }
                 };
-
-                const estimation: RelayEstimation =
-                    await provider!.estimateMaxPossibleGas(opts);
-
-                console.log('estimation', estimation);
+               
+                const estimation: RelayEstimation = await relayClient!.estimateTransaction(
+                    relayTransactionOpts
+                    , 
+                    {}
+                );
 
                 if (transfer.check === true) {
                     changeValue(estimation.requiredNativeAmount, 'fees');

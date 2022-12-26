@@ -1,13 +1,11 @@
 import { useState } from 'react';
-import {
-    RelayGasEstimationOptions,
-    RelayEstimation
-} from '@rsksmart/rif-relay-sdk';
 import { Modal, Col, Row, TextInput, Button } from 'react-materialize';
-import Utils, { ZERO_ADDRESS } from 'src/Utils';
 import 'src/modals/Deploy.css';
 import LoadingButton from 'src/components/LoadingButton';
 import { useStore } from 'src/context/context';
+import { addLocalSmartWallet } from 'src/Utils';
+import type { RelayEstimation, UserDefinedEnvelopingRequest } from '@rsksmart/rif-relay-client';
+import type { SmartWallet } from 'src/types';
 
 type DeployInfo = {
     fees: string;
@@ -19,7 +17,7 @@ type DeployInfoKey = keyof DeployInfo;
 
 function Deploy() {
     const { state, dispatch } = useStore();
-    const { chainId, account, smartWallet, token, provider, modals } = state;
+    const { chainId, account, smartWallet, token, provider, modals, relayClient } = state;
 
     const initialState: DeployInfo = {
         fees: '0',
@@ -48,18 +46,24 @@ function Deploy() {
     const handleEstimateDeploySmartWalletButtonClick = async () => {
         setEstimateLoading(true);
         try {
-            const opts: RelayGasEstimationOptions = {
-                abiEncodedTx: '0x',
-                destinationContract: ZERO_ADDRESS,
-                smartWalletAddress: smartWallet!.address,
-                tokenFees: '1',
-                isSmartWalletDeploy: true,
-                index: smartWallet!.index.toString(),
-                tokenAddress: token!.instance.address
+            const relayTransactionOpts: UserDefinedEnvelopingRequest = {
+                request: {
+                    from: account,
+                    value: '0',
+                    data: '0x00',
+                    to: token!.instance.address,
+                    tokenAmount: '0',
+                    tokenContract: token!.instance.address,
+                    validUntilTime: 0,
+                    index: smartWallet!.index
+                },
+                relayData: {
+                    callForwarder: process.env['REACT_APP_CONTRACTS_SMART_WALLET_FACTORY']!
+                }
             };
 
-            const estimation: RelayEstimation =
-                await provider!.estimateMaxPossibleGas(opts);
+            const estimation: RelayEstimation = await relayClient!.estimateTransaction(relayTransactionOpts, {});
+
             console.log('estimation', estimation);
 
             if (estimation) {
@@ -83,36 +87,41 @@ function Deploy() {
 
         console.log(`Your receipt is`);
         console.log(receipt);
-        return receipt.status;
+        return true;
     };
 
-    const relaySmartWalletDeployment = async (tokenAmount: string) => {
+    const relaySmartWalletDeployment = async (tokenAmount: string): Promise<SmartWallet | undefined> => {
         try {
-            const isTokenAllowed = await provider!.isAllowedToken(
-                token!.instance.address
-            );
-            if (isTokenAllowed) {
-                const newSmartWallet = await provider!.deploySmartWallet(
-                    smartWallet!,
-                    {
-                        tokenAddress: token!.instance.address,
-                        tokenAmount,
-                        transactionDetails: {
-                            ignoreTransactionReceipt: true
-                        }
-                    }
-                );
-                const smartWalledIsDeployed = await checkSmartWalletDeployment(
-                    newSmartWallet.deployment?.deployTransaction!
-                );
-                if (!smartWalledIsDeployed) {
-                    throw new Error('SmartWallet: deployment failed');
+            const relayTransactionOpts: UserDefinedEnvelopingRequest = {
+                request: {
+                    from: account,
+                    value: '0',
+                    data: '0x00',
+                    to: token!.instance.address,
+                    tokenAmount,
+                    tokenContract: token!.instance.address,
+                    validUntilTime: 0,
+                    index: smartWallet!.index
+                },
+                relayData: {
+                    callForwarder: process.env['REACT_APP_CONTRACTS_SMART_WALLET_FACTORY']!
                 }
-                return newSmartWallet;
-            }
-            throw new Error(
-                'SmartWallet: was not created because Verifier does not accept the specified token for payment'
+            };
+
+            const transaction = await relayClient!.relayTransaction(relayTransactionOpts, {});
+
+            const isDeployed = await checkSmartWalletDeployment(
+                transaction.hash!
             );
+            if (!isDeployed) {
+                throw new Error('SmartWallet: deployment failed');
+            }
+
+            
+            return {
+                ...smartWallet!,
+                isDeployed
+            };
         } catch (error) {
             const errorObj = error as Error;
             if (errorObj.message) {
@@ -120,6 +129,7 @@ function Deploy() {
             }
             console.error(error);
         }
+
         return undefined;
     };
 
@@ -134,9 +144,9 @@ function Deploy() {
 
         setDeployLoading(true);
         const newSmartWallet = await relaySmartWalletDeployment(fees);
-        if (newSmartWallet?.deployment) {
-            smartWallet!.deployed = true;
-            Utils.addLocalSmartWallet(chainId, account, smartWallet!);
+        if (newSmartWallet?.isDeployed) {
+            smartWallet!.isDeployed = true;
+            addLocalSmartWallet(chainId, account, smartWallet!);
             close();
             dispatch({ type: 'reload', reload: true });
         }

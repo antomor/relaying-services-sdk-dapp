@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Modal, Col, Row, Table, Button, Icon } from 'react-materialize';
-import { Transaction } from 'src/types';
-import Utils from 'src/Utils';
+import type { LocalTransaction } from 'src/types';
 import { useStore } from 'src/context/context';
+import { getTransactionKey, openExplorer } from 'src/Utils';
 
 function TransactionHistory() {
     const { state, dispatch } = useStore();
@@ -11,17 +11,17 @@ function TransactionHistory() {
 
     const columns: string[] = ['No', 'Date', 'Transaction', 'Type', 'Action'];
 
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [transactions, setTransactions] = useState<LocalTransaction[]>([]);
 
     useEffect(() => {
         if (
-            Utils.getTransactionKey(chainId, smartWallet?.address!) in
+            getTransactionKey(chainId, smartWallet?.address!) in
             localStorage
         ) {
             try {
-                const localTransactions: Transaction[] = JSON.parse(
+                const localTransactions: LocalTransaction[] = JSON.parse(
                     localStorage.getItem(
-                        Utils.getTransactionKey(chainId, smartWallet?.address!)
+                        getTransactionKey(chainId, smartWallet?.address!)
                     )!
                 );
                 setTransactions(localTransactions);
@@ -33,22 +33,22 @@ function TransactionHistory() {
         }
     }, [smartWallet, chainId]);
 
-    const openExplorer = (transaction: Transaction) => {
-        Utils.openExplorer(transaction.id);
+    const handleOpenExplorer = (transaction: LocalTransaction) => {
+        openExplorer(transaction.id);
     };
 
     const tableRows = transactions.map(
-        (transaction: Transaction, index: number) => (
+        (transaction: LocalTransaction, index: number) => (
             <tr key={transaction.id}>
                 <td>{index}</td>
-                <td>{transaction.date}</td>
+                <td>{transaction.date.toString()}</td>
                 <td style={{ wordBreak: 'break-all' }}>{transaction.id}</td>
                 <td>{transaction.type}</td>
                 <td>
                     <Button
                         waves='light'
                         className='indigo accent-2'
-                        onClick={() => openExplorer(transaction)}
+                        onClick={() => handleOpenExplorer(transaction)}
                         tooltip='Explore'
                         floating
                     >

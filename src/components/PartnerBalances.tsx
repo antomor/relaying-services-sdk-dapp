@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useStore } from 'src/context/context';
-import { Partner } from 'src/types';
-import Utils from 'src/Utils';
+import type { Partner } from 'src/types';
+import { getPartners, getTokenBalance } from 'src/Utils';
 
 type PartnerBalanceProp = {
     label: string;
@@ -34,7 +34,7 @@ function PartnerBalances() {
 
     const getPartnerBalance = async (address: string) => {
         try {
-            const balance = await Utils.getTokenBalance(address, token!);
+            const balance = await getTokenBalance(token!, address);
             return { address, balance };
         } catch (error) {
             console.error(error);
@@ -44,7 +44,7 @@ function PartnerBalances() {
 
     const refreshPartners = useCallback(async () => {
         if (provider && reloadPartners) {
-            const localPartners = await provider.getPartners();
+            const localPartners = await getPartners(provider!);
             const updatedBalances = await Promise.all(
                 localPartners.map((partner) => getPartnerBalance(partner))
             );

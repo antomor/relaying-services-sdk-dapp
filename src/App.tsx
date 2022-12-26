@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import {
-    DefaultRelayingServices,
-    EnvelopingConfig,
-    RelayingServicesAddresses
-} from '@rsksmart/rif-relay-sdk';
+import { providers } from 'ethers';
+import { HttpClient, RelayClient, setEnvelopingConfig, setProvider } from '@rsksmart/rif-relay-client';
 
 import ActionBar from 'src/components/ActionBar';
 import Header from 'src/components/Header';
@@ -14,27 +11,18 @@ import Loading from 'src/modals/Loading';
 import Receive from 'src/modals/Receive';
 import Transfer from 'src/modals/Transfer';
 import rLogin from 'src/rLogin';
-import Utils from 'src/Utils';
 import 'src/App.css';
-import Web3 from 'web3';
+import { useStore } from 'src/context/context';
+import TransactionHistory from 'src/modals/TransactionHistory';
+import Validate from 'src/modals/Validate';
+import type { SmartWallet } from 'src/types';
+import Snackbar from 'src/components/Snackbar';
+import PartnerBalances from 'src/components/PartnerBalances'; 
+import { getLocalSmartWallets } from 'src/Utils';
 
-import { useStore } from './context/context';
-import TransactionHistory from './modals/TransactionHistory';
-import Validate from './modals/Validate';
-import { SmartWalletWithBalance } from './types';
-import Snackbar from './components/Snackbar';
-import PartnerBalances from './components/PartnerBalances';
 
-if (window.ethereum) {
-    window.web3 = new Web3(window.ethereum);
-} else if (window.web3) {
-    window.web3 = new Web3(window.web3.currentProvider);
-} else {
-    throw new Error('Error: MetaMask or web3 not detected');
-}
-
-function getEnvParamAsInt(value: string | undefined): number | undefined {
-    return value ? parseInt(value, 10) : undefined;
+function getEnvParamAsInt(value: string | undefined): number {
+    return value ? parseInt(value, 10) : 0;
 }
 
 function App() {
@@ -44,63 +32,27 @@ function App() {
 
     const [errorMessage, setErrorMessage] = useState('');
 
-    const initProvider = async () => {
-        try {
-            const config: Partial<EnvelopingConfig> = {
-                chainId: getEnvParamAsInt(
-                    process.env.REACT_APP_RIF_RELAY_CHAIN_ID
-                ),
-                gasPriceFactorPercent: getEnvParamAsInt(
-                    process.env.REACT_APP_RIF_RELAY_GAS_PRICE_FACTOR_PERCENT
-                ),
-                relayLookupWindowBlocks: getEnvParamAsInt(
-                    process.env.REACT_APP_RIF_RELAY_LOOKUP_WINDOW_BLOCKS
-                ),
-                preferredRelays: process.env
-                    .REACT_APP_RIF_RELAY_PREFERRED_RELAYS
-                    ? process.env.REACT_APP_RIF_RELAY_PREFERRED_RELAYS.split(
-                          ','
-                      )
-                    : undefined,
-                relayHubAddress: process.env.REACT_APP_CONTRACTS_RELAY_HUB,
-                relayVerifierAddress:
-                    process.env.REACT_APP_CONTRACTS_RELAY_VERIFIER,
-                deployVerifierAddress:
-                    process.env.REACT_APP_CONTRACTS_DEPLOY_VERIFIER,
-                smartWalletFactoryAddress:
-                    process.env.REACT_APP_CONTRACTS_SMART_WALLET_FACTORY,
-                logLevel: 0
-            };
-            const contractAddresses: RelayingServicesAddresses = {
-                relayHub: process.env.REACT_APP_CONTRACTS_RELAY_HUB!,
-                smartWallet: process.env.REACT_APP_CONTRACTS_SMART_WALLET!,
-                smartWalletFactory:
-                    process.env.REACT_APP_CONTRACTS_SMART_WALLET_FACTORY!,
-                smartWalletDeployVerifier:
-                    process.env.REACT_APP_CONTRACTS_DEPLOY_VERIFIER!,
-                smartWalletRelayVerifier:
-                    process.env.REACT_APP_CONTRACTS_RELAY_VERIFIER!,
-                // TODO: Why aren't these addresses required? we may set them as optional
-                penalizer: '',
-                customSmartWallet: '',
-                customSmartWalletFactory: '',
-                customSmartWalletDeployVerifier: '',
-                customSmartWalletRelayVerifier: '',
-                sampleRecipient: ''
-            };
-            // Get an RIF Relay RelayProvider instance and assign it to Web3 to use RIF Relay transparently
-            const relayingServices = new DefaultRelayingServices(web3);
-            await relayingServices.initialize(config, contractAddresses, {
-                loglevel: 1
-            });
-            dispatch({ type: 'set_provider', provider: relayingServices });
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    const initProvider = async () => { 
+        const provider = new providers.Web3Provider(window.ethereum);
+        dispatch({ type: 'set_provider', provider });
+        
+        setEnvelopingConfig({
+            chainId: getEnvParamAsInt(process.env['REACT_APP_RIF_RELAY_CHAIN_ID']),
+            preferredRelays: process.env['REACT_APP_RIF_RELAY_PREFERRED_RELAYS']!.split(','),
+            relayHubAddress: process.env['REACT_APP_CONTRACTS_RELAY_HUB']!,
+            deployVerifierAddress: process.env['REACT_APP_CONTRACTS_DEPLOY_VERIFIER']!,
+            relayVerifierAddress: process.env['REACT_APP_CONTRACTS_RELAY_VERIFIER']!,
+            smartWalletFactoryAddress: process.env['REACT_APP_CONTRACTS_SMART_WALLET_FACTORY']!,
+            forwarderAddress: process.env['REACT_APP_CONTRACTS_SMART_WALLET']!,
+            gasPriceFactorPercent: getEnvParamAsInt(process.env['REACT_APP_RIF_RELAY_GAS_PRICE_FACTOR_PERCENT']),
+            relayLookupWindowBlocks: getEnvParamAsInt(process.env['REACT_APP_RIF_RELAY_LOOKUP_WINDOW_BLOCKS']),
+        });
+        setProvider(provider);
+        dispatch({ type: 'set_relay_client', relayClient: new RelayClient() });
+    }
 
     useEffect(() => {
-        const wallets: SmartWalletWithBalance[] = Utils.getLocalSmartWallets(
+        const wallets: SmartWallet[] = getLocalSmartWallets(
             chainId,
             account
         );
@@ -111,7 +63,8 @@ function App() {
     const checkServer = useCallback(async () => {
         if (provider && reload) {
             try {
-                const { ready } = await provider.getPingResponse();
+                const httpClient = new HttpClient();
+                const { ready } = await httpClient.getChainInfo('http://localhost:8090');
                 dispatch({ type: 'reload_partners', reloadPartners: true });
                 if (!ready) {
                     setErrorMessage('Server is not ready');
@@ -129,7 +82,7 @@ function App() {
     }, [checkServer]);
 
     const refreshAccount = async () => {
-        const accounts = await Utils.getAccounts();
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
         const currentAccount = accounts[0];
         dispatch({ type: 'set_account', account: currentAccount });
     };
@@ -145,8 +98,8 @@ function App() {
     const connectToRLogin = async () => {
         let isConnected = false;
         try {
-            const chain: number = await web3.eth.getChainId();
-            if (chain.toString() === process.env.REACT_APP_RIF_RELAY_CHAIN_ID) {
+            const chainId = window.ethereum.networkVersion;
+            if (chainId.toString() === process.env['REACT_APP_RIF_RELAY_CHAIN_ID']) {
                 const connect = await rLogin.connect();
                 const login = connect.provider;
 
@@ -160,11 +113,11 @@ function App() {
                         chainId: parseInt(newChain, 16)
                     });
                 });
-                dispatch({ type: 'set_chain_id', chainId: chain });
+                dispatch({ type: 'set_chain_id', chainId });
                 isConnected = true;
             } else {
                 alert(
-                    `Wrong network ID ${chain}, it must be ${process.env.REACT_APP_RIF_RELAY_CHAIN_ID}`
+                    `Wrong network ID ${chainId}, it must be ${process.env['REACT_APP_RIF_RELAY_CHAIN_ID']}`
                 );
             }
         } catch (error) {
