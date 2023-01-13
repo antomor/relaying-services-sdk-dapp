@@ -12,7 +12,7 @@ import {
 import LoadingButton from 'src/components/LoadingButton';
 import { useStore } from 'src/context/context';
 import type { Transaction } from 'ethers';
-import type { RelayEstimation, UserDefinedEnvelopingRequest } from '@rsksmart/rif-relay-client';
+import type { RelayEstimation, UserDefinedEnvelopingRequest, UserDefinedRelayRequest } from '@rsksmart/rif-relay-client';
 import { addTransaction, checkAddress } from 'src/Utils';
 
 type TransferInfo = {
@@ -94,15 +94,13 @@ function Transfer() {
                 transfer.amount
             ]);
 
-            const relayTransactionOpts: UserDefinedEnvelopingRequest = {
+            const relayTransactionOpts: UserDefinedRelayRequest = {
                 request: {
                     from: account,
-                    value: '0',
                     data: encodedAbi,
                     to: token!.instance.address,
                     tokenAmount,
                     tokenContract: token!.instance.address,
-                    validUntilTime: 0
                 },
                 relayData: {
                     callForwarder: smartWallet!.address
@@ -111,8 +109,6 @@ function Transfer() {
            
             const transaction: Transaction = await relayClient!.relayTransaction(
                 relayTransactionOpts
-                , 
-                {}
             );
         
             addTransaction(smartWallet!.address, chainId, {
@@ -144,22 +140,17 @@ function Transfer() {
                 const relayTransactionOpts: UserDefinedEnvelopingRequest = {
                     request: {
                         from: account,
-                        value: '0',
                         data: encodedAbi,
                         to: token!.instance.address,
-                        tokenAmount: '0',
                         tokenContract: token!.instance.address,
-                        validUntilTime: 0
                     },
                     relayData: {
                         callForwarder: smartWallet!.address
                     }
                 };
                
-                const estimation: RelayEstimation = await relayClient!.estimateTransaction(
+                const estimation: RelayEstimation = await relayClient!.estimateRelayTransaction(
                     relayTransactionOpts
-                    , 
-                    {}
                 );
 
                 if (transfer.check === true) {

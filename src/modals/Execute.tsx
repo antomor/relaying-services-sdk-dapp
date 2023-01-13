@@ -36,9 +36,9 @@ function Execute() {
     const initialState: ExecuteInfo = {
         check: false,
         show: false,
-        address: '0x1Af2844A588759D0DE58abD568ADD96BB8B3B6D8',
-        value: '0x2250a8CA897d2637284Bd0c6BA59F00215F5d7cd,1000000000000000000',
-        function: 'transfer(address,uint256)',
+        address: '',
+        value: '',
+        function: '',
         fees: ''
     };
 
@@ -110,12 +110,10 @@ function Execute() {
                 const relayTransactionOpts: UserDefinedEnvelopingRequest = {
                     request: {
                         from: account,
-                        value: '0',
                         data: funcData,
                         to: execute.address,
                         tokenAmount,
-                        tokenContract: token!.instance.address,
-                        validUntilTime: 0
+                        tokenContract: token!.instance.address
                     },
                     relayData: {
                         callForwarder: smartWallet!.address
@@ -123,7 +121,7 @@ function Execute() {
                 };
 
 
-                const transaction: Transaction = await relayClient!.relayTransaction(relayTransactionOpts, {});
+                const transaction: Transaction = await relayClient!.relayTransaction(relayTransactionOpts);
 
                 addTransaction(smartWallet!.address, chainId, {
                     date: new Date(),
@@ -178,26 +176,20 @@ function Execute() {
                 changeValue(result.toString(), 'fees');
             } else {
 
-
                 const relayTransactionOpts: UserDefinedEnvelopingRequest = {
                     request: {
                         from: account,
-                        value: '0',
                         data: funcData,
                         to: destinationContract,
-                        tokenAmount: '0',
                         tokenContract: token!.instance.address,
-                        validUntilTime: 0
                     },
                     relayData: {
                         callForwarder: smartWallet!.address
                     }
                 };
 
-                const estimation: RelayEstimation = await relayClient!.estimateTransaction(
+                const estimation: RelayEstimation = await relayClient!.estimateRelayTransaction(
                     relayTransactionOpts
-                    ,
-                    {}
                 );
 
                 changeValue(estimation.requiredTokenAmount, 'fees');

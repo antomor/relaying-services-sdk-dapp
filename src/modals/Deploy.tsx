@@ -4,7 +4,7 @@ import 'src/modals/Deploy.css';
 import LoadingButton from 'src/components/LoadingButton';
 import { useStore } from 'src/context/context';
 import { addLocalSmartWallet } from 'src/Utils';
-import type { RelayEstimation, UserDefinedEnvelopingRequest } from '@rsksmart/rif-relay-client';
+import type { RelayEstimation, UserDefinedDeployRequest } from '@rsksmart/rif-relay-client';
 import type { SmartWallet } from 'src/types';
 
 type DeployInfo = {
@@ -46,23 +46,15 @@ function Deploy() {
     const handleEstimateDeploySmartWalletButtonClick = async () => {
         setEstimateLoading(true);
         try {
-            const relayTransactionOpts: UserDefinedEnvelopingRequest = {
+            const relayTransactionOpts: UserDefinedDeployRequest = {
                 request: {
                     from: account,
-                    value: '0',
-                    data: '0x00',
-                    to: token!.instance.address,
-                    tokenAmount: '0',
                     tokenContract: token!.instance.address,
-                    validUntilTime: 0,
                     index: smartWallet!.index
-                },
-                relayData: {
-                    callForwarder: process.env['REACT_APP_CONTRACTS_SMART_WALLET_FACTORY']!
                 }
             };
 
-            const estimation: RelayEstimation = await relayClient!.estimateTransaction(relayTransactionOpts, {});
+            const estimation: RelayEstimation = await relayClient!.estimateRelayTransaction(relayTransactionOpts);
 
             console.log('estimation', estimation);
 
@@ -92,23 +84,16 @@ function Deploy() {
 
     const relaySmartWalletDeployment = async (tokenAmount: string): Promise<SmartWallet | undefined> => {
         try {
-            const relayTransactionOpts: UserDefinedEnvelopingRequest = {
+            const relayTransactionOpts: UserDefinedDeployRequest = {
                 request: {
                     from: account,
-                    value: '0',
-                    data: '0x00',
-                    to: token!.instance.address,
                     tokenAmount,
                     tokenContract: token!.instance.address,
-                    validUntilTime: 0,
                     index: smartWallet!.index
-                },
-                relayData: {
-                    callForwarder: process.env['REACT_APP_CONTRACTS_SMART_WALLET_FACTORY']!
                 }
             };
 
-            const transaction = await relayClient!.relayTransaction(relayTransactionOpts, {});
+            const transaction = await relayClient!.relayTransaction(relayTransactionOpts);
 
             const isDeployed = await checkSmartWalletDeployment(
                 transaction.hash!

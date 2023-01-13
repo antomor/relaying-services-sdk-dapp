@@ -37,6 +37,7 @@ function App() {
         dispatch({ type: 'set_provider', provider });
         
         setEnvelopingConfig({
+            logLevel: 1,
             chainId: getEnvParamAsInt(process.env['REACT_APP_RIF_RELAY_CHAIN_ID']),
             preferredRelays: process.env['REACT_APP_RIF_RELAY_PREFERRED_RELAYS']!.split(','),
             relayHubAddress: process.env['REACT_APP_CONTRACTS_RELAY_HUB']!,

@@ -12,6 +12,7 @@ import LoadingButton from 'src/components/LoadingButton';
 import { useStore } from 'src/context/context';
 import type { SmartWallet } from 'src/types';
 import { addLocalSmartWallet, addressHasCode, checkAddress } from 'src/Utils';
+import { getSmartWalletAddress } from '@rsksmart/rif-relay-client';
 
 type ValidateInfo = {
     check: boolean;
@@ -101,7 +102,7 @@ function Validate() {
     const createSmartWallet = async () => {
         if (provider) {
             const index =  Number(validate.address);
-            const address = await relayClient!.getSmartWalletAddress(
+            const address = await getSmartWalletAddress(
                 account,
                 index
             );
