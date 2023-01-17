@@ -77,9 +77,9 @@ function Deploy() {
             return false;
         }
 
-        console.log(`Your receipt is`);
-        console.log(receipt);
-        return true;
+        console.log(`Your receipt is ${receipt}`);
+
+        return receipt.status === 1;
     };
 
     const relaySmartWalletDeployment = async (tokenAmount: string): Promise<SmartWallet | undefined> => {

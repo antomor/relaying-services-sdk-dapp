@@ -76,9 +76,22 @@ function Execute() {
     ) => {
         const iForwarder = IForwarder__factory.connect(swAddress, provider!.getSigner());
 
+        const gasPrice = await relayClient!.calculateGasPrice();
+
         const transaction = await iForwarder.directExecute(toAddress, abiEncodedTx, {
-            gasPrice: '60000000'
+            gasPrice
         });
+
+        const receipt = transaction.wait();
+        
+        console.log(`Your receipt is`);
+        console.log(receipt);
+
+        if (execute.show) {
+            setResults(JSON.stringify(transaction));
+        } else {
+            close();
+        }
 
         addTransaction(smartWallet!.address, chainId, {
             date: new Date(),
@@ -119,7 +132,6 @@ function Execute() {
                         callForwarder: smartWallet!.address
                     }
                 };
-
 
                 const transaction: Transaction = await relayClient!.relayTransaction(relayTransactionOpts);
 

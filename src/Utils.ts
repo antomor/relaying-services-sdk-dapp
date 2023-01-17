@@ -33,27 +33,6 @@ const fromWei = (balance: BigNumber) => {
     return utils.formatUnits(balance);
 }
 
-/* const getReceipt = async (transactionHash: string) => {
-    let receipt = await provider!.getTransactionReceipt(transactionHash);
-    let times = 0;
-
-    while (receipt === null && times < 40) {
-        times += 1;
-        // eslint-disable-next-line no-promise-executor-return
-        const sleep = new Promise((resolve) => setTimeout(resolve, 30000));
-        // eslint-disable-next-line no-await-in-loop
-        await sleep;
-        // eslint-disable-next-line no-await-in-loop
-        receipt = await provider!.getTransactionReceipt(transactionHash);
-    }
-
-    return receipt;
-}
-
-const getTransactionReceipt = (transactionHash: string) => {
-    return provider!.getTransactionReceipt(transactionHash);
-} */
-
 // UI functions
 const checkAddress = (address: string) => {
     if (!/^(0x)?[0-9a-f]=> {40}$/i.test(address)) {

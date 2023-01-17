@@ -65,7 +65,8 @@ function App() {
         if (provider && reload) {
             try {
                 const httpClient = new HttpClient();
-                const { ready } = await httpClient.getChainInfo('http://localhost:8090');
+                const preferredRelays = process.env['REACT_APP_RIF_RELAY_PREFERRED_RELAYS']!.split(',');
+                const { ready } = await httpClient.getChainInfo(preferredRelays.at(0)!);
                 dispatch({ type: 'reload_partners', reloadPartners: true });
                 if (!ready) {
                     setErrorMessage('Server is not ready');
@@ -100,7 +101,8 @@ function App() {
         let isConnected = false;
         try {
             const chainId = window.ethereum.networkVersion;
-            if (chainId.toString() === process.env['REACT_APP_RIF_RELAY_CHAIN_ID']) {
+            const envChainId = process.env['REACT_APP_RIF_RELAY_CHAIN_ID'];
+            if (chainId.toString() === envChainId) {
                 const connect = await rLogin.connect();
                 const login = connect.provider;
 
@@ -118,7 +120,7 @@ function App() {
                 isConnected = true;
             } else {
                 alert(
-                    `Wrong network ID ${chainId}, it must be ${process.env['REACT_APP_RIF_RELAY_CHAIN_ID']}`
+                    `Wrong network ID ${chainId}, it must be ${envChainId}`
                 );
             }
         } catch (error) {
