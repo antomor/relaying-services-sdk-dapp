@@ -13,7 +13,7 @@ jobs:
                   node-version: '16.x'
 
             - name: Install dependencies
-              run: npm install
+              run: npm install --force # FIXME: PP-648
 
             - name: Check Linter bugs
               run: npm run lint

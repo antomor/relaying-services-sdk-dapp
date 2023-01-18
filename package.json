@@ -99,8 +99,8 @@
     ]
   },
   "dependencies": {
-    "@rsksmart/rif-relay-client": "github:rsksmart/rif-relay-client#PP-357/dapp-update",
-    "@rsksmart/rif-relay-contracts": "github:rsksmart/rif-relay-contracts#PP-357/dapp-update",
+    "@rsksmart/rif-relay-client": "github:rsksmart/rif-relay-client#feature/ethers/dependencies",
+    "@rsksmart/rif-relay-contracts": "github:rsksmart/rif-relay-contracts#feature/PP-278/PP-329/upgrade_contracts",
     "@rsksmart/rlogin": "^1.4.1-beta.1",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",

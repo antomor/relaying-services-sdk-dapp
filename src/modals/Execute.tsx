@@ -46,12 +46,6 @@ function Execute() {
     const [executeLoading, setExecuteLoading] = useState(false);
     const [estimateLoading, setEstimateLoading] = useState(false);
 
-    /*     const handleCheckAddress = (address: string) => {
-            if (!checkAddress(address.toLowerCase())) {
-                throw Error('Contract address is not valid');
-            }
-        };
-     */
     const calculateAbiEncodedFunction = () => {
         const functionTrimmed = execute.function.trim();
         const iface = new utils.Interface([`function ${functionTrimmed}`]);
