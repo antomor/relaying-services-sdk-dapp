@@ -30,29 +30,29 @@ export type Action =
   | { type: typeof SET_LOADER_ACTION; loader: boolean }
   | { type: typeof SET_TOKEN_ACTION; token: ERC20Token | undefined }
   | {
-    type: typeof SET_SMART_WALLET_ACTION;
-    smartWallet: SmartWallet;
-  }
+      type: typeof SET_SMART_WALLET_ACTION;
+      smartWallet: SmartWallet;
+    }
   | {
-    type: typeof SET_SMART_WALLETS_ACTION;
-    smartWallets: SmartWallet[];
-  }
+      type: typeof SET_SMART_WALLETS_ACTION;
+      smartWallets: SmartWallet[];
+    }
   | {
-    type: typeof ADD_SMART_WALLET_ACTION;
-    smartWallet: SmartWallet;
-  }
+      type: typeof ADD_SMART_WALLET_ACTION;
+      smartWallet: SmartWallet;
+    }
   | {
-    type: typeof UPDATE_SMART_WALLET_ACTION;
-    smartWallet: SmartWallet;
-  }
+      type: typeof UPDATE_SMART_WALLET_ACTION;
+      smartWallet: SmartWallet;
+    }
   | {
-    type: typeof SET_MODALS_ACTION;
-    modal: Partial<Modals>;
-  }
+      type: typeof SET_MODALS_ACTION;
+      modal: Partial<Modals>;
+    }
   | {
-    type: typeof SET_RELAY_CLIENT_ACTION;
-    relayClient: RelayClient;
-  };
+      type: typeof SET_RELAY_CLIENT_ACTION;
+      relayClient: RelayClient;
+    };
 
 export type Dispatch = (action: Action) => void;
 

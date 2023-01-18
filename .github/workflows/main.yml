@@ -19,7 +19,7 @@ jobs:
               run: npm run lint
 
             - name: Check Codestyles errors
-              run: npm run prettier
+              run: npm run format
             
             - name: Check build errors
               run: npm run build

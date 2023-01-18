@@ -1,9 +1,9 @@
 .copy-container {
-    padding-top: 0.2em;
+  padding-top: 0.2em;
 }
 
 .summary-smart-wallet-address {
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }

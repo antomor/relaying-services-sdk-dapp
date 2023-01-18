@@ -1,42 +1,42 @@
 .brand-logo {
-    display: flex;
+  display: flex;
 }
 
 .brand-logo img {
-    width: 85px;
-    height: auto;
-    padding-left: 0.5em;
-    padding-right: 0.2em;
+  width: 85px;
+  height: auto;
+  padding-left: 0.5em;
+  padding-right: 0.2em;
 }
 
 .brand-logo span {
-    color: black;
-    line-height: 72px;
+  color: black;
+  line-height: 72px;
 }
 
 .nav {
-    color: #fff;
-    background-color: #ee6e73;
-    width: 100%;
-    height: 72px;
+  color: #fff;
+  background-color: #ee6e73;
+  width: 100%;
+  height: 72px;
 }
 
 .connected-network {
-    background-color: #3bb550;
+  background-color: #3bb550;
 }
 
 .material-icons {
-    line-height: inherit !important;
+  line-height: inherit !important;
 }
 
 .data {
-    width: 100%;
+  width: 100%;
 }
 
 .data .address {
-    text-align: end;
+  text-align: end;
 }
 
 .data .connect {
-    text-align: end;
+  text-align: end;
 }

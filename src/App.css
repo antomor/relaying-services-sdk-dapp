@@ -1,16 +1,16 @@
 .space-row {
-    padding-top: 20px;
+  padding-top: 20px;
 }
 
 .row {
-    margin-bottom: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .input-field {
-    width: 100%;
+  width: 100%;
 }
 
 .vertical-align {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
