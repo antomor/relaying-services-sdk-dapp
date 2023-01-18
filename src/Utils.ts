@@ -176,10 +176,10 @@ type ChainInfo = {
 const getChainInfo = (): Promise<ChainInfo> => {
     const httpClient = new HttpClient();
     const preferredRelays = process.env['REACT_APP_RIF_RELAY_PREFERRED_RELAYS']!.split(',');
-    if ( preferredRelays.length < 1) {
+    if ( preferredRelays.length < 1 || !preferredRelays[0]) {
         throw new Error("No preferred relay configured, please set 'REACT_APP_RIF_RELAY_PREFERRED_RELAYS'");
     }
-    return httpClient.getChainInfo(preferredRelays[0]) as Promise<ChainInfo>;
+    return httpClient.getChainInfo(preferredRelays[0]!) as Promise<ChainInfo>;
 }
 
 const getPartners = async (provider: providers.JsonRpcProvider) =>{

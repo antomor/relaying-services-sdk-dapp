@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { providers } from 'ethers';
-import { HttpClient, RelayClient, setEnvelopingConfig, setProvider } from '@rsksmart/rif-relay-client';
+import { RelayClient, setEnvelopingConfig, setProvider } from '@rsksmart/rif-relay-client';
 
 import ActionBar from 'src/components/ActionBar';
 import Header from 'src/components/Header';
@@ -18,7 +18,7 @@ import Validate from 'src/modals/Validate';
 import type { SmartWallet } from 'src/types';
 import Snackbar from 'src/components/Snackbar';
 import PartnerBalances from 'src/components/PartnerBalances'; 
-import { getLocalSmartWallets } from 'src/Utils';
+import { getChainInfo, getLocalSmartWallets } from 'src/Utils';
 
 
 function getEnvParamAsInt(value: string | undefined): number {
@@ -64,9 +64,7 @@ function App() {
     const checkServer = useCallback(async () => {
         if (provider && reload) {
             try {
-                const httpClient = new HttpClient();
-                const preferredRelays = process.env['REACT_APP_RIF_RELAY_PREFERRED_RELAYS']!.split(',');
-                const { ready } = await httpClient.getChainInfo(preferredRelays.at(0)!);
+                const { ready } = await getChainInfo();
                 dispatch({ type: 'reload_partners', reloadPartners: true });
                 if (!ready) {
                     setErrorMessage('Server is not ready');
