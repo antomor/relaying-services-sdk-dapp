@@ -71,6 +71,7 @@
     "format:fix": "npm run format -- --write --ignore-unknown",
     "lint": "eslint --ext .ts --ext .tsx .",
     "lint:fix": "npm run lint -- --fix",
+    "prepare": "husky install",
     "start": "GENERATE_SOURCEMAP=false react-scripts start",
     "test": "react-scripts test"
   },
