@@ -33,8 +33,8 @@ function App() {
     const [errorMessage, setErrorMessage] = useState('');
 
     const initProvider = async () => { 
-        const provider = new providers.Web3Provider(window.ethereum);
-        dispatch({ type: 'set_provider', provider });
+        const web3Provider = new providers.Web3Provider(window.ethereum);
+        dispatch({ type: 'set_provider', provider: web3Provider });
         
         setEnvelopingConfig({
             logLevel: 1,
@@ -48,7 +48,7 @@ function App() {
             gasPriceFactorPercent: getEnvParamAsInt(process.env['REACT_APP_RIF_RELAY_GAS_PRICE_FACTOR_PERCENT']),
             relayLookupWindowBlocks: getEnvParamAsInt(process.env['REACT_APP_RIF_RELAY_LOOKUP_WINDOW_BLOCKS']),
         });
-        setProvider(provider);
+        setProvider(web3Provider);
         dispatch({ type: 'set_relay_client', relayClient: new RelayClient() });
     }
 
@@ -100,9 +100,9 @@ function App() {
     const connectToRLogin = async () => {
         let isConnected = false;
         try {
-            const chainId = window.ethereum.networkVersion;
+            const currentChainId = window.ethereum.networkVersion;
             const envChainId = process.env['REACT_APP_RIF_RELAY_CHAIN_ID'];
-            if (chainId.toString() === envChainId) {
+            if (currentChainId.toString() === envChainId) {
                 const connect = await rLogin.connect();
                 const login = connect.provider;
 
@@ -116,11 +116,11 @@ function App() {
                         chainId: parseInt(newChain, 16)
                     });
                 });
-                dispatch({ type: 'set_chain_id', chainId });
+                dispatch({ type: 'set_chain_id', chainId: currentChainId });
                 isConnected = true;
             } else {
                 alert(
-                    `Wrong network ID ${chainId}, it must be ${envChainId}`
+                    `Wrong network ID ${currentChainId}, it must be ${envChainId}`
                 );
             }
         } catch (error) {

@@ -4,6 +4,10 @@ import { BigNumber, providers, utils } from 'ethers';
 import type { SmartWallet, LocalTransaction, ERC20Token } from 'src/types';
 import type { BigNumber as BigNumberJs } from 'bignumber.js';
 
+const fromWei = (balance: BigNumber) => utils.formatUnits(balance);
+
+const getTransactionKey = (chainId: number, address: string): string => `${chainId}.${address}`
+
 const getTokenBalance = async (
     token: ERC20Token,
     address: string,
@@ -27,10 +31,6 @@ const getBalance = async (
         return fromWei(balance);
     }
     return balance.toString();
-}
-
-const fromWei = (balance: BigNumber) => {
-    return utils.formatUnits(balance);
 }
 
 // UI functions
@@ -118,9 +118,7 @@ const addTransaction = (
     );
 }
 
-const getTransactionKey = (chainId: number, address: string): string => {
-    return `${chainId}.${address}`;
-}
+
 
 const addressHasCode = async (
     provider: providers.JsonRpcProvider,
@@ -168,13 +166,27 @@ const getERC20TokenPrice = async (
     return relayPricer.getExchangeRate(erc20.symbol, targetCurrency);
 };
 
-const getPartners = async (provider: providers.JsonRpcProvider) =>{
+// FIXME: it needs to be replaced by HubInfo from rif-relay-client
+type ChainInfo = {
+    feesReceiver: string;
+    relayWorkerAddress: string;
+    ready: boolean;
+}
+
+const getChainInfo = (): Promise<ChainInfo> => {
     const httpClient = new HttpClient();
-    const { feesReceiver, relayWorkerAddress } = await httpClient.getChainInfo('http://localhost:8090');
-    
+    const preferredRelays = process.env['REACT_APP_RIF_RELAY_PREFERRED_RELAYS']!.split(',');
+    if ( preferredRelays.length < 1) {
+        throw new Error("No preferred relay configured, please set 'REACT_APP_RIF_RELAY_PREFERRED_RELAYS'");
+    }
+    return httpClient.getChainInfo(preferredRelays[0]) as Promise<ChainInfo>;
+}
+
+const getPartners = async (provider: providers.JsonRpcProvider) =>{
+    const { feesReceiver, relayWorkerAddress } = await getChainInfo();  
 
     let partners: Array<{ beneficiary: string; share: number }> = [];
-        if (feesReceiver != relayWorkerAddress) {
+        if (feesReceiver !== relayWorkerAddress) {
             try {
                 const collector = Collector__factory.connect(feesReceiver, provider);
                 partners = await collector.getPartners() ;
@@ -202,5 +214,6 @@ export {
     getERC20Token,
     getAllowedTokens,
     getERC20TokenPrice,
-    getPartners
+    getPartners,
+    getChainInfo
 }
