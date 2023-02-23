@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { Modal, Col, Row, TextInput, Button } from 'react-materialize';
 import 'src/modals/Deploy.css';
 import LoadingButton from 'src/components/LoadingButton';
@@ -151,6 +151,11 @@ function Deploy() {
     setDeployLoading(false);
   };
 
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    handleDeploySmartWalletButtonClick();
+  }
+
   function returnActions() {
     return [
       <Button
@@ -188,7 +193,7 @@ function Deploy() {
       actions={returnActions()}
     >
       <Row>
-        <form>
+        <form onSubmit={handleSubmit}>
           <Col s={8}>
             <TextInput
               label={`Fees (${token!.symbol})`}

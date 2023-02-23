@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import {
   Button,
   Col,
@@ -133,6 +133,11 @@ function Validate() {
     }
   };
 
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    handleValidateButtonClick();
+  }
+
   function returnActions() {
     return [
       <Button
@@ -160,7 +165,7 @@ function Validate() {
       actions={returnActions()}
     >
       <Row>
-        <form>
+        <form onSubmit={handleSubmit}>
           <Col s={7}>
             <TextInput
               label={validate.check ? 'Address' : 'Index'}
