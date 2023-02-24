@@ -84,14 +84,9 @@ function Execute() {
       provider!.getSigner()
     );
 
-    const gasPrice = await relayClient!.calculateGasPrice();
-
     const transaction = await iForwarder.directExecute(
       toAddress,
-      abiEncodedTx,
-      {
-        gasPrice,
-      }
+      abiEncodedTx
     );
 
     const receipt = transaction.wait();

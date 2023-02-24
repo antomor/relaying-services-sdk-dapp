@@ -71,13 +71,11 @@ function Transfer() {
     if (account) {
       setTransferLoading(true);
       try {
-        const gasPrice = await relayClient!.calculateGasPrice();
 
         await provider!.getSigner().sendTransaction({
           from: account, // currentSmartWallet.address,
           to: transfer.address,
           value: transfer.amount,
-          gasPrice,
         });
         close();
       } catch (error) {
