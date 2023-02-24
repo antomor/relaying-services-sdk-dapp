@@ -84,10 +84,7 @@ function Execute() {
       provider!.getSigner()
     );
 
-    const transaction = await iForwarder.directExecute(
-      toAddress,
-      abiEncodedTx
-    );
+    const transaction = await iForwarder.directExecute(toAddress, abiEncodedTx);
 
     const receipt = transaction.wait();
 

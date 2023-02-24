@@ -71,7 +71,6 @@ function Transfer() {
     if (account) {
       setTransferLoading(true);
       try {
-
         await provider!.getSigner().sendTransaction({
           from: account, // currentSmartWallet.address,
           to: transfer.address,
