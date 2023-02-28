@@ -136,7 +136,7 @@ function Validate() {
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     handleValidateButtonClick();
-  }
+  };
 
   function returnActions() {
     return [

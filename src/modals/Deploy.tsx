@@ -154,7 +154,7 @@ function Deploy() {
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     handleDeploySmartWalletButtonClick();
-  }
+  };
 
   function returnActions() {
     return [
