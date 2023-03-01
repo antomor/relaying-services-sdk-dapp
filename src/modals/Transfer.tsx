@@ -92,6 +92,8 @@ function Transfer() {
     const address = await navigator.clipboard.readText();
     if (checkAddress(address.toLowerCase())) {
       changeValue(address, 'address');
+    } else {
+      alert('Invalid address');
     }
   };
 
