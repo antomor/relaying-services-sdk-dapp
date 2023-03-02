@@ -18,6 +18,8 @@ type DeployInfo = {
 
 type DeployInfoKey = keyof DeployInfo;
 
+const FORTY_SECONDS = 40 * 1000;
+
 function Deploy() {
   const { state, dispatch } = useStore();
   const {
@@ -87,7 +89,7 @@ function Deploy() {
     if ( !provider ) {
       return false;
     }
-    const receipt = await provider.waitForTransaction(txHash, 1, 40000);
+    const receipt = await provider.waitForTransaction(txHash, 1, FORTY_SECONDS);
     if (receipt === null) {
       return false;
     }
