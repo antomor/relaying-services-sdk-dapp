@@ -18,6 +18,8 @@ type DeployInfo = {
 
 type DeployInfoKey = keyof DeployInfo;
 
+const FORTY_SECONDS = 40 * 1000;
+
 function Deploy() {
   const { state, dispatch } = useStore();
   const {
@@ -84,7 +86,10 @@ function Deploy() {
   };
 
   const checkSmartWalletDeployment = async (txHash: string) => {
-    const receipt = await provider!.getTransactionReceipt(txHash);
+    if (!provider) {
+      return false;
+    }
+    const receipt = await provider.waitForTransaction(txHash, 1, FORTY_SECONDS);
     if (receipt === null) {
       return false;
     }
