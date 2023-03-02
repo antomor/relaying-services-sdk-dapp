@@ -86,7 +86,7 @@ function Deploy() {
   };
 
   const checkSmartWalletDeployment = async (txHash: string) => {
-    if ( !provider ) {
+    if (!provider) {
       return false;
     }
     const receipt = await provider.waitForTransaction(txHash, 1, FORTY_SECONDS);
