@@ -212,7 +212,13 @@ function Transfer() {
       Estimate
       <LoadingButton show={estimateLoading} />
     </Button>,
-    <Button flat modal='close' node='button' waves='green' className='transfer-btn-cancel'>
+    <Button
+      flat
+      modal='close'
+      node='button'
+      waves='green'
+      className='transfer-btn-cancel'
+    >
       Cancel
     </Button>,
   ];

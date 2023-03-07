@@ -151,7 +151,13 @@ function Validate() {
         {validate.check ? 'Import' : 'Create'}
         <LoadingButton show={validateLoading} />
       </Button>,
-      <Button flat modal='close' node='button' waves='green' className='validate-btn-cancel'>
+      <Button
+        flat
+        modal='close'
+        node='button'
+        waves='green'
+        className='validate-btn-cancel'
+      >
         Cancel
       </Button>,
     ];

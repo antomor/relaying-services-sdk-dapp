@@ -185,7 +185,13 @@ function Deploy() {
         Estimate
         <LoadingButton show={estimateLoading} />
       </Button>,
-      <Button flat modal='close' node='button' waves='green' className='deploy-btn-cancel'>
+      <Button
+        flat
+        modal='close'
+        node='button'
+        waves='green'
+        className='deploy-btn-cancel'
+      >
         Cancel
       </Button>,
     ];

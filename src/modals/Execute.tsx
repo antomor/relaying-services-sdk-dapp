@@ -246,7 +246,13 @@ function Execute() {
       Estimate
       <LoadingButton show={estimateLoading} />
     </Button>,
-    <Button flat modal='close' node='button' waves='green' className='execute-btn-cancel'>
+    <Button
+      flat
+      modal='close'
+      node='button'
+      waves='green'
+      className='execute-btn-cancel'
+    >
       Cancel
     </Button>,
   ];
