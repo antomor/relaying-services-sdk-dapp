@@ -196,6 +196,7 @@ function Transfer() {
       waves='green'
       onClick={handleTransferSmartWalletButtonClick}
       disabled={transferLoading}
+      className='transfer-btn-transfer'
     >
       Transfer
       <LoadingButton show={transferLoading} />
@@ -206,11 +207,12 @@ function Transfer() {
       waves='green'
       onClick={handleEstimateTransferButtonClick}
       disabled={estimateLoading}
+      className='transfer-btn-estimate'
     >
       Estimate
       <LoadingButton show={estimateLoading} />
     </Button>,
-    <Button flat modal='close' node='button' waves='green'>
+    <Button flat modal='close' node='button' waves='green' className='transfer-btn-cancel'>
       Cancel
     </Button>,
   ];
@@ -234,13 +236,14 @@ function Transfer() {
               onChange={(event) => {
                 changeValue(event.currentTarget.value, 'address');
               }}
+              id='transfer-input-to'
             />
           </Col>
           <Col s={1}>
             <Button
               onClick={pasteRecipientAddress}
               waves='light'
-              className='indigo accent-2'
+              className='indigo accent-2 transfer-btn-paste'
               tooltip='Paste'
               node='div'
             >
@@ -257,6 +260,7 @@ function Transfer() {
               onChange={(event) => {
                 changeValue(event.currentTarget.value, 'amount');
               }}
+              id='transfer-input-amount'
             />
           </Col>
           <Col s={4}>
@@ -267,6 +271,7 @@ function Transfer() {
               onChange={(event) => {
                 changeValue(event.currentTarget.checked, 'check');
               }}
+              id='transfer-switch-rbtc'
             />
           </Col>
           <Col s={10}>
@@ -279,6 +284,7 @@ function Transfer() {
               onChange={(event) => {
                 changeValue(event.currentTarget.value, 'fees');
               }}
+              id='transfer-input-fee'
             />
           </Col>
         </form>

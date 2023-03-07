@@ -169,6 +169,7 @@ function Deploy() {
         waves='green'
         onClick={handleDeploySmartWalletButtonClick}
         disabled={deployLoading}
+        className='deploy-btn-deploy'
       >
         Deploy
         <LoadingButton show={deployLoading} />
@@ -179,11 +180,12 @@ function Deploy() {
         waves='green'
         onClick={handleEstimateDeploySmartWalletButtonClick}
         disabled={estimateLoading}
+        className='deploy-btn-estimate'
       >
         Estimate
         <LoadingButton show={estimateLoading} />
       </Button>,
-      <Button flat modal='close' node='button' waves='green'>
+      <Button flat modal='close' node='button' waves='green' className='deploy-btn-cancel'>
         Cancel
       </Button>,
     ];
@@ -209,6 +211,7 @@ function Deploy() {
               onChange={(event) => {
                 changeValue(event.target.value, 'fees');
               }}
+              id='deploy-input-fee'
             />
           </Col>
         </form>

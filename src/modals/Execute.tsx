@@ -230,6 +230,7 @@ function Execute() {
       waves='green'
       onClick={handleExecuteSmartWalletButtonClick}
       disabled={executeLoading}
+      className='execute-btn-execute'
     >
       Execute
       <LoadingButton show={executeLoading} />
@@ -240,11 +241,12 @@ function Execute() {
       waves='green'
       onClick={handleEstimateSmartWalletButtonClick}
       disabled={estimateLoading}
+      className='execute-btn-estimate'
     >
       Estimate
       <LoadingButton show={estimateLoading} />
     </Button>,
-    <Button flat modal='close' node='button' waves='green'>
+    <Button flat modal='close' node='button' waves='green' className='execute-btn-cancel'>
       Cancel
     </Button>,
   ];
@@ -268,13 +270,14 @@ function Execute() {
               onChange={(event) => {
                 changeValue(event.currentTarget.value, 'address');
               }}
+              id='execute-input-address'
             />
           </Col>
           <Col s={1}>
             <Button
               onClick={pasteRecipientAddress}
               waves='light'
-              className='indigo accent-2'
+              className='indigo accent-2 execute-btn-past'
               tooltip='Paste'
               node='div'
             >
@@ -291,6 +294,7 @@ function Execute() {
               onChange={(event) => {
                 changeValue(event.currentTarget.value, 'function');
               }}
+              id='execute-input-function'
             />
           </Col>
           <Col s={4}>
@@ -301,17 +305,19 @@ function Execute() {
               onChange={(event) => {
                 changeValue(event.currentTarget.checked, 'show');
               }}
+              id='execute-switch-return-data'
             />
           </Col>
           <Col s={8}>
             <TextInput
-              label='Contrac function values'
+              label='Contract function values'
               placeholder='e.g. recipientAddr,amount'
               value={execute.value}
               validate
               onChange={(event) => {
                 changeValue(event.currentTarget.value, 'value');
               }}
+              id='execute-input-function-values'
             />
           </Col>
           <Col s={8}>
@@ -324,6 +330,7 @@ function Execute() {
               onChange={(event) => {
                 changeValue(event.currentTarget.value, 'fees');
               }}
+              id='execute-input-fee'
             />
           </Col>
           <Col s={4}>
@@ -334,6 +341,7 @@ function Execute() {
               onChange={(event) => {
                 changeValue(event.currentTarget.checked, 'check');
               }}
+              id='execute-switch-rbtc'
             />
           </Col>
           <Col s={12}>
