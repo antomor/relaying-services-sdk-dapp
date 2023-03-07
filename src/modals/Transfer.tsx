@@ -11,7 +11,7 @@ import {
 } from 'react-materialize';
 import LoadingButton from 'src/components/LoadingButton';
 import { useStore } from 'src/context/context';
-import type { Transaction } from 'ethers';
+import { Transaction, Wallet } from 'ethers';
 import type {
   RelayEstimation,
   UserDefinedEnvelopingRequest,
@@ -39,6 +39,7 @@ function Transfer() {
     provider,
     chainId,
     relayClient,
+    wallet,
   } = state;
 
   const [transferLoading, setTransferLoading] = useState(false);
@@ -109,7 +110,7 @@ function Transfer() {
 
       const relayTransactionOpts: UserDefinedRelayRequest = {
         request: {
-          from: account,
+          from: wallet?.address || account,
           data: encodedAbi,
           to: token!.instance.address,
           tokenAmount,
@@ -121,7 +122,8 @@ function Transfer() {
       };
 
       const transaction: Transaction = await relayClient!.relayTransaction(
-        relayTransactionOpts
+        relayTransactionOpts,
+        { wallet }
       );
 
       addTransaction(smartWallet!.address, chainId, {

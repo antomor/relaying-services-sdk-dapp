@@ -1,5 +1,5 @@
 import type { RelayClient } from '@rsksmart/rif-relay-client';
-import type { providers } from 'ethers';
+import type { providers, Wallet } from 'ethers';
 import type { ReactNode } from 'react';
 import type { ERC20Token, Modals, SmartWallet } from 'src/types';
 
@@ -18,6 +18,7 @@ export const ADD_SMART_WALLET_ACTION = 'add_smart_wallet';
 export const UPDATE_SMART_WALLET_ACTION = 'update_smart_wallet';
 export const SET_MODALS_ACTION = 'set_modals';
 export const SET_RELAY_CLIENT_ACTION = 'set_relay_client';
+export const SET_SIGNATURE_WALLET = 'set_signature_wallet';
 
 export type Action =
   | { type: typeof RELOAD_ACTION; reload: boolean }
@@ -52,7 +53,11 @@ export type Action =
   | {
       type: typeof SET_RELAY_CLIENT_ACTION;
       relayClient: RelayClient;
-    };
+    }
+  | {
+    type: typeof SET_SIGNATURE_WALLET;
+    wallet: Wallet;
+  };
 
 export type Dispatch = (action: Action) => void;
 
@@ -72,4 +77,5 @@ export type State = {
   modals: Modals;
   smartWallets: SmartWallet[];
   relayClient: RelayClient | undefined;
+  wallet: Wallet | undefined;
 };

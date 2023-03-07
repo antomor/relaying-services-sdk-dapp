@@ -32,6 +32,7 @@ const initialState: State = {
   },
   smartWallets: [],
   relayClient: undefined,
+  wallet: undefined
 };
 
 const Context = createContext<{ state: State; dispatch: Dispatch } | undefined>(

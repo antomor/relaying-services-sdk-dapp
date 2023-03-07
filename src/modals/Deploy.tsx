@@ -30,6 +30,7 @@ function Deploy() {
     provider,
     modals,
     relayClient,
+    wallet
   } = state;
 
   const initialState: DeployInfo = {
@@ -105,7 +106,7 @@ function Deploy() {
     try {
       const relayTransactionOpts: UserDefinedDeployRequest = {
         request: {
-          from: account,
+          from: wallet?.address || account,
           tokenAmount,
           tokenContract: token!.instance.address,
           index: smartWallet!.index,
@@ -113,7 +114,10 @@ function Deploy() {
       };
 
       const transaction = await relayClient!.relayTransaction(
-        relayTransactionOpts
+        relayTransactionOpts,
+        {
+          wallet: wallet!
+        }
       );
 
       const isDeployed = await checkSmartWalletDeployment(transaction.hash!);

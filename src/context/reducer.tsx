@@ -16,6 +16,7 @@ import {
   SET_MODALS_ACTION,
   SET_RELAY_CLIENT_ACTION,
   State,
+  SET_SIGNATURE_WALLET,
 } from 'src/context/types';
 
 const StoreReducer = (state: State, action: Action) => {
@@ -99,6 +100,11 @@ const StoreReducer = (state: State, action: Action) => {
         ...state,
         relayClient: action.relayClient,
       };
+    case SET_SIGNATURE_WALLET:
+        return {
+          ...state,
+          wallet: action.wallet,
+        };
     default:
       return state;
   }

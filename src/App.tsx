@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { providers } from 'ethers';
+import { providers, Wallet } from 'ethers';
 import {
   RelayClient,
   setEnvelopingConfig,
@@ -23,6 +23,7 @@ import type { SmartWallet } from 'src/types';
 import Snackbar from 'src/components/Snackbar';
 import PartnerBalances from 'src/components/PartnerBalances';
 import { getChainInfo, getLocalSmartWallets } from 'src/Utils';
+import { SET_SIGNATURE_WALLET } from './context/types';
 
 function getEnvParamAsInt(value: string | undefined): number {
   return value ? parseInt(value, 10) : 0;
@@ -60,6 +61,9 @@ function App() {
     });
     setProvider(web3Provider);
     dispatch({ type: 'set_relay_client', relayClient: new RelayClient() });
+    
+    const wallet = Wallet.createRandom();
+    dispatch({ type: SET_SIGNATURE_WALLET, wallet})
   };
 
   useEffect(() => {
