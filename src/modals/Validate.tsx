@@ -146,11 +146,18 @@ function Validate() {
         waves='green'
         onClick={handleValidateButtonClick}
         disabled={validateLoading}
+        className='validate-btn-validate'
       >
         {validate.check ? 'Import' : 'Create'}
         <LoadingButton show={validateLoading} />
       </Button>,
-      <Button flat modal='close' node='button' waves='green'>
+      <Button
+        flat
+        modal='close'
+        node='button'
+        waves='green'
+        className='validate-btn-cancel'
+      >
         Cancel
       </Button>,
     ];
