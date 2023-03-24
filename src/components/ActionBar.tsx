@@ -26,6 +26,7 @@ function ActionBar() {
         const price = await getERC20TokenPrice(token!, 'RBTC');
         setTokenPrice(price.toString());
       } catch (error) {
+        console.error(error);
         setTokenPrice('-');
       }
       setPriceLoading(false);
