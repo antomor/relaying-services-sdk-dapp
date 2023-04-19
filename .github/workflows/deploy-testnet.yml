@@ -28,7 +28,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        npm ci
+        npm ci --force # FIXME: PP-648
 
     - name: Build site
       run: |
