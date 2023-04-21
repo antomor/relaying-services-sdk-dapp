@@ -1,4 +1,4 @@
-import { HttpClient, RelayPricer } from '@rsksmart/rif-relay-client';
+import { HttpClient, getExchangeRate } from '@rsksmart/rif-relay-client';
 import {
   ERC20__factory,
   DeployVerifier__factory,
@@ -153,12 +153,7 @@ const getAllowedTokens = async (
 const getERC20TokenPrice = async (
   erc20: ERC20Token,
   targetCurrency: string
-): Promise<BigNumberJs> => {
-  const relayPricer = new RelayPricer();
-
-  return relayPricer.getExchangeRate(erc20.symbol, targetCurrency);
-};
-
+): Promise<BigNumberJs> => getExchangeRate(erc20.symbol, targetCurrency);
 // FIXME: it needs to be replaced by HubInfo from rif-relay-client
 type ChainInfo = {
   feesReceiver: string;

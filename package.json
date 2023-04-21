@@ -99,7 +99,7 @@
     ]
   },
   "dependencies": {
-    "@rsksmart/rif-relay-client": "2.0.0-beta.5",
+    "@rsksmart/rif-relay-client": "2.0.0-beta.6",
     "@rsksmart/rif-relay-contracts": "2.0.0-beta.1",
     "@rsksmart/rlogin": "^1.4.1-beta.1",
     "@testing-library/jest-dom": "^5.16.5",
