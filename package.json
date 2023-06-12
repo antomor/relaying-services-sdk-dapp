@@ -1,6 +1,6 @@
 {
   "name": "@rsksmart/rif-relay-sample-dapp",
-  "version": "2.0.0-beta.2",
+  "version": "2.0.0",
   "private": true,
   "description": "This project contains a sample dApp to interact with the RIF Relay project.",
   "keywords": [
