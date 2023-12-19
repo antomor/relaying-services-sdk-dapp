@@ -51,7 +51,7 @@ To setup the dApp:
 ## Running the sample dApp as a Docker container
 
 You can run the sample dApp as a Docker container. Docker and Docker compose should be installed.
-The steps are the same as indicated [here](#running-the-sample-dapp). The difference is in the step 3. Instead of npm run start, run this:
+The steps are the same as indicated [here](#running-the-sample-dapp). The difference is in the step 3. Instead of npm start, run this:
 
 ```bash
 docker-compose build && docker-compose up
