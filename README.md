@@ -1,6 +1,6 @@
 # RIF Relaying Services SDK sample dApp
 
-This is a sample dApp to showcase how users can submit relayed transactions to the RSK blockchain using the [RIF Relay SDK](https://github.com/rsksmart/rif-relay-sdk). You will need to connect to the dApp with MetaMask but only for signing transactions with the account that owns the Smart Wallets.
+This is a sample dApp to showcase how users can submit relayed transactions to the RSK blockchain using the RIF Relay Sample dApp SDK. You will need to connect to the dApp with MetaMask but only for signing transactions with the account that owns the Smart Wallets.
 
 For a detailed step-by-step guide on getting started with RIF Relay, refer to the [RIF Relay Starter kit](https://dev.rootstock.io/guides/rif-relay/starter-kit).
 
