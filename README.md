@@ -1,81 +1,57 @@
 # RIF Relaying Services SDK sample dApp
 
-This is a sample dApp to showcase how users can submit relayed transactions to the RSK blockchain using the [RIF Relay SDK](https://github.com/infuy/relaying-services-sdk). You will need to connect to the dApp with MetaMask but only for signing transactions with the account that owns the Smart Wallets.
+This is a sample dApp that displays how users can submit relayed transactions to the Rootstock blockchain using the RIF Relay Sample dApp SDK. You will need to connect to the dApp with MetaMask but only for signing transactions with the account that owns the Smart Wallets.
 
-See [RIF Relay](https://github.com/rsksmart/rif-relay) project.
-
+For a detailed step-by-step guide on getting started with RIF Relay, refer to the [RIF Relay Starter kit](https://dev.rootstock.io/guides/rif-relay/starter-kit).
 
 ## Pre-Requisites
 
 * [NodeJS Version v16.14.2 or higher](https://nodejs.org/en/download/).
 * [RSKj Node Running](https://github.com/rsksmart/rskj).
-* [RIF Relay Contract](https://github.com/anarancio/rif-relay-contracts) deployed.
-* [Current Token Allowed](https://github.com/anarancio/rif-relay-contracts#allowing-tokens).
-* [RIF Relay Server](https://github.com/infuy/rif-relay-server) running and registered.
+* [RIF Relay Contract](https://github.com/rsksmart/rif-relay-contracts) deployed.
+* [Current Token Allowed](https://github.com/rsksmart/rif-relay-contracts#allowing-tokens).
+* [RIF Relay Server](https://github.com/rsksmart/rif-relay-server) running and registered.
+
+For details on the RIF Relay modules, see [RIF Relay](https://github.com/rsksmart/rif-relay) project.
 
 ## Running the sample dApp
 
 To setup the dApp:
 
-* Clone this repo 
-* Run `npm i`
+1. Clone this repository and install dependencies:
+    ```bash
+    # clone repository
+    git clone https://github.com/rsksmart/relaying-services-sdk-dapp
+    cd relaying-services-sdk-dapp
+    # install dependencies
+    npm install --force
+    ```
+2. Create a new file named `.env`  in the top directory, and add the following lines in it (with the contract addresses generated when we deployed the contracts) in the **Set up RIF Relay Contracts** section above:
+    ```bash
+    REACT_APP_CONTRACTS_RELAY_HUB=0x463F29B11503e198f6EbeC9903b4e5AaEddf6D29
+    REACT_APP_CONTRACTS_DEPLOY_VERIFIER=0x14f6504A7ca4e574868cf8b49e85187d3Da9FA70
+    REACT_APP_CONTRACTS_RELAY_VERIFIER=0xA66939ac57893C2E65425a5D66099Bc20C76D4CD
+    REACT_APP_CONTRACTS_SMART_WALLET_FACTORY=0x79bbC6403708C6578B0896bF1d1a91D2BB2AAa1c
+    REACT_APP_CONTRACTS_SMART_WALLET=0x987c1f13d417F7E04d852B44badc883E4E9782e1
 
-To run the sample dApp follow these steps:
-
-1. Create the `.env` file copying the content from `.env.sample`. Edit the sample dApp config file located in `.env` and add the contract addresses. By default the project imports `.env` on the `npm start`. Look for these lines and modify them accordingly:
-```
-REACT_APP_CONTRACTS_RELAY_HUB=0xE0825f57Dd05Ef62FF731c27222A86E104CC4Cad
-REACT_APP_CONTRACTS_DEPLOY_VERIFIER=0x1eD614cd3443EFd9c70F04b6d777aed947A4b0c4
-REACT_APP_CONTRACTS_RELAY_VERIFIER=0x5159345aaB821172e795d56274D0f5FDFdC6aBD9
-REACT_APP_CONTRACTS_SMART_WALLET_FACTORY=0x03F23ae1917722d5A27a2Ea0Bcc98725a2a2a49a
-REACT_APP_CONTRACTS_SMART_WALLET=0x73ec81da0C72DD112e06c09A6ec03B5544d26F05
-REACT_APP_CONTRACTS_RIF_TOKEN=0x726ECC75d5D51356AA4d0a5B648790cC345985ED
-REACT_APP_CONTRACTS_TEST_RECIPIENT=0xCd5805d60Bbf9Afe69a394c2BDa10F6Dae2c39AF
-REACT_APP_CONTRACTS_RIF_TOKEN=0x726ECC75d5D51356AA4d0a5B648790cC345985ED
-REACT_APP_CONTRACTS_RELAY_WORKER=0x3d67f029f778a088904f12d030933967d220faa3
-REACT_APP_CONTRACTS_COLLECTOR=0x9957A338858bc941dA9D0ED2ACBCa4F16116B836
-REACT_APP_CONTRACTS_PARTNERS="0x7986b3DF570230288501EEa3D890bd66948C9B79,0x0a3aA774752ec2042c46548456c094A76C7F3a79,0xCF7CDBbB5F7BA79d3ffe74A0bBA13FC0295F6036,0x39B12C05E8503356E3a7DF0B7B33efA4c054C409"
-
-REACT_APP_RIF_RELAY_CHAIN_ID=33
-REACT_APP_RIF_RELAY_GAS_PRICE_FACTOR_PERCENT=0
-REACT_APP_RIF_RELAY_LOOKUP_WINDOW_BLOCKS=1e5
-REACT_APP_RIF_RELAY_PREFERRED_RELAYS=http://localhost:8090
-```
-
-To retrieve the value of `REACT_APP_CONTRACTS_RELAY_WORKER`, please call the `/getaddr` API against a running [rif-relay-server](https://github.com/infuy/rif-relay-server) instance and use the field `relayWorkerAddress` from the response.
-
-E.g.:
-```bash
-curl http://localhost:8090/getaddr
-```
-The response has the following format:
-```json
-{
-  "relayWorkerAddress": "0x74105590d404df3f384a099c2e55135281ca6b40",
-  "relayManagerAddress": "0x4a6a175c1140f01679525ca3612364f5384cde46",
-  "relayHubAddress": "0x66Fa9FEAfB8Db66Fe2160ca7aEAc7FC24e254387",
-  "minGasPrice": "65164000",
-  "chainId": "31",
-  "networkId": "31",
-  "ready": true,
-  "version": "2.0.1"
-}
-```
-
-2. Open a terminal in the sample dApp project root and run
-
-```
-npm start
-```
-
-3. Ensure that MetaMask is configured to use the same network where you deployed the contracts (e.g. Regtest or Testnet).
-
+    REACT_APP_RIF_RELAY_CHAIN_ID=33
+    REACT_APP_RIF_RELAY_GAS_PRICE_FACTOR_PERCENT=0
+    REACT_APP_RIF_RELAY_LOOKUP_WINDOW_BLOCKS=1e5
+    REACT_APP_RIF_RELAY_PREFERRED_RELAYS=http://localhost:8090
+    REACT_APP_BLOCK_EXPLORER=https://explorer.testnet.rsk.co
+    ```
+3. Run the dApp
+    ```bash
+    # run app in regtest environment
+    ENV_VALUE="regtest" npm run start
+    ```
+4. Ensure that MetaMask is configured to use the same network where you deployed the contracts (e.g. Regtest or Testnet).
 4. Open a browser and navigate to http://localhost:3000
 
 ## Running the sample dApp as a Docker container
 
 You can run the sample dApp as a Docker container. Docker and Docker compose should be installed.
-The steps are the same as indicated [here](#running-the-sample-dapp). The difference is in the step 2. Instead of npm start, run this:
+The steps are the same as indicated [here](#running-the-sample-dapp). The difference is in the step 3. Instead of npm start, run this:
 
 ```bash
 docker-compose build && docker-compose up
