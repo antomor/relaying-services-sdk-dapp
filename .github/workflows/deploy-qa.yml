@@ -8,6 +8,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: QA
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
     - name: Checkout
