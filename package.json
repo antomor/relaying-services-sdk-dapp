@@ -101,7 +101,7 @@
   "dependencies": {
     "@rsksmart/rif-relay-client": "2.1.0",
     "@rsksmart/rif-relay-contracts": "2.0.0-beta.1",
-    "@rsksmart/rlogin": "^1.4.1-beta.1",
+    "@rsksmart/rlogin": "^1.6.0-beta.1",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
